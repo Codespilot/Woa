@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+    
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <Nullable>disable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>dotnet-Woa.Chatbot-6EF65B09-DFC8-4CA7-BACF-9F0F698E3097</UserSecretsId>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+        <PackageReference Include="Refit" Version="7.0.0" />
+        <PackageReference Include="Refit.HttpClientFactory" Version="7.0.0" />
+        <PackageReference Include="Refit.Newtonsoft.Json" Version="7.0.0" />
+        <PackageReference Include="Serilog" Version="3.0.1" />
+        <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
+        <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+        <PackageReference Include="supabase-csharp" Version="0.12.1" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <Using Include="Supabase.Client" Alias="SupabaseClient" />
+        <Using Include="Supabase.Realtime.Client" Alias="RealtimeClient" />
+    </ItemGroup>
+    
+</Project>
