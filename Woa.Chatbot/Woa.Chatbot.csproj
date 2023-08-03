@@ -12,15 +12,15 @@
         <PackageReference Include="Refit" Version="7.0.0" />
         <PackageReference Include="Refit.HttpClientFactory" Version="7.0.0" />
         <PackageReference Include="Refit.Newtonsoft.Json" Version="7.0.0" />
-        <PackageReference Include="Serilog" Version="3.0.1" />
-        <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
-        <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
-        <PackageReference Include="supabase-csharp" Version="0.12.1" />
     </ItemGroup>
     
     <ItemGroup>
         <Using Include="Supabase.Client" Alias="SupabaseClient" />
         <Using Include="Supabase.Realtime.Client" Alias="RealtimeClient" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <ProjectReference Include="..\Woa.Common\Woa.Common.csproj" />
     </ItemGroup>
     
 </Project>

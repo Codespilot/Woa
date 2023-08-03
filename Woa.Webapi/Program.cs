@@ -1,6 +1,7 @@
 using Refit;
 using Serilog;
 using Serilog.Events;
+using Woa.Common;
 using Woa.Webapi;
 using Woa.Webapi.Apis;
 using Woa.Webapi.Services;

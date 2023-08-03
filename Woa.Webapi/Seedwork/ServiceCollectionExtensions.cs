@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Quartz;
 using Supabase;
+using Woa.Common;
 using Woa.Webapi.Handlers;
 using Woa.Webapi.Jobs;
 
@@ -171,72 +172,7 @@ internal static class ServiceCollectionExtensions
         return services;
     }
 
-    // ReSharper disable once MemberCanBePrivate.Global
-    internal static IServiceCollection AddSupabaseClient(this IServiceCollection services, string url, string key)
-    {
-        if (string.IsNullOrWhiteSpace(url))
-        {
-            throw new NullReferenceException("Supabase:Url is null or empty");
-        }
-
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            throw new NullReferenceException("Supabase:Key is null or empty");
-        }
-
-        var options = new SupabaseOptions
-        {
-            AutoRefreshToken = true,
-            AutoConnectRealtime = true
-        };
-        services.AddSingleton(_ => new SupabaseClient(url, key, options));
-
-        return services;
-    }
-
-    internal static IServiceCollection AddSupabaseClient(this IServiceCollection services, IConfiguration configuration)
-    {
-        var url = configuration["Supabase:Url"];
-        var key = configuration["Supabase:Key"];
-        if (string.IsNullOrWhiteSpace(url))
-        {
-            throw new NullReferenceException("Supabase:Url is null or empty");
-        }
-
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            throw new NullReferenceException("Supabase:Key is null or empty");
-        }
-
-        return services.AddSupabaseClient(url, key);
-    }
-
-    internal static IServiceCollection AddSupabaseClient(this IServiceCollection services)
-    {
-        var options = new SupabaseOptions
-        {
-            AutoRefreshToken = true,
-            AutoConnectRealtime = true
-        };
-        return services.AddSingleton(provider =>
-        {
-            var configuration = provider.GetRequiredService<IConfiguration>();
-            var url = configuration["Supabase:Url"];
-            var key = configuration["Supabase:Key"];
-            if (string.IsNullOrWhiteSpace(url))
-            {
-                throw new NullReferenceException("Supabase:Url is null or empty");
-            }
-
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new NullReferenceException("Supabase:Key is null or empty");
-            }
-
-            return new SupabaseClient(url, key, options);
-        });
-    }
-
+    
     internal static IServiceCollection AddWechatMessageHandler(this IServiceCollection services)
     {
         foreach (var (_, type) in _handlerTypes)
@@ -244,7 +180,7 @@ internal static class ServiceCollectionExtensions
             services.AddScoped(type);
         }
 
-        services.AddScoped<NamedService<IWechatMessageHandler>>(provider =>
+        services.AddTransient<NamedService<IWechatMessageHandler>>(provider =>
         {
             return name =>
             {

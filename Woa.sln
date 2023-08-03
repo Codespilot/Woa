@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Woa.Webapi", "Woa.Webapi\Wo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Woa.Chatbot", "Woa.Chatbot\Woa.Chatbot.csproj", "{4790CBE7-0242-4679-B9FC-C73C64FC99B6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Woa.Common", "Woa.Common\Woa.Common.csproj", "{8B25D4B6-80AB-436E-A0F2-3CF9A68B409B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{4790CBE7-0242-4679-B9FC-C73C64FC99B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4790CBE7-0242-4679-B9FC-C73C64FC99B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4790CBE7-0242-4679-B9FC-C73C64FC99B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B25D4B6-80AB-436E-A0F2-3CF9A68B409B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B25D4B6-80AB-436E-A0F2-3CF9A68B409B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B25D4B6-80AB-436E-A0F2-3CF9A68B409B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B25D4B6-80AB-436E-A0F2-3CF9A68B409B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -2,6 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
+using Woa.Common;
 using Woa.Webapi.Entities;
 using Woa.Webapi.Handlers;
 using Woa.Webapi.Models;
@@ -101,6 +102,11 @@ public class WechatController : ControllerBase
         return Content(response.ToXml(), "text/xml");
     }
 
+    /// <summary>
+    /// 查看消息回复
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet("{id:long}/reply")]
     public async Task<IActionResult> Reply(long id)
     {
@@ -112,6 +118,6 @@ public class WechatController : ControllerBase
             return NotFound();
         }
 
-        return Content(model.Reply, "text/plain", Encoding.UTF8);
+        return Content(model.Reply ?? "正在处理您的请求，请耐心等待...", "text/plain", Encoding.UTF8);
     }
 }
