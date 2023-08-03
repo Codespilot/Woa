@@ -85,7 +85,7 @@ public class WechatController : ControllerBase
 
         var response = WechatMessage.Empty;
 
-        var handler = _provider.GetService<NamedService<IWechatMessageHandler>>()?.Invoke(message.MessageType.ToString());
+        var handler = _provider.GetService<IWechatMessageHandler>(message.MessageType.ToString());
         if (handler != null)
         {
             response = await handler.HandleAsync(message);

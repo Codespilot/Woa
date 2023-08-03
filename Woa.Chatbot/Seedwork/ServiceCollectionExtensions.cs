@@ -1,6 +1,8 @@
 ﻿using System.Net.Http.Headers;
 using Refit;
 using Woa.Chatbot.Apis;
+using Woa.Chatbot.Services;
+using Woa.Common;
 
 namespace Woa.Chatbot;
 
@@ -30,6 +32,24 @@ internal static class ServiceCollectionExtensions
                     client.DefaultRequestHeaders.Add("anthropic-version", configuration["Bot:Claude:Version"]);
                     client.DefaultRequestHeaders.Add("x-api-key", configuration["Bot:Claude:Key"]);
                 });
+        return services;
+    }
+
+    internal static IServiceCollection AddChatCompletionService(this IServiceCollection services)
+    {
+        services.AddTransient<ChatGptCompletionService>()
+                .AddTransient<ClaudeCompletionService>();
+
+        services.AddTransient<NamedService<IChatCompletionService>>(provider =>
+        {
+            return name => name switch
+            {
+                "ChatGPT" => provider.GetRequiredService<ChatGptCompletionService>(),
+                "Claude" => provider.GetRequiredService<ClaudeCompletionService>(),
+                _ => throw new ArgumentException($"Unknown chat completion service {name}")
+            };
+        });
+
         return services;
     }
 }
