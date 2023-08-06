@@ -1,4 +1,4 @@
-﻿namespace Woa.Webapi;
+﻿namespace Woa.Common;
 
 /// <summary>
 /// The delegate to inject or resolve service with specified name.

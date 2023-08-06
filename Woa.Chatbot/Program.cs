@@ -1,11 +1,8 @@
-using System.Net;
-using System.Net.Http.Headers;
-using Refit;
 using Serilog;
 using Serilog.Events;
 using Woa.Chatbot;
-using Woa.Chatbot.Apis;
 using Woa.Chatbot.Services;
+using Woa.Common;
 
 //HttpClient.DefaultProxy = new WebProxy("localhost", 8888);
 

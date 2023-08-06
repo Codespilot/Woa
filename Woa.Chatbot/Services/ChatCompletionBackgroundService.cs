@@ -1,6 +1,7 @@
 ﻿using Supabase;
 using Supabase.Realtime;
 using Supabase.Realtime.Models;
+using Woa.Common;
 
 namespace Woa.Chatbot.Services;
 
@@ -61,15 +62,9 @@ public class ChatCompletionBackgroundService : BackgroundService
         {
             try
             {
-                var llm = _configuration["Bot:Name"];
+                var name = _configuration["Bot:Name"];
 
-                var scope = _provider.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider;
-                IChatCompletionService service = llm switch
-                {
-                    "ChatGPT" => scope.GetRequiredService<ChatGptCompletionService>(),
-                    "Claude" => scope.GetRequiredService<ClaudeCompletionService>(),
-                    _ => null
-                };
+                var service = _provider.GetRequiredService<IChatCompletionService>(name);
 
                 if (service == null)
                 {

@@ -1,0 +1,24 @@
+﻿# https://docs.microsoft.com/en-us/visualstudio/ide/editorconfig-code-style-settings-reference
+# https://editorconfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Default settings:
+# A newline ending every file
+# Use 4 spaces as indentation
+[*]
+# insert_final_newline = false
+indent_style = space
+indent_size = 4
+
+# C# files
+[*.cs]
+indent_style = tab
+
+csharp_style_namespace_declarations = file_scoped:error
+
+resharper_explicit_caller_info_argument_highlighting = none # 去除CallerMemberName警告
+
+[*.xaml.cs]
+resharper_redundant_extends_list_entry_highlighting = none # 去除xaml.cs文件的基类型重复警告。基类型不能删除，否则编译报错。

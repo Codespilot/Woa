@@ -1,7 +1,7 @@
 ﻿using Postgrest.Attributes;
 using Postgrest.Models;
 
-namespace Woa.Webapi.Entities;
+namespace Woa.Webapi.Domain;
 
 [Table("wechat_message")]
 public class WechatMessageEntity : BaseModel

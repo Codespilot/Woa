@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Woa.Webapi.Entities;
+using Woa.Common;
+using Woa.Webapi.Domain;
 using Woa.Webapi.Handlers;
 using Woa.Webapi.Models;
 
@@ -13,6 +15,7 @@ namespace Woa.Webapi.Controllers;
 /// </summary>
 [Route("api/[controller]")]
 [ApiController]
+[AllowAnonymous]
 public class WechatController : ControllerBase
 {
     private readonly IServiceProvider _provider;
@@ -84,7 +87,7 @@ public class WechatController : ControllerBase
 
         var response = WechatMessage.Empty;
 
-        var handler = _provider.GetService<NamedService<IWechatMessageHandler>>()?.Invoke(message.MessageType.ToString());
+        var handler = _provider.GetService<IWechatMessageHandler>(message.MessageType.ToString());
         if (handler != null)
         {
             response = await handler.HandleAsync(message);
@@ -101,6 +104,11 @@ public class WechatController : ControllerBase
         return Content(response.ToXml(), "text/xml");
     }
 
+    /// <summary>
+    /// 查看消息回复
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet("{id:long}/reply")]
     public async Task<IActionResult> Reply(long id)
     {
@@ -112,6 +120,6 @@ public class WechatController : ControllerBase
             return NotFound();
         }
 
-        return Content(model.Reply, "text/plain", Encoding.UTF8);
+        return Content(model.Reply ?? "正在处理您的请求，请耐心等待...", "text/plain", Encoding.UTF8);
     }
 }
