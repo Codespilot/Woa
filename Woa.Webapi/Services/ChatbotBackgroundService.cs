@@ -4,7 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Supabase.Realtime;
 using Supabase.Realtime.Models;
 using Woa.Webapi.Apis;
-using Woa.Webapi.Entities;
+using Woa.Webapi.Domain;
 using Woa.Webapi.Models;
 
 namespace Woa.Webapi.Services;

@@ -3,7 +3,7 @@ using Postgrest.Models;
 
 // ReSharper disable ExplicitCallerInfoArgument
 
-namespace Woa.Webapi.Entities;
+namespace Woa.Webapi.Domain;
 
 /// <summary>
 /// 敏感词

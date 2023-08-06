@@ -1,9 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Woa.Common;
-using Woa.Webapi.Entities;
+using Woa.Webapi.Domain;
 using Woa.Webapi.Handlers;
 using Woa.Webapi.Models;
 
@@ -14,6 +15,7 @@ namespace Woa.Webapi.Controllers;
 /// </summary>
 [Route("api/[controller]")]
 [ApiController]
+[AllowAnonymous]
 public class WechatController : ControllerBase
 {
     private readonly IServiceProvider _provider;

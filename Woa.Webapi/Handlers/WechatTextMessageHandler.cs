@@ -1,5 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
-using Woa.Webapi.Entities;
+using Woa.Webapi.Domain;
 using Woa.Webapi.Models;
 using Woa.Webapi.Services;
 

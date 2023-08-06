@@ -1,5 +1,5 @@
 ﻿using Postgrest;
-using Woa.Webapi.Entities;
+using Woa.Webapi.Domain;
 using Woa.Webapi.Models;
 
 namespace Woa.Webapi.Handlers;
