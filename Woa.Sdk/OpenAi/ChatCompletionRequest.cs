@@ -1,4 +1,4 @@
-﻿namespace Woa.Chatbot.Models.ChatGpt;
+﻿namespace Woa.Sdk.OpenAi;
 
 public class ChatCompletionRequest
 {

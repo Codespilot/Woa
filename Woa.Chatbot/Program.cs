@@ -1,8 +1,11 @@
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Events;
 using Woa.Chatbot;
 using Woa.Chatbot.Services;
 using Woa.Common;
+using Woa.Sdk;
+using Woa.Sdk.OpenAi;
 
 //HttpClient.DefaultProxy = new WebProxy("localhost", 8888);
 
@@ -24,11 +27,11 @@ try
 {
     var host = Host.CreateDefaultBuilder(args)
                    .UseSerilog()
-                   .ConfigureServices(services =>
+                   .ConfigureServices((context,services) =>
                    {
                        services.AddSupabaseClient()
-                               .AddChatGptApi()
-                               .AddClaudeApi();
+                               .AddOpenAiApi(context.Configuration.GetSection("Bot:OpenAi"))
+                               .AddClaudeApi(context.Configuration.GetSection("Bot:Claude"));
                        services.AddTransient<ChatGptCompletionService>()
                                .AddTransient<ClaudeCompletionService>();
                        services.AddHostedService<ChatCompletionBackgroundService>();

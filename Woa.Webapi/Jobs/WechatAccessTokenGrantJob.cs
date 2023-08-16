@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Quartz;
-using Woa.Webapi.Apis;
+using Woa.Sdk.Wechat;
 
 namespace Woa.Webapi.Jobs;
 

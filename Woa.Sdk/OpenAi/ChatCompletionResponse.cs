@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Woa.Chatbot.Models.ChatGpt;
+namespace Woa.Sdk.OpenAi;
 
 public class ChatCompletionResponse
 {

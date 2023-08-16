@@ -1,23 +1,18 @@
-﻿using System.Globalization;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using IdentityModel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Quartz;
-using Woa.Common;
-using Woa.Webapi.Handlers;
 using Woa.Webapi.Jobs;
 using Woa.Webapi.Application;
+using Supabase;
 
 namespace Woa.Webapi;
 
 internal static class ServiceCollectionExtensions
 {
-	private static readonly Dictionary<string, Type> _handlerTypes = GetWechatMessageHandlers();
-
 	internal static IServiceCollection AddApplicationServices(this IServiceCollection services)
 	{
 		services.AddMediatR(config =>
@@ -78,19 +73,19 @@ internal static class ServiceCollectionExtensions
 		var key = Encoding.UTF8.GetBytes(tokenKey.ToSha256());
 
 		services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-		        .AddJwtBearer(options =>
-		        {
-			        options.TokenValidationParameters = new TokenValidationParameters()
-			        {
-				        ValidateIssuerSigningKey = true,
-				        ValidIssuer = issuer,
-				        ValidAudience = bearerOptions.Audience,
-				        //用于签名验证
-				        IssuerSigningKey = new SymmetricSecurityKey(key),
-				        ValidateIssuer = false,
-				        ValidateAudience = false
-			        };
-		        });
+				.AddJwtBearer(options =>
+				{
+					options.TokenValidationParameters = new TokenValidationParameters()
+					{
+						ValidateIssuerSigningKey = true,
+						ValidIssuer = issuer,
+						ValidAudience = bearerOptions.Audience,
+						//用于签名验证
+						IssuerSigningKey = new SymmetricSecurityKey(key),
+						ValidateIssuer = false,
+						ValidateAudience = false
+					};
+				});
 	}
 
 	internal static IServiceCollection AddRecurringJobService(this IServiceCollection services)
@@ -129,10 +124,10 @@ internal static class ServiceCollectionExtensions
 			// quickest way to create a job with single trigger is to use ScheduleJob
 			// (requires version 3.2)
 			quartz.ScheduleJob<WechatAccessTokenGrantJob>(trigger => trigger.WithIdentity("WechatAccessTokenGrantJob")
-			                                                                .StartAt(DateBuilder.EvenSecondDate(DateTimeOffset.UtcNow.AddSeconds(7)))
-			                                                                .WithSimpleSchedule(x => x.WithIntervalInMinutes(30).RepeatForever())
-				//.WithDailyTimeIntervalSchedule(x => x.WithInterval(10, IntervalUnit.Second))
-				//.WithDescription("my awesome trigger configured for a job with single call")
+																			.StartAt(DateBuilder.EvenSecondDate(DateTimeOffset.UtcNow.AddSeconds(7)))
+																			.WithSimpleSchedule(x => x.WithIntervalInMinutes(30).RepeatForever())
+			//.WithDailyTimeIntervalSchedule(x => x.WithInterval(10, IntervalUnit.Second))
+			//.WithDescription("my awesome trigger configured for a job with single call")
 			);
 
 			/*
@@ -252,56 +247,69 @@ internal static class ServiceCollectionExtensions
 		return services;
 	}
 
-	internal static IServiceCollection AddWechatMessageHandler(this IServiceCollection services)
+	// ReSharper disable once MemberCanBePrivate.Global
+	internal static IServiceCollection AddSupabaseClient(this IServiceCollection services, string url, string key)
 	{
-		foreach (var (_, type) in _handlerTypes)
+		if (string.IsNullOrWhiteSpace(url))
 		{
-			services.AddScoped(type);
+			throw new NullReferenceException("Supabase:Url is null or empty");
 		}
 
-		services.AddTransient<NamedService<IWechatMessageHandler>>(provider =>
+		if (string.IsNullOrWhiteSpace(key))
 		{
-			return name =>
-			{
-				if (_handlerTypes.TryGetValue(name, out var type))
-				{
-					return provider.GetRequiredService(type) as IWechatMessageHandler;
-				}
+			throw new NullReferenceException("Supabase:Key is null or empty");
+		}
 
-				return default;
-			};
-		});
+		var options = new SupabaseOptions
+		{
+			AutoRefreshToken = true,
+			AutoConnectRealtime = true
+		};
+		services.AddSingleton(_ => new SupabaseClient(url, key, options));
 
 		return services;
 	}
 
-	private static Dictionary<string, Type> GetWechatMessageHandlers()
+	internal static IServiceCollection AddSupabaseClient(this IServiceCollection services, IConfiguration configuration)
 	{
-		var types = typeof(IWechatMessageHandler).Assembly
-		                                         .GetTypes()
-		                                         .Where(type => !type.IsAbstract && typeof(IWechatMessageHandler).IsAssignableFrom(type));
-		var handlers = new Dictionary<string, Type>();
-		foreach (var type in types)
+		var url = configuration["Supabase:Url"];
+		var key = configuration["Supabase:Key"];
+		if (string.IsNullOrWhiteSpace(url))
 		{
-			var attributes = type.GetCustomAttributes<WechatMessageHandleAttribute>();
-			if (attributes.Any())
-			{
-				foreach (var attribute in attributes)
-				{
-					handlers.Add(attribute.Type.ToString(), type);
-				}
-			}
-			else
-			{
-				var match = Regex.Match(type.Name, @"^Wechat(\w+)MessageHandler$");
-
-				if (match.Success)
-				{
-					handlers.Add(match.Groups[1].Value.ToLower(CultureInfo.CurrentCulture), type);
-				}
-			}
+			throw new NullReferenceException("Supabase:Url is null or empty");
 		}
 
-		return handlers;
+		if (string.IsNullOrWhiteSpace(key))
+		{
+			throw new NullReferenceException("Supabase:Key is null or empty");
+		}
+
+		return services.AddSupabaseClient(url, key);
+	}
+
+	internal static IServiceCollection AddSupabaseClient(this IServiceCollection services)
+	{
+		var options = new SupabaseOptions
+		{
+			AutoRefreshToken = true,
+			AutoConnectRealtime = true
+		};
+		return services.AddSingleton(provider =>
+		{
+			var configuration = provider.GetRequiredService<IConfiguration>();
+			var url = configuration["Supabase:Url"];
+			var key = configuration["Supabase:Key"];
+			if (string.IsNullOrWhiteSpace(url))
+			{
+				throw new NullReferenceException("Supabase:Url is null or empty");
+			}
+
+			if (string.IsNullOrWhiteSpace(key))
+			{
+				throw new NullReferenceException("Supabase:Key is null or empty");
+			}
+
+			return new SupabaseClient(url, key, options);
+		});
 	}
 }

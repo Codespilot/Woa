@@ -1,17 +1,17 @@
-﻿using Woa.Webapi.Models;
+﻿using Woa.Sdk.Wechat;
 
 namespace Woa.Webapi.Handlers;
 
 [WechatMessageHandle(WechatMessageType.Location)]
 public class WechatLocationMessageHandler : WechatUserMessageHandler
 {
-    public WechatLocationMessageHandler(SupabaseClient client, ILoggerFactory logger)
-        : base(client, logger)
-    {
-    }
+	public WechatLocationMessageHandler(IWechatUserMessageStore store)
+		: base(store)
+	{
+	}
 
-    protected override async Task<WechatMessage> HandleMessageAsync(string openId, WechatMessage message, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
+	protected override async Task<WechatMessage> HandleMessageAsync(string openId, WechatMessage message, CancellationToken cancellationToken)
+	{
+		throw new NotImplementedException();
+	}
 }

@@ -4,9 +4,8 @@ using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Woa.Common;
+using Woa.Sdk.Wechat;
 using Woa.Webapi.Domain;
-using Woa.Webapi.Handlers;
-using Woa.Webapi.Models;
 
 namespace Woa.Webapi.Controllers;
 

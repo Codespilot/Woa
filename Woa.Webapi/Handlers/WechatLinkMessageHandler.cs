@@ -1,12 +1,12 @@
-﻿using Woa.Webapi.Models;
+﻿using Woa.Sdk.Wechat;
 
 namespace Woa.Webapi.Handlers;
 
 [WechatMessageHandle(WechatMessageType.Link)]
 public class WechatLinkMessageHandler : WechatUserMessageHandler
 {
-    public WechatLinkMessageHandler(SupabaseClient client, ILoggerFactory logger)
-        : base(client, logger)
+    public WechatLinkMessageHandler(IWechatUserMessageStore store)
+        : base(store)
     {
     }
 

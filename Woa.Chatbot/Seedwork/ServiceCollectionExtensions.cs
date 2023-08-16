@@ -1,6 +1,4 @@
-﻿using System.Net.Http.Headers;
-using Refit;
-using Woa.Chatbot.Apis;
+﻿using Supabase;
 using Woa.Chatbot.Services;
 using Woa.Common;
 
@@ -8,33 +6,6 @@ namespace Woa.Chatbot;
 
 internal static class ServiceCollectionExtensions
 {
-    internal static IServiceCollection AddChatGptApi(this IServiceCollection services)
-    {
-        services.AddRefitClient<IChatGptApi>()
-                .ConfigureHttpClient((provider, client) =>
-                {
-                    var configuration = provider.GetRequiredService<IConfiguration>();
-                    client.BaseAddress = new Uri("https://api.openai.com");
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", configuration["Bot:ChatGPT:Token"]);
-                    client.DefaultRequestHeaders.Add("openai-organization", configuration["Bot:ChatGPT:Organization"]);
-                });
-
-        return services;
-    }
-
-    internal static IServiceCollection AddClaudeApi(this IServiceCollection services)
-    {
-        services.AddRefitClient<IClaudeApi>()
-                .ConfigureHttpClient((provider, client) =>
-                {
-                    var configuration = provider.GetRequiredService<IConfiguration>();
-                    client.BaseAddress = new Uri("https://api.anthropic.com");
-                    client.DefaultRequestHeaders.Add("anthropic-version", configuration["Bot:Claude:Version"]);
-                    client.DefaultRequestHeaders.Add("x-api-key", configuration["Bot:Claude:Key"]);
-                });
-        return services;
-    }
-
     internal static IServiceCollection AddChatCompletionService(this IServiceCollection services)
     {
         services.AddTransient<ChatGptCompletionService>()
@@ -52,4 +23,70 @@ internal static class ServiceCollectionExtensions
 
         return services;
     }
+
+	// ReSharper disable once MemberCanBePrivate.Global
+	internal static IServiceCollection AddSupabaseClient(this IServiceCollection services, string url, string key)
+	{
+		if (string.IsNullOrWhiteSpace(url))
+		{
+			throw new NullReferenceException("Supabase:Url is null or empty");
+		}
+
+		if (string.IsNullOrWhiteSpace(key))
+		{
+			throw new NullReferenceException("Supabase:Key is null or empty");
+		}
+
+		var options = new SupabaseOptions
+		{
+			AutoRefreshToken = true,
+			AutoConnectRealtime = true
+		};
+		services.AddSingleton(_ => new SupabaseClient(url, key, options));
+
+		return services;
+	}
+
+	internal static IServiceCollection AddSupabaseClient(this IServiceCollection services, IConfiguration configuration)
+	{
+		var url = configuration["Supabase:Url"];
+		var key = configuration["Supabase:Key"];
+		if (string.IsNullOrWhiteSpace(url))
+		{
+			throw new NullReferenceException("Supabase:Url is null or empty");
+		}
+
+		if (string.IsNullOrWhiteSpace(key))
+		{
+			throw new NullReferenceException("Supabase:Key is null or empty");
+		}
+
+		return services.AddSupabaseClient(url, key);
+	}
+
+	internal static IServiceCollection AddSupabaseClient(this IServiceCollection services)
+	{
+		var options = new SupabaseOptions
+		{
+			AutoRefreshToken = true,
+			AutoConnectRealtime = true
+		};
+		return services.AddSingleton(provider =>
+		{
+			var configuration = provider.GetRequiredService<IConfiguration>();
+			var url = configuration["Supabase:Url"];
+			var key = configuration["Supabase:Key"];
+			if (string.IsNullOrWhiteSpace(url))
+			{
+				throw new NullReferenceException("Supabase:Url is null or empty");
+			}
+
+			if (string.IsNullOrWhiteSpace(key))
+			{
+				throw new NullReferenceException("Supabase:Key is null or empty");
+			}
+
+			return new SupabaseClient(url, key, options);
+		});
+	}
 }

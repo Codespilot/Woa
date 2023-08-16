@@ -1,14 +1,13 @@
-﻿using Woa.Chatbot.Apis;
-using Woa.Chatbot.Models.ChatGpt;
+﻿using Woa.Sdk.OpenAi;
 
 namespace Woa.Chatbot.Services;
 
 public class ChatGptCompletionService : IChatCompletionService
 {
-    private readonly IChatGptApi _api;
+    private readonly IOpenAiApi _api;
     private readonly IConfiguration _configuration;
 
-    public ChatGptCompletionService(IChatGptApi api, IConfiguration configuration)
+    public ChatGptCompletionService(IOpenAiApi api, IConfiguration configuration)
     {
         _api = api;
         _configuration = configuration;

@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Xml.Linq;
 
-namespace Woa.Webapi.Models;
+namespace Woa.Sdk.Wechat;
 
 /// <summary>
 /// 微信消息对象

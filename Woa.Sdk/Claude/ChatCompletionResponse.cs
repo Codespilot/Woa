@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Woa.Chatbot.Models.Claude;
+namespace Woa.Sdk.Claude;
 
 /// <summary>
 /// Represents a response from the Claude API.

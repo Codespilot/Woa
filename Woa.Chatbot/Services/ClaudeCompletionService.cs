@@ -1,5 +1,4 @@
-﻿using Woa.Chatbot.Apis;
-using Woa.Chatbot.Models.Claude;
+﻿using Woa.Sdk.Claude;
 
 namespace Woa.Chatbot.Services;
 
