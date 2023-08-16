@@ -108,7 +108,7 @@ internal static class ServiceCollectionExtensions
 			// q.SchedulerName = "Quartz ASP.NET Core Sample Scheduler";
 
 			// as of 3.3.2 this also injects scoped services (like EF DbContext) without problems
-			quartz.UseMicrosoftDependencyInjectionJobFactory();
+			// quartz.UseMicrosoftDependencyInjectionJobFactory();
 
 			// or for scoped service support like EF Core DbContext
 			// q.UseMicrosoftDependencyInjectionScopedJobFactory();

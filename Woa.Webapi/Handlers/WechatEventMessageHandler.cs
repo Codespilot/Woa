@@ -58,10 +58,7 @@ public class WechatEventMessageHandler : IWechatMessageHandler
             await _client.From<WechatFollowerEntity>().Update(follower);
         }
 
-        return new WechatMessage(WechatMessageType.Text)
-        {
-            [WechatMessageKey.Reply.Content] = "欢迎关注公众号",
-        };
+        return WechatMessage.Text("欢迎关注公众号");
     }
 
     /// <summary>
@@ -87,7 +84,7 @@ public class WechatEventMessageHandler : IWechatMessageHandler
     /// <param name="openId"></param>
     /// <param name="menuKey"></param>
     /// <returns></returns>
-    public async Task<WechatMessage> OnUserClickedMeneAsync(string openId, string menuKey)
+    public async Task<WechatMessage> OnUserClickedMenuAsync(string openId, string menuKey)
     {
         return await Task.FromResult(WechatMessage.Empty);
     }

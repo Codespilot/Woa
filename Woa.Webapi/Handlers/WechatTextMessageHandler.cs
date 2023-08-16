@@ -10,13 +10,11 @@ public class WechatTextMessageHandler : WechatUserMessageHandler
 {
 	private readonly SupabaseClient _client;
 	private readonly IConfiguration _configuration;
-	private readonly ILogger<WechatTextMessageHandler> _logger;
 
-	public WechatTextMessageHandler(IWechatUserMessageStore store, SupabaseClient client, ILoggerFactory logger, IConfiguration configuration)
+	public WechatTextMessageHandler(IWechatUserMessageStore store, SupabaseClient client, IConfiguration configuration)
 		: base(store)
 	{
 		_client = client;
-		_logger = logger.CreateLogger<WechatTextMessageHandler>();
 		_configuration = configuration;
 	}
 
@@ -26,15 +24,12 @@ public class WechatTextMessageHandler : WechatUserMessageHandler
 
 		if (string.IsNullOrWhiteSpace(messageContent))
 		{
-			return new WechatMessage(WechatMessageType.Text)
-			{
-				[WechatMessageKey.Reply.Content] = "无法识别内容"
-			};
+			return WechatMessage.Text("无法识别内容");
 		}
 
 		var user = await _client.From<WechatFollowerEntity>()
-						  .Where(t => t.OpenId == openId)
-						  .Single(cancellationToken);
+								.Where(t => t.OpenId == openId)
+								.Single(cancellationToken);
 		if (user?.IsChatbotEnabled == true)
 		{
 			WeakReferenceMessenger.Default.Send(new ChatbotBroadcast { OpenId = openId, MessageId = message.MessageId, MessageContent = messageContent });
@@ -67,9 +62,6 @@ public class WechatTextMessageHandler : WechatUserMessageHandler
 		{
 		}
 
-		return new WechatMessage(WechatMessageType.Text)
-		{
-			[WechatMessageKey.Reply.Content] = "您已关闭聊天机器人功能，无法使用此功能。"
-		};
+		return WechatMessage.Text("您已关闭聊天机器人功能，无法使用此功能。");
 	}
 }

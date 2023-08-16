@@ -25,25 +25,24 @@ Log.Logger = new LoggerConfiguration()
              .CreateLogger();
 try
 {
-    var host = Host.CreateDefaultBuilder(args)
-                   .UseSerilog()
-                   .ConfigureServices((context,services) =>
-                   {
-                       services.AddSupabaseClient()
-                               .AddOpenAiApi(context.Configuration.GetSection("Bot:OpenAi"))
-                               .AddClaudeApi(context.Configuration.GetSection("Bot:Claude"));
-                       services.AddTransient<ChatGptCompletionService>()
-                               .AddTransient<ClaudeCompletionService>();
-                       services.AddHostedService<ChatCompletionBackgroundService>();
-                   })
-                   .Build();
-    host.Run();
+	var host = Host.CreateDefaultBuilder(args)
+	               .UseSerilog()
+	               .ConfigureServices((context, services) =>
+	               {
+		               services.AddSupabaseClient()
+		                       .AddOpenAiApi(context.Configuration.GetSection("Bot:OpenAi"))
+		                       .AddClaudeApi(context.Configuration.GetSection("Bot:Claude"))
+		                       .AddChatCompletionService();
+		               services.AddHostedService<ChatCompletionBackgroundService>();
+	               })
+	               .Build();
+	host.Run();
 }
 catch (Exception exception)
 {
-    Log.Fatal(exception, "Application terminated unexpectedly");
+	Log.Fatal(exception, "Application terminated unexpectedly");
 }
 finally
 {
-    Log.CloseAndFlush();
+	Log.CloseAndFlush();
 }

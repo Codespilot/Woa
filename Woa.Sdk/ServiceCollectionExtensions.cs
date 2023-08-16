@@ -20,39 +20,39 @@ internal static class ServiceCollectionExtensions
 		services.Configure<OpenAiOptions>(configuration);
 
 		services.AddRefitClient<IOpenAiApi>()
-				.ConfigureHttpClient((provider, client) =>
-				{
-					var options = provider.GetRequiredService<IOptions<OpenAiOptions>>()?.Value;
-					if (options == null)
-					{
-						throw new InvalidOperationException($"{nameof(OpenAiOptions)} is not configured");
-					}
+		        .ConfigureHttpClient((provider, client) =>
+		        {
+			        var options = provider.GetRequiredService<IOptions<OpenAiOptions>>()?.Value;
+			        if (options == null)
+			        {
+				        throw new InvalidOperationException($"{nameof(OpenAiOptions)} is not configured");
+			        }
 
-					client.BaseAddress = new Uri(options.Host);
-					client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", options.Token);
-					client.DefaultRequestHeaders.Add("openai-organization", options.Organization);
-				});
+			        client.BaseAddress = new Uri(options.Host);
+			        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", options.Token);
+			        client.DefaultRequestHeaders.Add("openai-organization", options.Organization);
+		        });
 
 		return services;
 	}
 
 	internal static IServiceCollection AddClaudeApi(this IServiceCollection services, IConfiguration configuration)
 	{
-		services.Configure<OpenAiOptions>(configuration);
+		services.Configure<ClaudeOptions>(configuration);
 
 		services.AddRefitClient<IClaudeApi>()
-				.ConfigureHttpClient((provider, client) =>
-				{
-					var options = provider.GetRequiredService<IOptions<ClaudeOptions>>()?.Value;
-					if (options == null)
-					{
-						throw new InvalidOperationException($"{nameof(ClaudeOptions)} is not configured");
-					}
+		        .ConfigureHttpClient((provider, client) =>
+		        {
+			        var options = provider.GetRequiredService<IOptions<ClaudeOptions>>()?.Value;
+			        if (options == null)
+			        {
+				        throw new InvalidOperationException($"{nameof(ClaudeOptions)} is not configured");
+			        }
 
-					client.BaseAddress = new Uri(options.Host);
-					client.DefaultRequestHeaders.Add("anthropic-version", options.Version);
-					client.DefaultRequestHeaders.Add("x-api-key", options.Key);
-				});
+			        client.BaseAddress = new Uri(options.Host);
+			        client.DefaultRequestHeaders.Add("anthropic-version", options.Version);
+			        client.DefaultRequestHeaders.Add("x-api-key", options.Key);
+		        });
 		return services;
 	}
 
@@ -62,26 +62,29 @@ internal static class ServiceCollectionExtensions
 
 		var settings = new RefitSettings { Buffered = true, ContentSerializer = new NewtonsoftJsonContentSerializer() };
 		services.AddRefitClient<IWechatApi>(settings)
-		   .ConfigureHttpClient((provider, client) =>
-		   {
-			   var options = provider.GetRequiredService<IOptions<WechatOptions>>()?.Value;
-			   if (options == null)
-			   {
-				   throw new InvalidOperationException($"{nameof(WechatOptions)} is not configured");
-			   }
-			   client.BaseAddress = new Uri("https://api.weixin.qq.com");
-		   });
+		        .ConfigureHttpClient((provider, client) =>
+		        {
+			        var options = provider.GetRequiredService<IOptions<WechatOptions>>()?.Value;
+			        if (options == null)
+			        {
+				        throw new InvalidOperationException($"{nameof(WechatOptions)} is not configured");
+			        }
+
+			        client.BaseAddress = new Uri("https://api.weixin.qq.com");
+		        });
 
 		return services;
 	}
 
-	internal static IServiceCollection AddWechatMessageHandler(this IServiceCollection services, Func<IEnumerable<Type>> handlerTypesFactory)
+	internal static IServiceCollection AddWechatMessageHandler<TStore>(this IServiceCollection services, Func<IEnumerable<Type>> handlerTypesFactory)
+		where TStore : class, IWechatUserMessageStore
 	{
 		var handlerTypes = handlerTypesFactory();
-		return services.AddWechatMessageHandler(handlerTypes);
+		return services.AddWechatMessageHandler<TStore>(handlerTypes);
 	}
 
-	internal static IServiceCollection AddWechatMessageHandler(this IServiceCollection services, IEnumerable<Type> handlerTypes)
+	internal static IServiceCollection AddWechatMessageHandler<TStore>(this IServiceCollection services, IEnumerable<Type> handlerTypes)
+		where TStore : class, IWechatUserMessageStore
 	{
 		var types = GetWechatMessageHandlers(handlerTypes);
 
@@ -102,14 +105,15 @@ internal static class ServiceCollectionExtensions
 				return default;
 			};
 		});
-
+		services.AddScoped<IWechatUserMessageStore, TStore>();
 		return services;
 	}
 
-	internal static IServiceCollection AddWechatMessageHandler(this IServiceCollection services, Assembly assembly)
+	internal static IServiceCollection AddWechatMessageHandler<TStore>(this IServiceCollection services, Assembly assembly)
+		where TStore : class, IWechatUserMessageStore
 	{
-		return services.AddWechatMessageHandler(() => assembly.GetTypes().Where(type => !type.IsAbstract && typeof(IWechatMessageHandler).IsAssignableFrom(type)));
-
+		var handlerTypes = assembly.GetTypes().Where(type => !type.IsAbstract && typeof(IWechatMessageHandler).IsAssignableFrom(type));
+		return services.AddWechatMessageHandler<TStore>(handlerTypes);
 	}
 
 	private static Dictionary<string, Type> GetWechatMessageHandlers(IEnumerable<Type> handlerTypes)

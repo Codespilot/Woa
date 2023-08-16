@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-
-namespace Woa.Sdk.Wechat;
+﻿namespace Woa.Sdk.Wechat;
 
 public abstract class WechatUserMessageHandler : IWechatMessageHandler
 {
@@ -22,6 +20,9 @@ public abstract class WechatUserMessageHandler : IWechatMessageHandler
 
 	private async void SaveMessage(WechatMessage message)
 	{
-		await _store?.SaveAsync(message);
+		if (_store != null)
+		{
+			await _store.SaveAsync(message);
+		}
 	}
 }

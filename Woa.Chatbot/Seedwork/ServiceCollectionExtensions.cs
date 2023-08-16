@@ -8,15 +8,15 @@ internal static class ServiceCollectionExtensions
 {
     internal static IServiceCollection AddChatCompletionService(this IServiceCollection services)
     {
-        services.AddTransient<ChatGptCompletionService>()
-                .AddTransient<ClaudeCompletionService>();
+        services.AddTransient<OpenAiChatCompletionService>()
+                .AddTransient<ClaudeChatCompletionService>();
 
         services.AddTransient<NamedService<IChatCompletionService>>(provider =>
         {
             return name => name switch
             {
-                "ChatGPT" => provider.GetRequiredService<ChatGptCompletionService>(),
-                "Claude" => provider.GetRequiredService<ClaudeCompletionService>(),
+                "OpenAi" => provider.GetRequiredService<OpenAiChatCompletionService>(),
+                "Claude" => provider.GetRequiredService<ClaudeChatCompletionService>(),
                 _ => throw new ArgumentException($"Unknown chat completion service {name}")
             };
         });

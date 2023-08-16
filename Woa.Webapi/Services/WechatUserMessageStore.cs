@@ -9,20 +9,20 @@ public class WechatUserMessageStore : IWechatUserMessageStore
 	private readonly SupabaseClient _client;
 	private readonly ILogger<WechatUserMessageStore> _logger;
 
-	protected WechatUserMessageStore(SupabaseClient client, ILoggerFactory logger)
+	public WechatUserMessageStore(SupabaseClient client, ILoggerFactory logger)
 	{
 		_client = client;
 		_logger = logger.CreateLogger<WechatUserMessageStore>();
 	}
 
-	public async Task SaveAsync(WechatMessage message)
+	public async Task SaveAsync(WechatMessage message, CancellationToken cancellationToken = default)
 	{
 		try
 		{
 			var exists = await _client.From<WechatMessageEntity>()
-									  .Where(t => t.Id == message.MessageId)
-									  .Count(Constants.CountType.Exact)
-									  .ContinueWith(task => task.Result > 0);
+			                          .Where(t => t.Id == message.MessageId)
+			                          .Count(Constants.CountType.Exact, cancellationToken)
+			                          .ContinueWith(task => task.Result > 0, cancellationToken);
 			if (exists)
 			{
 				return;
@@ -38,7 +38,7 @@ public class WechatUserMessageStore : IWechatUserMessageStore
 			};
 
 			await _client.From<WechatMessageEntity>()
-						 .Insert(entity);
+			             .Insert(entity, cancellationToken: cancellationToken);
 		}
 		catch (Exception exception)
 		{

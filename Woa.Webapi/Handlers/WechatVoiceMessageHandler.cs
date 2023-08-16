@@ -10,13 +10,11 @@ public class WechatVoiceMessageHandler : WechatUserMessageHandler
 {
 	private readonly SupabaseClient _client;
 	private readonly IConfiguration _configuration;
-	private readonly ILogger<WechatTextMessageHandler> _logger;
 
-	public WechatVoiceMessageHandler(IWechatUserMessageStore store, SupabaseClient client, ILoggerFactory logger, IConfiguration configuration)
+	public WechatVoiceMessageHandler(IWechatUserMessageStore store, SupabaseClient client, IConfiguration configuration)
 		: base(store)
 	{
 		_client = client;
-		_logger = logger.CreateLogger<WechatTextMessageHandler>();
 		_configuration = configuration;
 	}
 
