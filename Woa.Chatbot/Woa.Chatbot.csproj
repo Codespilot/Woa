@@ -5,6 +5,7 @@
         <Nullable>disable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>dotnet-Woa.Chatbot-6EF65B09-DFC8-4CA7-BACF-9F0F698E3097</UserSecretsId>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
     
     <ItemGroup>
@@ -23,6 +24,12 @@
     <ItemGroup>
         <ProjectReference Include="..\Woa.Common\Woa.Common.csproj" />
         <ProjectReference Include="..\Woa.Sdk\Woa.Sdk.csproj" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
     </ItemGroup>
     
 </Project>
