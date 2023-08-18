@@ -1,6 +1,4 @@
-﻿using Woa.Webapi.Models;
-
-namespace Woa.Webapi.Handlers;
+﻿namespace Woa.Sdk.Wechat;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public class WechatMessageHandleAttribute : Attribute

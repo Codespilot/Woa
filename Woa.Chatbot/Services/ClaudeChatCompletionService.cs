@@ -1,14 +1,13 @@
-﻿using Woa.Chatbot.Apis;
-using Woa.Chatbot.Models.Claude;
+﻿using Woa.Sdk.Claude;
 
 namespace Woa.Chatbot.Services;
 
-public class ClaudeCompletionService : IChatCompletionService
+public class ClaudeChatCompletionService : IChatCompletionService
 {
     private readonly IClaudeApi _api;
     private readonly IConfiguration _configuration;
 
-    public ClaudeCompletionService(IClaudeApi api, IConfiguration configuration)
+    public ClaudeChatCompletionService(IClaudeApi api, IConfiguration configuration)
     {
         _api = api;
         _configuration = configuration;

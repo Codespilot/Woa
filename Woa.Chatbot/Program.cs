@@ -1,8 +1,11 @@
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Events;
 using Woa.Chatbot;
 using Woa.Chatbot.Services;
 using Woa.Common;
+using Woa.Sdk;
+using Woa.Sdk.OpenAi;
 
 //HttpClient.DefaultProxy = new WebProxy("localhost", 8888);
 
@@ -22,25 +25,24 @@ Log.Logger = new LoggerConfiguration()
              .CreateLogger();
 try
 {
-    var host = Host.CreateDefaultBuilder(args)
-                   .UseSerilog()
-                   .ConfigureServices(services =>
-                   {
-                       services.AddSupabaseClient()
-                               .AddChatGptApi()
-                               .AddClaudeApi();
-                       services.AddTransient<ChatGptCompletionService>()
-                               .AddTransient<ClaudeCompletionService>();
-                       services.AddHostedService<ChatCompletionBackgroundService>();
-                   })
-                   .Build();
-    host.Run();
+	var host = Host.CreateDefaultBuilder(args)
+	               .UseSerilog()
+	               .ConfigureServices((context, services) =>
+	               {
+		               services.AddSupabaseClient()
+		                       .AddOpenAiApi(context.Configuration.GetSection("Bot:OpenAi"))
+		                       .AddClaudeApi(context.Configuration.GetSection("Bot:Claude"))
+		                       .AddChatCompletionService();
+		               services.AddHostedService<ChatCompletionBackgroundService>();
+	               })
+	               .Build();
+	host.Run();
 }
 catch (Exception exception)
 {
-    Log.Fatal(exception, "Application terminated unexpectedly");
+	Log.Fatal(exception, "Application terminated unexpectedly");
 }
 finally
 {
-    Log.CloseAndFlush();
+	Log.CloseAndFlush();
 }

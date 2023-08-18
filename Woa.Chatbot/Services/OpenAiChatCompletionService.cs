@@ -1,14 +1,13 @@
-﻿using Woa.Chatbot.Apis;
-using Woa.Chatbot.Models.ChatGpt;
+﻿using Woa.Sdk.OpenAi;
 
 namespace Woa.Chatbot.Services;
 
-public class ChatGptCompletionService : IChatCompletionService
+public class OpenAiChatCompletionService : IChatCompletionService
 {
-    private readonly IChatGptApi _api;
+    private readonly IOpenAiApi _api;
     private readonly IConfiguration _configuration;
 
-    public ChatGptCompletionService(IChatGptApi api, IConfiguration configuration)
+    public OpenAiChatCompletionService(IOpenAiApi api, IConfiguration configuration)
     {
         _api = api;
         _configuration = configuration;
@@ -16,7 +15,7 @@ public class ChatGptCompletionService : IChatCompletionService
 
     public async Task<string> CreateCompletionAsync(string message, CancellationToken cancellationToken = default)
     {
-        var request = new ChatCompletionRequest(message) { Model = _configuration["Bot:ChatGPT:Model"] };
+        var request = new ChatCompletionRequest(message) { Model = _configuration["Bot:OpenAi:Model"] };
         var response = await _api.CreateCompletionAsync(request, cancellationToken);
         var result = await response.EnsureSuccessStatusCodeAsync();
         return result.Content!.Choices[0].Message.Content;

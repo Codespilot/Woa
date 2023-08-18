@@ -1,4 +1,4 @@
-﻿namespace Woa.Webapi.Models;
+﻿namespace Woa.Sdk.Wechat;
 
 /// <summary>
 /// 微信公众号消息Xml节点Key

@@ -1,4 +1,4 @@
-﻿namespace Woa.Webapi.Models;
+﻿namespace Woa.Sdk.Wechat;
 
 /// <summary>
 /// 微信图文消息

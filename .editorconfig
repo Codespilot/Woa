@@ -20,5 +20,7 @@ csharp_style_namespace_declarations = file_scoped:error
 
 resharper_explicit_caller_info_argument_highlighting = none # 去除CallerMemberName警告
 
+resharper_separate_local_functions_with_jump_statement_highlighting = none # 去除本地函数的警告
+
 [*.xaml.cs]
 resharper_redundant_extends_list_entry_highlighting = none # 去除xaml.cs文件的基类型重复警告。基类型不能删除，否则编译报错。

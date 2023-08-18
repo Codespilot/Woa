@@ -1,11 +1,9 @@
 using Microsoft.OpenApi.Models;
-using Refit;
 using Serilog;
 using Serilog.Events;
-using Woa.Common;
 using Woa.Webapi;
-using Woa.Webapi.Apis;
 using Woa.Webapi.Services;
+using Woa.Sdk;
 
 Log.Logger = new LoggerConfiguration().Enrich
                                       .FromLogContext()
@@ -24,83 +22,81 @@ Log.Logger = new LoggerConfiguration().Enrich
 
 try
 {
-    var builder = WebApplication.CreateBuilder(args);
-    builder.Host.UseSerilog();
+	var builder = WebApplication.CreateBuilder(args);
+	builder.Host.UseSerilog();
 
-    builder.Services.AddAuthentication(builder.Configuration);
-    builder.Services.AddControllers();
-    builder.Services.AddApplicationServices();
-    builder.Services.AddMemoryCache();
-    builder.Services.AddSupabaseClient(builder.Configuration);
-    builder.Services.AddRefitClient<IWechatApi>(new RefitSettings { Buffered = true, ContentSerializer = new NewtonsoftJsonContentSerializer() })
-           .ConfigureHttpClient((_, client) =>
-           {
-               client.BaseAddress = new Uri("https://api.weixin.qq.com");
-           });
-    builder.Services.AddWechatMessageHandler();
+	builder.Services.AddAuthentication(builder.Configuration);
+	builder.Services.AddControllers();
+	builder.Services.AddApplicationServices();
+	builder.Services.AddMemoryCache();
+	builder.Services.AddSupabaseClient(builder.Configuration);
+	builder.Services.AddWechatApi(builder.Configuration.GetSection("Wechat"));
+	builder.Services.AddWechatMessageHandler<WechatUserMessageStore>(typeof(Program).Assembly);
 
-    builder.Services.AddHostedService<ChatbotBackgroundService>();
-    builder.Services.AddRecurringJobService();
+	builder.Services.AddHostedService<ChatbotBackgroundService>();
+	builder.Services.AddRecurringJobService();
 
-    builder.Services.AddSwaggerGen(gen =>
-    {
-        gen.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-        {
-            Name = "Authorization",
-            Type = SecuritySchemeType.Http,
-            Scheme = "bearer"
-        });
+	builder.Services.AddSwaggerGen(gen =>
+	{
+		gen.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+		{
+			Name = "Authorization",
+			Type = SecuritySchemeType.Http,
+			Scheme = "bearer"
+		});
 
-        gen.AddSecurityRequirement(new OpenApiSecurityRequirement
-        {
-            {
-                new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                    }
-                },
-                new List<string>()
-            }
-        });
+		gen.AddSecurityRequirement(new OpenApiSecurityRequirement
+		{
+			{
+				new OpenApiSecurityScheme
+				{
+					Reference = new OpenApiReference
+					{
+						Type = ReferenceType.SecurityScheme,
+						Id = "Bearer"
+					}
+				},
+				new List<string>()
+			}
+		});
 
-        gen.SwaggerDoc("v1", new OpenApiInfo
-        {
-            Title = "API", Version = "v1", License = new OpenApiLicense
-            {
-                Name = "© 2020 Nerosoft. All Rights Reserved."
-            }
-        });
-    });
+		gen.SwaggerDoc("v1", new OpenApiInfo
+		{
+			Title = "API",
+			Version = "v1",
+			License = new OpenApiLicense
+			{
+				Name = "© 2020 Nerosoft. All Rights Reserved."
+			}
+		});
+	});
 
-    var app = builder.Build();
+	var app = builder.Build();
 
-    // Configure the HTTP request pipeline.
-    if (app.Environment.IsDevelopment())
-    {
-        app.UseDeveloperExceptionPage();
-    }
+	// Configure the HTTP request pipeline.
+	if (app.Environment.IsDevelopment())
+	{
+		app.UseDeveloperExceptionPage();
+	}
 
-    app.UseSwagger();
-    app.UseSwaggerUI(option =>
-    {
-        option.SwaggerEndpoint("/swagger/v1/swagger.json", "v1.0");
-    });
+	app.UseSwagger();
+	app.UseSwaggerUI(option =>
+	{
+		option.SwaggerEndpoint("/swagger/v1/swagger.json", "v1.0");
+	});
 
-    app.UseAuthentication();
-    app.UseAuthorization();
+	app.UseAuthentication();
+	app.UseAuthorization();
 
-    app.MapControllers();
+	app.MapControllers();
 
-    app.Run();
+	app.Run();
 }
 catch (Exception exception)
 {
-    Log.Fatal(exception, "Application terminated unexpectedly");
+	Log.Fatal(exception, "Application terminated unexpectedly");
 }
 finally
 {
-    Log.CloseAndFlush();
+	Log.CloseAndFlush();
 }

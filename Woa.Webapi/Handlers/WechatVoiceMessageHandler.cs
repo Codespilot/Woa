@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using Woa.Sdk.Wechat;
 using Woa.Webapi.Domain;
-using Woa.Webapi.Models;
 using Woa.Webapi.Services;
 
 namespace Woa.Webapi.Handlers;
@@ -8,15 +8,17 @@ namespace Woa.Webapi.Handlers;
 [WechatMessageHandle(WechatMessageType.Voice)]
 public class WechatVoiceMessageHandler : WechatUserMessageHandler
 {
-    private readonly IConfiguration _configuration;
+	private readonly SupabaseClient _client;
+	private readonly IConfiguration _configuration;
 
-    public WechatVoiceMessageHandler(SupabaseClient client, ILoggerFactory logger, IConfiguration configuration)
-        : base(client, logger)
-    {
-        _configuration = configuration;
-    }
+	public WechatVoiceMessageHandler(IWechatUserMessageStore store, SupabaseClient client, IConfiguration configuration)
+		: base(store)
+	{
+		_client = client;
+		_configuration = configuration;
+	}
 
-    protected override async Task<WechatMessage> HandleMessageAsync(string openId, WechatMessage message, CancellationToken cancellationToken = default)
+	protected override async Task<WechatMessage> HandleMessageAsync(string openId, WechatMessage message, CancellationToken cancellationToken = default)
     {
         var messageContent = message.GetValue<string>(WechatMessageKey.Standard.Recognition);
 
@@ -28,7 +30,7 @@ public class WechatVoiceMessageHandler : WechatUserMessageHandler
             };
         }
 
-        var user = await SupabaseClient.From<WechatFollowerEntity>()
+        var user = await _client.From<WechatFollowerEntity>()
                                        .Where(t => t.OpenId == openId)
                                        .Single(cancellationToken);
 
