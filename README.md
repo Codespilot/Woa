@@ -8,6 +8,8 @@ graph TD
 	Woa.Chatbot --> Woa.Sdk
 	Woa.Webapi --> Woa.Shared
 	Woa.Chatbot --> Woa.Shared
+	Woa.Webapi --> Woa.Common
+	Woa.Chatbot --> Woa.Common
 	Woa.Sdk --> Woa.Common
 ```
 
