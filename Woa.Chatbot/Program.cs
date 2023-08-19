@@ -1,11 +1,9 @@
-using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Events;
 using Woa.Chatbot;
 using Woa.Chatbot.Services;
-using Woa.Common;
 using Woa.Sdk;
-using Woa.Sdk.OpenAi;
+using Woa.Shared;
 
 //HttpClient.DefaultProxy = new WebProxy("localhost", 8888);
 

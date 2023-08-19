@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Woa.Chatbot", "Woa.Chatbot\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Woa.Common", "Woa.Common\Woa.Common.csproj", "{8B25D4B6-80AB-436E-A0F2-3CF9A68B409B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Woa.Sdk", "Woa.Sdk\Woa.Sdk.csproj", "{A80006CB-41CD-4A43-A4A3-3195F4CF8C48}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Woa.Sdk", "Woa.Sdk\Woa.Sdk.csproj", "{A80006CB-41CD-4A43-A4A3-3195F4CF8C48}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Woa.Shared", "Woa.Shared\Woa.Shared.shproj", "{12FB0676-61FD-4138-93F0-C70AB5E3FE50}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,5 +38,13 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {74AEC4FE-29D1-4448-BE83-C3A37DA00EDB}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Woa.Shared\Woa.Shared.projitems*{12fb0676-61fd-4138-93f0-c70ab5e3fe50}*SharedItemsImports = 13
+		Woa.Shared\Woa.Shared.projitems*{4181323b-8a93-40de-9556-906cbed374c9}*SharedItemsImports = 5
+		Woa.Shared\Woa.Shared.projitems*{4790cbe7-0242-4679-b9fc-c73c64fc99b6}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

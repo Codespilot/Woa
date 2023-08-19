@@ -4,6 +4,7 @@ using Serilog.Events;
 using Woa.Webapi;
 using Woa.Webapi.Host;
 using Woa.Sdk;
+using Woa.Shared;
 using Woa.Webapi.Wechat;
 
 Log.Logger = new LoggerConfiguration().Enrich

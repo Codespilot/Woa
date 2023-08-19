@@ -4,6 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Supabase.Realtime;
 using Supabase.Realtime.Models;
 using Woa.Sdk.Wechat;
+using Woa.Shared;
 using Woa.Webapi.Domain;
 
 namespace Woa.Webapi.Host;
@@ -77,13 +78,4 @@ public class ChatbotBackgroundService : BackgroundService
 		var response = await _api.SendCustomMessageAsync(accessToken, reply);
 		Debug.WriteLine(response);
 	}
-}
-
-public class ChatbotBroadcast : BaseBroadcast
-{
-	public string OpenId { get; set; }
-
-	public long MessageId { get; set; }
-
-	public string MessageContent { get; set; }
 }

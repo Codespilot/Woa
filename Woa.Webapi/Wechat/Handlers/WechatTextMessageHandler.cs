@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using Woa.Sdk.Wechat;
+using Woa.Shared;
 using Woa.Webapi.Domain;
 using Woa.Webapi.Host;
 
@@ -28,8 +29,8 @@ public class WechatTextMessageHandler : WechatUserMessageHandler
 		}
 
 		var user = await _client.From<WechatFollowerEntity>()
-								.Where(t => t.OpenId == openId)
-								.Single(cancellationToken);
+		                        .Where(t => t.OpenId == openId)
+		                        .Single(cancellationToken);
 		if (user?.IsChatbotEnabled == true)
 		{
 			WeakReferenceMessenger.Default.Send(new ChatbotBroadcast { OpenId = openId, MessageId = message.MessageId, MessageContent = messageContent });

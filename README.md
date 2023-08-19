@@ -1,9 +1,13 @@
-Woa（Wechat Official Account）是一个基于.net 7开发的微信公众平台接口项目。本项目利用Supabase作为数据存储和消息通信服务，同时提供了ChatGPT和Claude2等目前热门的生成式AI会话功能接入。
+Woa（Wechat Official Account）是一个基于.net 7开发的微信公众平台接口项目，利用Supabase作为数据存储和消息通信服务，同时提供了ChatGPT和Claude2等目前热门的生成式AI会话功能接入。
 
 ### 项目结构
 
 ```mermaid
 graph TD
+    Woa.Webapi --> Woa.Shared
+	Woa.Chatbot --> Woa.Shared
+	Woa.Webapi --> Woa.Common
+	Woa.Chatbot --> Woa.Common
 	Woa.Webapi --> Woa.Sdk
 	Woa.Chatbot --> Woa.Sdk
 	Woa.Sdk --> Woa.Common
@@ -28,7 +32,7 @@ Chatbot的代码为何要分离出来呢？当然是为了异地单独部署咯�
 
 公众号开通之后，需要配置服务器地址（微信公众平台向接口发送的消息全部都是通过这个接口的），请求令牌（Token，用于服务端接口鉴别消息是否来自腾讯服务器），开发者Id等等。
 
-正式的公众号并不是所有接口都能使用的，根据账号类型、认证状态的不同，公众号的接口权限也不一样，为了方便接口对接调试，我们还需要同事开通公众平台测试账号。测试账号的所有接口权限都是开通的。
+正式的公众号并不是所有接口都能使用的，根据账号类型、认证状态的不同，公众号的接口权限也不一样，为了方便接口对接调试，我们还需要同时开通公众平台测试账号。测试账号的所有接口权限都是开通的。
 
 #### 2. 准备域名
 
@@ -72,36 +76,37 @@ supabase 基于 PostgreSQL 数据库，因此当你创建完项目后，就自�
 
 ```json
 {
-  "Wechat": {
-    "Host": "https://api.weixin.qq.com",
-    "AppId": "",
-    "AppSecret": "",
-    "AppToken": "",
-    "EncodingKey": "",
-    "EncryptType": "None",
-    "OpenId": "",
-    "EnableCustomMessage": false,
-    "EnableTemplateMessage": true,
-    "ReplyTitle": "查看回复",
-    "ReplyDescription": "点击查看回复",
-    "ReplyUrl": null,
-    "ReplyPicUrl": null
-  },
-  "Supabase": {
-    "Url": "",
-    "Key": ""
-  }
+	"Wechat": {
+	    "Host": "https://api.weixin.qq.com",
+	    "AppId": "",
+	    "AppSecret": "",
+	    "AppToken": "",
+	    "EncodingKey": "",
+	    "EncryptType": "None",
+	    "OpenId": "",
+	    "EnableCustomMessage": false,
+	    "EnableTemplateMessage": true,
+	    "ReplyTitle": "查看回复",
+	    "ReplyDescription": "点击查看回复",
+	    "ReplyUrl": null,
+	    "ReplyPicUrl": null
+	},
+	"Supabase": {
+	    "Url": "",
+	    "Key": ""
+	}
 }
 ```
 
 #### Wechat
+
 - AppId：开发者ID
 - AppSecret：开发者密码，公众号不提供展示开发者密码的功能，需要自己保存，忘记开发者密码只能进行重置。
 - AppToken：令牌，在公众号自行设置，用于鉴别接口收到的请求是否来源于微信服务器。
 - EncodingKey：消息加解密密钥，将用于消息体加解密过程。
 - EncryptType：消息加密模式，可选值有None（明文模式）、Compatible（兼容模式）、Safe（安全模式）三个。
 - OpenId：公众号原始Id，正式账号可以在公众号设置的注册信息栏找到。测试公众号在测试号管理页面右上角位置的微信号后面的字符串。
-- EnableCustomMessage：是否开通客服消息权限。在接口权限页面查看开通状态，开通此接口权限必须通过微信认证。开通客服消息权限后，Chatbot回复的内容将通过客服消息接口异步下发个用户。
+- EnableCustomMessage：是否开通客服消息权限。在接口权限页面查看开通状态，开通此接口权限必须通过微信认证。开通客服消息权限后，Chatbot回复的内容将通过客服消息接口异步下发给用户。
 - EnableTemplateMessage：是否开通模板消息。
 - ReplyTitle：回复消息标题。未开通客服消息的公众号，接口收到用户发送的消息后将同步回复一条图文消息，Chatbot回复之后用户可以通过点击图文消息查看回复内容。
 - ReplyDescription：回复消息描述信息。
@@ -109,6 +114,7 @@ supabase 基于 PostgreSQL 数据库，因此当你创建完项目后，就自�
 - ReplyPicUrl：消息图片Url。
 
 #### Supabase
+
 - Url：项目Url地址，可以在supabase的项目配置里面找到。
 - Key：项目API Key。
 
@@ -116,25 +122,25 @@ supabase 基于 PostgreSQL 数据库，因此当你创建完项目后，就自�
 
 ```json
 {
-  "Bot": {
-    "Name": "OpenAi",
-    "OpenAi": {
-      "Host": "https://api.openai.com",
-      "Token": "",
-      "Organization": "",
-      "Model": "gpt-3.5-turbo"
-    },
-    "Claude": {
-      "Host": "https://api.anthropic.com",
-      "Key": "",
-      "Version": "2023.6.1",
-      "Model": "claude-2"
-    }
-  },
-  "Supabase": {
-    "Url": "",
-    "Key": ""
-  }
+	"Bot": {
+	    "Name": "OpenAi",
+	    "OpenAi": {
+	        "Host": "https://api.openai.com",
+	        "Token": "",
+	        "Organization": "",
+	        "Model": "gpt-3.5-turbo"
+	    },
+	    "Claude": {
+	        "Host": "https://api.anthropic.com",
+	        "Key": "",
+	        "Version": "2023.6.1",
+	        "Model": "claude-2"
+	    }
+	},
+	"Supabase": {
+	    "Url": "",
+	    "Key": ""
+	}
 }
 ```
 
@@ -149,9 +155,10 @@ Supabase节点的配置与Woa.Webapi保持一致，OpenAI的配置在OpenAI开�
 ```shell
 .natapp -authtoken=xxxxxx
 ```
+
 如果觉得每次查询authtoken很费劲，也可以在natapp官网下载config.ini，与natapp客户端软件放到一起，将authtoken写到配置文件里面，启动的时候就不需要再指定authtoken参数。
 
-具体教程可以在官网找到，这里不再赘述。
+具体教程可以在官网找到。
 
 Woa.Chatbot和Woa.Webapi可以通过IDE启动，或者通过终端输入指令运行：
 
