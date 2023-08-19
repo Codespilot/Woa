@@ -2,7 +2,7 @@
 
 namespace Woa.Webapi.Domain;
 
-public class UserLoginSuccessEvent : INotification
+public class UserLoginSuccessEvent : IEvent
 {
 	public UserLoginSuccessEvent(int userId)
 	{

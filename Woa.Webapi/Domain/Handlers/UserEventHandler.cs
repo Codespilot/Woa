@@ -1,11 +1,8 @@
-﻿using MediatR;
-using Woa.Webapi.Domain;
+﻿namespace Woa.Webapi.Domain;
 
-namespace Woa.Webapi.Handlers;
-
-public class UserEventHandler : INotificationHandler<UserLoginFaultEvent>,
-                                INotificationHandler<UserLoginSuccessEvent>,
-                                INotificationHandler<RefreshTokenUsedEvent>
+public class UserEventHandler : IEventHandler<UserLoginFaultEvent>,
+                                IEventHandler<UserLoginSuccessEvent>,
+                                IEventHandler<RefreshTokenUsedEvent>
 {
 	private readonly SupabaseClient _client;
 	private readonly ILogger<UserEventHandler> _logger;

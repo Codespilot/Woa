@@ -1,8 +1,6 @@
-﻿using MediatR;
+﻿namespace Woa.Webapi.Domain;
 
-namespace Woa.Webapi.Domain;
-
-public class RefreshTokenUsedEvent : INotification
+public class RefreshTokenUsedEvent : IEvent
 {
 	public RefreshTokenUsedEvent(string token)
 	{

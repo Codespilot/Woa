@@ -1,14 +1,13 @@
 ﻿using System.Data;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Text;
+using AutoMapper;
 using IdentityModel;
 using MediatR;
 using Microsoft.IdentityModel.Tokens;
 using Polly;
-using Postgrest;
 using Woa.Common;
 using Woa.Webapi.Domain;
 using Woa.Webapi.Dtos;
@@ -19,13 +18,15 @@ public class UserService : IUserService
 {
 	private readonly SupabaseClient _client;
 	private readonly IMediator _mediator;
+	private readonly IMapper _mapper;
 	private readonly IConfiguration _configuration;
 	private readonly ILogger<UserService> _logger;
 
-	public UserService(SupabaseClient client, IMediator mediator, IConfiguration configuration, ILoggerFactory logger)
+	public UserService(SupabaseClient client, IMediator mediator, IMapper mapper, IConfiguration configuration, ILoggerFactory logger)
 	{
 		_client = client;
 		_mediator = mediator;
+		_mapper = mapper;
 		_configuration = configuration;
 		_logger = logger.CreateLogger<UserService>();
 	}
@@ -34,12 +35,12 @@ public class UserService : IUserService
 	{
 		if (string.IsNullOrWhiteSpace(username))
 		{
-			throw new ArgumentNullException(nameof(username));
+			throw new BadRequestException("用户名不能为空");
 		}
 
 		if (string.IsNullOrWhiteSpace(password))
 		{
-			throw new ArgumentNullException(nameof(password));
+			throw new BadRequestException("密码不能为空");
 		}
 
 		username = username.Trim().ToLower(CultureInfo.CurrentCulture);
@@ -91,7 +92,7 @@ public class UserService : IUserService
 	{
 		if (string.IsNullOrWhiteSpace(token))
 		{
-			throw new ArgumentNullException(nameof(token), "Token错误");
+			throw new BadRequestException("Token错误");
 		}
 
 		token = token.Trim().ToLower(CultureInfo.CurrentCulture);
@@ -106,7 +107,7 @@ public class UserService : IUserService
 
 		if (entity == null || !entity.IsValid || entity.ExpiredAt < DateTime.UtcNow)
 		{
-			throw new RowNotInTableException("无效的Token");
+			throw new NotFoundException("无效的Token");
 		}
 
 		var refreshToken = await GenerateRefreshTokenAsync(entity.Id, entity.Username);
@@ -124,7 +125,7 @@ public class UserService : IUserService
 		};
 
 		await _mediator.Publish(new RefreshTokenUsedEvent(token));
-		
+
 		return response;
 	}
 
@@ -132,7 +133,7 @@ public class UserService : IUserService
 	{
 		if (id <= 0)
 		{
-			throw new ArgumentNullException(nameof(id), "Id必须大于0");
+			throw new BadRequestException("Id必须大于0");
 		}
 
 		var entity = await Policy.Handle<Exception>()
@@ -154,7 +155,7 @@ public class UserService : IUserService
 	{
 		if (string.IsNullOrWhiteSpace(username))
 		{
-			throw new ArgumentNullException(nameof(username), "用户名不能为空");
+			throw new BadRequestException("用户名不能为空");
 		}
 
 		username = username.Trim().ToLower(CultureInfo.CurrentCulture);
@@ -178,7 +179,7 @@ public class UserService : IUserService
 	{
 		if (id <= 0)
 		{
-			throw new ArgumentNullException(nameof(id), "Id必须大于0");
+			throw new BadRequestException("Id必须大于0");
 		}
 
 		var entity = await Policy.Handle<Exception>()
@@ -191,99 +192,27 @@ public class UserService : IUserService
 
 		if (entity == null || entity.IsDeleted)
 		{
-			throw new RowNotInTableException();
+			throw new NotFoundException("用户不存在");
 		}
 
-		var dto = new UserProfileDto
-		{
-			Id = entity.Id,
-			Username = entity.Username,
-			Email = entity.Email,
-			Phone = entity.Phone,
-			Avatar = entity.Avatar
-		};
-
-		return dto;
+		return _mapper.Map<UserProfileDto>(entity);
 	}
 
-	public async Task<UserEntity> CreateAsync(UserRegisterDto model)
+	public async Task<int> CreateAsync(UserRegisterDto model)
 	{
 		if (model == null)
 		{
-			throw new ArgumentNullException(nameof(model));
+			throw new BadRequestException("参数不能为空");
 		}
 
-		if (string.IsNullOrWhiteSpace(model.Username))
+		var command = _mapper.Map<UserCreateCommand>(model);
+		var id = await _mediator.Send(command);
+		if (id <= 0)
 		{
-			throw new ArgumentNullException(nameof(model.Username));
-		}
-		else
-		{
-			model.Username = model.Username.Trim().ToLower(CultureInfo.CurrentCulture);
-			var exists = await CheckExistsAsync(t => t.Username == model.Username);
-			if (exists)
-			{
-				throw new DuplicateNameException("用户名已存在");
-			}
+			throw new InternalServerException("创建用户失败");
 		}
 
-		if (string.IsNullOrWhiteSpace(model.Password))
-		{
-			throw new ArgumentNullException(nameof(model.Password));
-		}
-
-		if (!string.IsNullOrWhiteSpace(model.Email))
-		{
-			model.Email = model.Email.Trim().ToLower(CultureInfo.CurrentCulture);
-			var exists = await CheckExistsAsync(t => t.Email == model.Email);
-			if (exists)
-			{
-				throw new DuplicateNameException("邮箱已被注册");
-			}
-		}
-
-		if (!string.IsNullOrWhiteSpace(model.Phone))
-		{
-			model.Phone = model.Phone.Trim().ToLower(CultureInfo.CurrentCulture);
-			var exists = await CheckExistsAsync(t => t.Phone == model.Phone);
-			if (exists)
-			{
-				throw new DuplicateNameException("手机号已被注册");
-			}
-		}
-
-		var salt = RandomUtility.CreateUniqueId();
-		var hash = Cryptography.DES.Encrypt(model.Password, Encoding.UTF8.GetBytes(salt));
-
-		var entity = new UserEntity
-		{
-			Username = model.Username.Trim().ToLower(CultureInfo.CurrentCulture),
-			PasswordSalt = salt,
-			PasswordHash = hash,
-			LockoutTime = DateTime.UtcNow,
-			IsDeleted = false,
-		};
-
-		var result = await Policy.Handle<Exception>()
-		                         .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		                         .ExecuteAsync(() =>
-			                         _client.From<UserEntity>()
-			                                .Insert(entity)
-		                         );
-
-		return result.Model;
-	}
-
-	private async Task<bool> CheckExistsAsync(Expression<Func<UserEntity, bool>> predicate)
-	{
-		var result = await Policy.Handle<Exception>()
-		                         .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		                         .ExecuteAsync(() =>
-			                         _client.From<UserEntity>()
-			                                .Where(predicate)
-			                                .Count(Constants.CountType.Exact)
-		                         );
-		return result > 0;
+		return id;
 	}
 
 	private Tuple<string, DateTime> GenerateAccessToken(int userId, string userName)
@@ -320,7 +249,7 @@ public class UserService : IUserService
 			UserId = userId,
 			Username = userName,
 			Token = token,
-			ExpiredAt = expiresAt, 
+			ExpiredAt = expiresAt,
 			IsValid = true
 		};
 

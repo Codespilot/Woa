@@ -2,7 +2,7 @@
 using Woa.Sdk.Wechat;
 using Woa.Webapi.Domain;
 
-namespace Woa.Webapi.Handlers;
+namespace Woa.Webapi.Wechat;
 
 /// <summary>
 /// 微信事件消息处理器

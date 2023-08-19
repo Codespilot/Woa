@@ -2,12 +2,12 @@
 
 namespace Woa.Webapi.Domain;
 
-public class UserLoginFaultEvent : INotification
+public class UserLoginFaultEvent : IEvent
 {
-    public UserLoginFaultEvent(long userId)
-    {
-        UserId = userId;
-    }
+	public UserLoginFaultEvent(long userId)
+	{
+		UserId = userId;
+	}
 
-    public long UserId { get; }
+	public long UserId { get; }
 }
