@@ -1,7 +1,6 @@
-﻿using Supabase;
-using Supabase.Realtime;
-using Supabase.Realtime.Models;
+﻿using Supabase.Realtime;
 using Woa.Common;
+using Woa.Shared;
 
 namespace Woa.Chatbot.Services;
 
@@ -26,7 +25,7 @@ public class ChatCompletionBackgroundService : BackgroundService
 		{
 			var key = _configuration["Supabase:Key"];
 			var url = _configuration["Supabase:Url"];
-			var options = new SupabaseOptions
+			var options = new Supabase.SupabaseOptions
 			{
 				AutoRefreshToken = true,
 				AutoConnectRealtime = true
@@ -56,7 +55,7 @@ public class ChatCompletionBackgroundService : BackgroundService
 		}
 	}
 
-	private async void InvokeChatCompletion(string openId, string messageId, string text)
+	private async void InvokeChatCompletion(string openId, long messageId, string text)
 	{
 		var content = await Task.Run(async () =>
 		{
@@ -86,19 +85,5 @@ public class ChatCompletionBackgroundService : BackgroundService
 		});
 
 		await _channel.Send(Constants.ChannelEventName.Broadcast, null, new ChatbotBroadcast { MessageContent = content, MessageId = messageId, OpenId = openId });
-	}
-}
-
-public class ChatbotBroadcast : BaseBroadcast
-{
-	public string OpenId { get; set; }
-
-	public string MessageId { get; set; }
-
-	public string MessageContent { get; set; }
-
-	public override string ToString()
-	{
-		return $"{OpenId} ({MessageId}){MessageContent}";
 	}
 }
