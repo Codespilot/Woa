@@ -1,7 +1,10 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Text;
+using AutoMapper;
+using FluentValidation;
 using IdentityModel;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Quartz;
@@ -13,17 +16,85 @@ namespace Woa.Webapi;
 
 internal static class ServiceCollectionExtensions
 {
-	internal static IServiceCollection AddApplicationServices(this IServiceCollection services)
+	private static readonly List<Type> _types = typeof(Program).Assembly.GetTypes().ToList();
+
+	public static IServiceCollection AddApplicationServices(this IServiceCollection services)
 	{
 		services.AddMediatR(config =>
-		{
-			config.Lifetime = ServiceLifetime.Scoped;
-			config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
-		});
-		return services.AddTransient<IUserService, UserService>();
+		        {
+			        config.Lifetime = ServiceLifetime.Scoped;
+			        config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+		        })
+		        .AddObjectMapping()
+		        .AddObjectValidation();
+
+		services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+		return services.AddScoped<IUserService, UserService>();
 	}
 
-	internal static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
+	public static IServiceCollection AddObjectMapping(this IServiceCollection services, Action<MapperConfigurationExpression> config = null)
+	{
+		var expression = new MapperConfigurationExpression();
+
+		if (_types != null)
+		{
+			foreach (var type in _types)
+			{
+				if (!typeof(Profile).IsAssignableFrom(type) || !type.IsClass || type.IsAbstract)
+				{
+					continue;
+				}
+
+				expression.AddProfile(type);
+			}
+		}
+
+		config?.Invoke(expression);
+		var mapperConfiguration = new MapperConfiguration(expression);
+
+		var mapper = mapperConfiguration.CreateMapper();
+
+		services.AddSingleton(mapper);
+		return services;
+	}
+
+	public static IServiceCollection AddObjectValidation(this IServiceCollection services)
+	{
+		if (_types == null)
+		{
+			return services;
+		}
+
+		var implements = _types.Where(type => typeof(IValidator).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract)
+		                       .ToList();
+
+		foreach (var validatorType in implements)
+		{
+			var inheritedType = validatorType.GetInterfaces().FirstOrDefault(t => t.IsGenericType);
+			if (inheritedType == null)
+			{
+				continue;
+			}
+
+			if (inheritedType.GenericTypeArguments.Length != 1)
+			{
+				continue;
+			}
+
+			var objectType = inheritedType.GenericTypeArguments[0];
+			if (!objectType.IsClass || objectType.IsAbstract || objectType.IsEnum)
+			{
+				continue;
+			}
+
+			var interfaceType = typeof(IValidator<>).MakeGenericType(objectType);
+			services.AddSingleton(interfaceType, validatorType);
+		}
+
+		return services;
+	}
+
+	public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
 	{
 		JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
@@ -65,7 +136,7 @@ internal static class ServiceCollectionExtensions
 		});
 	}
 
-	internal static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+	public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
 	{
 		var bearerOptions = configuration.GetSection(nameof(JwtBearerOptions)).Get<JwtBearerOptions>();
 		var issuer = configuration.GetValue<string>("JwtBearerOptions:TokenIssuer");
@@ -73,22 +144,22 @@ internal static class ServiceCollectionExtensions
 		var key = Encoding.UTF8.GetBytes(tokenKey.ToSha256());
 
 		services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-				.AddJwtBearer(options =>
-				{
-					options.TokenValidationParameters = new TokenValidationParameters()
-					{
-						ValidateIssuerSigningKey = true,
-						ValidIssuer = issuer,
-						ValidAudience = bearerOptions.Audience,
-						//用于签名验证
-						IssuerSigningKey = new SymmetricSecurityKey(key),
-						ValidateIssuer = false,
-						ValidateAudience = false
-					};
-				});
+		        .AddJwtBearer(options =>
+		        {
+			        options.TokenValidationParameters = new TokenValidationParameters()
+			        {
+				        ValidateIssuerSigningKey = true,
+				        ValidIssuer = issuer,
+				        ValidAudience = bearerOptions.Audience,
+				        //用于签名验证
+				        IssuerSigningKey = new SymmetricSecurityKey(key),
+				        ValidateIssuer = false,
+				        ValidateAudience = false
+			        };
+		        });
 	}
 
-	internal static IServiceCollection AddRecurringJobService(this IServiceCollection services)
+	public static IServiceCollection AddRecurringJobService(this IServiceCollection services)
 	{
 		services.AddTransient<WechatAccessTokenGrantJob>();
 
@@ -124,10 +195,10 @@ internal static class ServiceCollectionExtensions
 			// quickest way to create a job with single trigger is to use ScheduleJob
 			// (requires version 3.2)
 			quartz.ScheduleJob<WechatAccessTokenGrantJob>(trigger => trigger.WithIdentity("WechatAccessTokenGrantJob")
-																			.StartAt(DateBuilder.EvenSecondDate(DateTimeOffset.UtcNow.AddSeconds(7)))
-																			.WithSimpleSchedule(x => x.WithIntervalInMinutes(30).RepeatForever())
-			//.WithDailyTimeIntervalSchedule(x => x.WithInterval(10, IntervalUnit.Second))
-			//.WithDescription("my awesome trigger configured for a job with single call")
+			                                                                .StartAt(DateBuilder.EvenSecondDate(DateTimeOffset.UtcNow.AddSeconds(7)))
+			                                                                .WithSimpleSchedule(x => x.WithIntervalInMinutes(30).RepeatForever())
+				//.WithDailyTimeIntervalSchedule(x => x.WithInterval(10, IntervalUnit.Second))
+				//.WithDescription("my awesome trigger configured for a job with single call")
 			);
 
 			/*
@@ -248,7 +319,7 @@ internal static class ServiceCollectionExtensions
 	}
 
 	// ReSharper disable once MemberCanBePrivate.Global
-	internal static IServiceCollection AddSupabaseClient(this IServiceCollection services, string url, string key)
+	public static IServiceCollection AddSupabaseClient(this IServiceCollection services, string url, string key)
 	{
 		if (string.IsNullOrWhiteSpace(url))
 		{
@@ -270,7 +341,7 @@ internal static class ServiceCollectionExtensions
 		return services;
 	}
 
-	internal static IServiceCollection AddSupabaseClient(this IServiceCollection services, IConfiguration configuration)
+	public static IServiceCollection AddSupabaseClient(this IServiceCollection services, IConfiguration configuration)
 	{
 		var url = configuration["Supabase:Url"];
 		var key = configuration["Supabase:Key"];
@@ -287,7 +358,7 @@ internal static class ServiceCollectionExtensions
 		return services.AddSupabaseClient(url, key);
 	}
 
-	internal static IServiceCollection AddSupabaseClient(this IServiceCollection services)
+	public static IServiceCollection AddSupabaseClient(this IServiceCollection services)
 	{
 		var options = new SupabaseOptions
 		{

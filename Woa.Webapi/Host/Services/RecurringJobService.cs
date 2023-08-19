@@ -4,7 +4,7 @@ using Quartz.Impl;
 using Quartz.Spi;
 using Woa.Webapi.Jobs;
 
-namespace Woa.Webapi.Services;
+namespace Woa.Webapi.Host;
 
 public class RecurringJobService : BackgroundService
 {

@@ -1,6 +1,6 @@
 ﻿using Woa.Sdk.Wechat;
 
-namespace Woa.Webapi.Handlers;
+namespace Woa.Webapi.Wechat;
 
 [WechatMessageHandle(WechatMessageType.Link)]
 public class WechatLinkMessageHandler : WechatUserMessageHandler

@@ -1,9 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using Woa.Sdk.Wechat;
 using Woa.Webapi.Domain;
-using Woa.Webapi.Services;
+using Woa.Webapi.Host;
 
-namespace Woa.Webapi.Handlers;
+namespace Woa.Webapi.Wechat;
 
 [WechatMessageHandle(WechatMessageType.Voice)]
 public class WechatVoiceMessageHandler : WechatUserMessageHandler

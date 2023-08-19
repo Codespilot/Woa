@@ -2,7 +2,7 @@
 using Woa.Sdk.Wechat;
 using Woa.Webapi.Domain;
 
-namespace Woa.Webapi.Services;
+namespace Woa.Webapi.Wechat;
 
 public class WechatUserMessageStore : IWechatUserMessageStore
 {

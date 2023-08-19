@@ -73,7 +73,7 @@ public class AccountController : ControllerBase
 		try
 		{
 			var result = await _service.CreateAsync(model);
-			Response.Headers.Add("x-entry-id", result.Id.ToString());
+			Response.Headers.Add("x-entry-id", result.ToString());
 			return Ok();
 		}
 		catch (ArgumentException exception)

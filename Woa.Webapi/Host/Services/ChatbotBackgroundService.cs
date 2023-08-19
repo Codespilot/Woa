@@ -6,7 +6,7 @@ using Supabase.Realtime.Models;
 using Woa.Sdk.Wechat;
 using Woa.Webapi.Domain;
 
-namespace Woa.Webapi.Services;
+namespace Woa.Webapi.Host;
 
 public class ChatbotBackgroundService : BackgroundService
 {

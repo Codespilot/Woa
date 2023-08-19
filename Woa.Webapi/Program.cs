@@ -2,8 +2,9 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Events;
 using Woa.Webapi;
-using Woa.Webapi.Services;
+using Woa.Webapi.Host;
 using Woa.Sdk;
+using Woa.Webapi.Wechat;
 
 Log.Logger = new LoggerConfiguration().Enrich
                                       .FromLogContext()
@@ -24,14 +25,19 @@ try
 {
 	var builder = WebApplication.CreateBuilder(args);
 	builder.Host.UseSerilog();
-
+	builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 	builder.Services.AddAuthentication(builder.Configuration);
 	builder.Services.AddControllers();
+
 	builder.Services.AddApplicationServices();
+
 	builder.Services.AddMemoryCache();
+
 	builder.Services.AddSupabaseClient(builder.Configuration);
-	builder.Services.AddWechatApi(builder.Configuration.GetSection("Wechat"));
-	builder.Services.AddWechatMessageHandler<WechatUserMessageStore>(typeof(Program).Assembly);
+
+	builder.Services
+	       .AddWechatApi(builder.Configuration.GetSection("Wechat"))
+	       .AddWechatMessageHandler<WechatUserMessageStore>(typeof(Program).Assembly);
 
 	builder.Services.AddHostedService<ChatbotBackgroundService>();
 	builder.Services.AddRecurringJobService();
