@@ -4,12 +4,12 @@ Woa（Wechat Official Account）是一个基于.net 7开发的微信公众平台
 
 ```mermaid
 graph TD
-	Woa.Webapi --> Woa.Sdk
-	Woa.Chatbot --> Woa.Sdk
-	Woa.Webapi --> Woa.Shared
+    Woa.Webapi --> Woa.Shared
 	Woa.Chatbot --> Woa.Shared
 	Woa.Webapi --> Woa.Common
 	Woa.Chatbot --> Woa.Common
+	Woa.Webapi --> Woa.Sdk
+	Woa.Chatbot --> Woa.Sdk
 	Woa.Sdk --> Woa.Common
 ```
 
