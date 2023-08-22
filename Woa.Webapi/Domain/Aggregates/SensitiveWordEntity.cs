@@ -9,7 +9,7 @@ namespace Woa.Webapi.Domain;
 /// 敏感词
 /// </summary>
 [Table("sensitive_words")]
-public class SensitiveWord : BaseModel
+public class SensitiveWordEntity : BaseModel
 {
     /// <summary>
     /// Id

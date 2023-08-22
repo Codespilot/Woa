@@ -10,8 +10,8 @@ public class WechatImageMessageHandler : WechatUserMessageHandler
 	{
 	}
 
-	protected override async Task<WechatMessage> HandleMessageAsync(string openId, WechatMessage message, CancellationToken cancellationToken)
+	protected override async Task<WechatMessage> HandleMessageAsync(string openId, WechatMessage message, CancellationToken cancellationToken = default)
 	{
-		return WechatMessage.Empty;
+		return await Task.FromResult(WechatMessage.Empty);
 	}
 }

@@ -1,24 +1,28 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.Options;
 using Woa.Sdk.Wechat;
 using Woa.Shared;
 using Woa.Webapi.Domain;
-using Woa.Webapi.Host;
 
 namespace Woa.Webapi.Wechat;
 
+/// <summary>
+/// 微信用户文本消息处理器
+/// </summary>
 [WechatMessageHandle(WechatMessageType.Text)]
 public class WechatTextMessageHandler : WechatUserMessageHandler
 {
 	private readonly SupabaseClient _client;
-	private readonly IConfiguration _configuration;
+	private readonly WechatOptions _options;
 
-	public WechatTextMessageHandler(IWechatUserMessageStore store, SupabaseClient client, IConfiguration configuration)
+	public WechatTextMessageHandler(IWechatUserMessageStore store, SupabaseClient client, IOptions<WechatOptions> options)
 		: base(store)
 	{
 		_client = client;
-		_configuration = configuration;
+		_options = options.Value;
 	}
 
+	/// <inheritdoc />
 	protected override async Task<WechatMessage> HandleMessageAsync(string openId, WechatMessage message, CancellationToken cancellationToken = default)
 	{
 		var messageContent = message.GetValue<string>(WechatMessageKey.Standard.Content);
@@ -35,14 +39,13 @@ public class WechatTextMessageHandler : WechatUserMessageHandler
 		{
 			WeakReferenceMessenger.Default.Send(new ChatbotBroadcast { OpenId = openId, MessageId = message.MessageId, MessageContent = messageContent });
 
-			if (_configuration.GetValue<bool>("Wechat:EnableCustomMessage"))
+			if (_options.EnableCustomMessage)
 			{
 				// 如果公众号开启了客服消息功能，直接返回null，表示不需要等待聊天机器人回复，因为聊天机器人回复的消息会通过异步方式下发给用户
 				return WechatMessage.Empty;
 			}
 
 			{
-				var replyUrl = _configuration.GetValue<string>("Wechat:ReplyUrl");
 				return new WechatMessage(WechatMessageType.News)
 				{
 					[WechatMessageKey.Reply.ArticleCount] = 1,
@@ -50,10 +53,10 @@ public class WechatTextMessageHandler : WechatUserMessageHandler
 					{
 						new
 						{
-							Title = _configuration.GetValue<string>("Wechat:ReplyTitle"),
-							Description = _configuration.GetValue<string>("Wechat:ReplyDescription"),
-							PicUrl = _configuration.GetValue<string>("Wechat:ReplyPicUrl"),
-							Url = $"{replyUrl}{message.MessageId}/reply"
+							Title = _options.ReplyTitle,
+							Description = _options.ReplyDescription,
+							PicUrl = _options.ReplyPicUrl,
+							Url = $"{_options.ReplyUrl}{message.MessageId}/reply"
 						}
 					}
 				};

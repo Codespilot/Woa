@@ -14,24 +14,24 @@ using Woa.Webapi.Dtos;
 
 namespace Woa.Webapi.Application;
 
-public class UserService : IUserService
+public class UserApplicationService : IUserApplicationService
 {
 	private readonly SupabaseClient _client;
 	private readonly IMediator _mediator;
 	private readonly IMapper _mapper;
 	private readonly IConfiguration _configuration;
-	private readonly ILogger<UserService> _logger;
+	private readonly ILogger<UserApplicationService> _logger;
 
-	public UserService(SupabaseClient client, IMediator mediator, IMapper mapper, IConfiguration configuration, ILoggerFactory logger)
+	public UserApplicationService(SupabaseClient client, IMediator mediator, IMapper mapper, IConfiguration configuration, ILoggerFactory logger)
 	{
 		_client = client;
 		_mediator = mediator;
 		_mapper = mapper;
 		_configuration = configuration;
-		_logger = logger.CreateLogger<UserService>();
+		_logger = logger.CreateLogger<UserApplicationService>();
 	}
 
-	public async Task<LoginResponseDto> AuthenticateAsync(string username, string password)
+	public async Task<LoginResponseDto> AuthenticateAsync(string username, string password, CancellationToken cancellationToken = default)
 	{
 		if (string.IsNullOrWhiteSpace(username))
 		{
@@ -50,7 +50,7 @@ public class UserService : IUserService
 		                         .ExecuteAsync(() =>
 			                         _client.From<UserEntity>()
 			                                .Where(t => t.Username == username)
-			                                .Single()
+			                                .Single(cancellationToken)
 		                         );
 		if (entity == null || entity.IsDeleted)
 		{
@@ -65,13 +65,13 @@ public class UserService : IUserService
 		var hash = Cryptography.DES.Encrypt(password, Encoding.UTF8.GetBytes(entity.PasswordSalt));
 		if (!string.Equals(entity.PasswordHash, hash))
 		{
-			await _mediator.Publish(new UserLoginFaultEvent(entity.Id));
+			await _mediator.Publish(new UserLoginFaultEvent(entity.Id), cancellationToken);
 			throw new InvalidOperationException("用户名或密码错误");
 		}
 
 		var refreshToken = await GenerateRefreshTokenAsync(entity.Id, entity.Username);
 
-		await _mediator.Publish(new UserLoginSuccessEvent(entity.Id));
+		await _mediator.Publish(new UserLoginSuccessEvent(entity.Id), cancellationToken);
 
 		var (token, expiresAt) = GenerateAccessToken(entity.Id, entity.Username);
 
@@ -88,7 +88,7 @@ public class UserService : IUserService
 		return response;
 	}
 
-	public async Task<LoginResponseDto> AuthenticateAsync(string token)
+	public async Task<LoginResponseDto> AuthenticateAsync(string token, CancellationToken cancellationToken = default)
 	{
 		if (string.IsNullOrWhiteSpace(token))
 		{
@@ -102,7 +102,7 @@ public class UserService : IUserService
 		                         .ExecuteAsync(() =>
 			                         _client.From<RefreshTokenEntity>()
 			                                .Where(t => t.Token == token)
-			                                .Single()
+			                                .Single(cancellationToken)
 		                         );
 
 		if (entity == null || !entity.IsValid || entity.ExpiredAt < DateTime.UtcNow)
@@ -124,12 +124,12 @@ public class UserService : IUserService
 			Username = entity.Username,
 		};
 
-		await _mediator.Publish(new RefreshTokenUsedEvent(token));
+		await _mediator.Publish(new RefreshTokenUsedEvent(token), cancellationToken);
 
 		return response;
 	}
 
-	public async Task<UserEntity> GetAsync(int id)
+	public async Task<UserEntity> GetAsync(int id, CancellationToken cancellationToken = default)
 	{
 		if (id <= 0)
 		{
@@ -141,7 +141,7 @@ public class UserService : IUserService
 		                         .ExecuteAsync(() =>
 			                         _client.From<UserEntity>()
 			                                .Where(t => t.Id == id)
-			                                .Single()
+			                                .Single(cancellationToken)
 		                         );
 		if (entity == null)
 		{
@@ -151,7 +151,7 @@ public class UserService : IUserService
 		return entity;
 	}
 
-	public async Task<UserEntity> GetAsync(string username)
+	public async Task<UserEntity> GetAsync(string username, CancellationToken cancellationToken = default)
 	{
 		if (string.IsNullOrWhiteSpace(username))
 		{
@@ -165,17 +165,17 @@ public class UserService : IUserService
 		                         .ExecuteAsync(() =>
 			                         _client.From<UserEntity>()
 			                                .Where(t => t.Username == username)
-			                                .Single()
+			                                .Single(cancellationToken)
 		                         );
 		if (entity == null)
 		{
-			throw new RowNotInTableException();
+			throw new NotFoundException();
 		}
 
 		return entity;
 	}
 
-	public async Task<UserProfileDto> GetProfileAsync(int id)
+	public async Task<UserProfileDto> GetProfileAsync(int id, CancellationToken cancellationToken = default)
 	{
 		if (id <= 0)
 		{
@@ -187,7 +187,7 @@ public class UserService : IUserService
 		                         .ExecuteAsync(() =>
 			                         _client.From<UserEntity>()
 			                                .Where(t => t.Id == id)
-			                                .Single()
+			                                .Single(cancellationToken)
 		                         );
 
 		if (entity == null || entity.IsDeleted)
@@ -198,7 +198,7 @@ public class UserService : IUserService
 		return _mapper.Map<UserProfileDto>(entity);
 	}
 
-	public async Task<int> CreateAsync(UserRegisterDto model)
+	public async Task<int> CreateAsync(UserRegisterDto model, CancellationToken cancellationToken = default)
 	{
 		if (model == null)
 		{
@@ -206,7 +206,7 @@ public class UserService : IUserService
 		}
 
 		var command = _mapper.Map<UserCreateCommand>(model);
-		var id = await _mediator.Send(command);
+		var id = await _mediator.Send(command, cancellationToken);
 		if (id <= 0)
 		{
 			throw new InternalServerException("创建用户失败");

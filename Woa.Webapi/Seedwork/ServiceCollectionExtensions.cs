@@ -10,7 +10,6 @@ using Microsoft.IdentityModel.Tokens;
 using Quartz;
 using Woa.Webapi.Jobs;
 using Woa.Webapi.Application;
-using Supabase;
 
 namespace Woa.Webapi;
 
@@ -29,7 +28,8 @@ internal static class ServiceCollectionExtensions
 		        .AddObjectValidation();
 
 		services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-		return services.AddScoped<IUserService, UserService>();
+		return services.AddScoped<IUserApplicationService, UserApplicationService>()
+		               .AddScoped<ISensitiveWordApplicationService, SensitiveWordApplicationService>();
 	}
 
 	public static IServiceCollection AddObjectMapping(this IServiceCollection services, Action<MapperConfigurationExpression> config = null)

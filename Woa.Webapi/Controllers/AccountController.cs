@@ -12,18 +12,18 @@ namespace Woa.Webapi.Controllers;
 [Authorize]
 public class AccountController : ControllerBase
 {
-	private readonly IUserService _service;
+	private readonly IUserApplicationService _applicationService;
 
-	public AccountController(IUserService service)
+	public AccountController(IUserApplicationService applicationService)
 	{
-		_service = service;
+		_applicationService = applicationService;
 	}
 
 	[HttpGet]
 	public async Task<IActionResult> GetAsync()
 	{
 		var id = int.Parse(User.FindFirstValue(JwtClaimTypes.Subject)!);
-		var entity = await _service.GetProfileAsync(id);
+		var entity = await _applicationService.GetProfileAsync(id, HttpContext.RequestAborted);
 		return Ok(entity);
 	}
 
@@ -33,7 +33,7 @@ public class AccountController : ControllerBase
 	{
 		try
 		{
-			var response = await _service.AuthenticateAsync(model.Username, model.Password);
+			var response = await _applicationService.AuthenticateAsync(model.Username, model.Password, HttpContext.RequestAborted);
 
 			return Ok(response);
 		}
@@ -53,7 +53,7 @@ public class AccountController : ControllerBase
 	{
 		try
 		{
-			var response = await _service.AuthenticateAsync(token);
+			var response = await _applicationService.AuthenticateAsync(token, HttpContext.RequestAborted);
 			return Ok(response);
 		}
 		catch (ArgumentException exception)
@@ -72,7 +72,7 @@ public class AccountController : ControllerBase
 	{
 		try
 		{
-			var result = await _service.CreateAsync(model);
+			var result = await _applicationService.CreateAsync(model, HttpContext.RequestAborted);
 			Response.Headers.Add("x-entry-id", result.ToString());
 			return Ok();
 		}
