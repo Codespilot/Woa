@@ -90,9 +90,19 @@ public class UserApplicationService : IUserApplicationService
 
 		var json = Cryptography.AES.Decrypt(token);
 
-		var model = JsonSerializer.Deserialize<RefreshTokenModel>(json);
+		var document = JsonSerializer.Deserialize<JsonDocument>(json);
 
-		var entity = await _repository.GetAsync(model.Id, cancellationToken);
+		var id = ReadJson<int>(document.RootElement, "Id");
+		var expiry = ReadJson<long>(document.RootElement, "Expiry");
+
+		var timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+
+		if (expiry < timestamp)
+		{
+			throw new BadRequestException("Token已失效");
+		}
+
+		var entity = await _repository.GetAsync(id, cancellationToken);
 
 		if (entity == null || entity.IsDeleted)
 		{
@@ -113,9 +123,13 @@ public class UserApplicationService : IUserApplicationService
 			Username = entity.Username,
 		};
 
-		await _mediator.Publish(new RefreshTokenUsedEvent(token), cancellationToken);
-
 		return response;
+
+		TValue ReadJson<TValue>(JsonElement element, string property)
+		{
+			var value = element.GetProperty(property);
+			return JsonSerializer.Deserialize<TValue>(value.GetRawText());
+		}
 	}
 
 	public async Task<UserEntity> GetAsync(int id, CancellationToken cancellationToken = default)
@@ -186,6 +200,12 @@ public class UserApplicationService : IUserApplicationService
 		return id;
 	}
 
+	/// <summary>
+	/// 生成Access Token
+	/// </summary>
+	/// <param name="userId"></param>
+	/// <param name="userName"></param>
+	/// <returns></returns>
 	private Tuple<string, DateTime> GenerateAccessToken(int userId, string userName)
 	{
 		var authTime = DateTime.UtcNow;
@@ -211,25 +231,21 @@ public class UserApplicationService : IUserApplicationService
 		return Tuple.Create(tokenString, expiresAt);
 	}
 
+	/// <summary>
+	/// 生成Refresh Token
+	/// </summary>
+	/// <param name="userId">用户Id</param>
+	/// <returns></returns>
 	private static string GenerateRefreshToken(int userId)
 	{
 		var expiresAt = DateTime.UtcNow.AddDays(30);
-		var obj = new RefreshTokenModel
+		var model = new
 		{
 			Id = userId,
 			Expiry = new DateTimeOffset(expiresAt).ToUnixTimeSeconds(),
 			Rdm = Guid.NewGuid().ToString()
 		};
-		var json = JsonSerializer.Serialize(obj);
+		var json = JsonSerializer.Serialize(model);
 		return Cryptography.AES.Encrypt(json);
-	}
-
-	public class RefreshTokenModel
-	{
-		public int Id { get; set; }
-
-		public long Expiry { get; set; }
-
-		public string Rdm { get; set; }
 	}
 }
