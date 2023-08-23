@@ -1,13 +1,12 @@
-﻿using System.Data;
-using System.Globalization;
+﻿using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using AutoMapper;
 using IdentityModel;
 using MediatR;
 using Microsoft.IdentityModel.Tokens;
-using Polly;
 using Woa.Common;
 using Woa.Webapi.Domain;
 using Woa.Webapi.Dtos;
@@ -16,19 +15,17 @@ namespace Woa.Webapi.Application;
 
 public class UserApplicationService : IUserApplicationService
 {
-	private readonly SupabaseClient _client;
+	private readonly IRepository<UserEntity, int> _repository;
 	private readonly IMediator _mediator;
 	private readonly IMapper _mapper;
 	private readonly IConfiguration _configuration;
-	private readonly ILogger<UserApplicationService> _logger;
 
-	public UserApplicationService(SupabaseClient client, IMediator mediator, IMapper mapper, IConfiguration configuration, ILoggerFactory logger)
+	public UserApplicationService(IRepository<UserEntity, int> repository, IMediator mediator, IMapper mapper, IConfiguration configuration)
 	{
-		_client = client;
+		_repository = repository;
 		_mediator = mediator;
 		_mapper = mapper;
 		_configuration = configuration;
-		_logger = logger.CreateLogger<UserApplicationService>();
 	}
 
 	public async Task<LoginResponseDto> AuthenticateAsync(string username, string password, CancellationToken cancellationToken = default)
@@ -45,16 +42,10 @@ public class UserApplicationService : IUserApplicationService
 
 		username = username.Trim().ToLower(CultureInfo.CurrentCulture);
 
-		var entity = await Policy.Handle<Exception>()
-		                         .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		                         .ExecuteAsync(() =>
-			                         _client.From<UserEntity>()
-			                                .Where(t => t.Username == username)
-			                                .Single(cancellationToken)
-		                         );
+		var entity = await _repository.GetAsync(t => t.Username == username, cancellationToken);
 		if (entity == null || entity.IsDeleted)
 		{
-			throw new RowNotInTableException("用户名或密码错误");
+			throw new NotFoundException("用户名或密码错误");
 		}
 
 		if (entity.LockoutTime > DateTime.UtcNow)
@@ -69,7 +60,7 @@ public class UserApplicationService : IUserApplicationService
 			throw new InvalidOperationException("用户名或密码错误");
 		}
 
-		var refreshToken = await GenerateRefreshTokenAsync(entity.Id, entity.Username);
+		var refreshToken = GenerateRefreshToken(entity.Id);
 
 		await _mediator.Publish(new UserLoginSuccessEvent(entity.Id), cancellationToken);
 
@@ -97,22 +88,20 @@ public class UserApplicationService : IUserApplicationService
 
 		token = token.Trim().ToLower(CultureInfo.CurrentCulture);
 
-		var entity = await Policy.Handle<Exception>()
-		                         .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		                         .ExecuteAsync(() =>
-			                         _client.From<RefreshTokenEntity>()
-			                                .Where(t => t.Token == token)
-			                                .Single(cancellationToken)
-		                         );
+		var json = Cryptography.AES.Decrypt(token);
 
-		if (entity == null || !entity.IsValid || entity.ExpiredAt < DateTime.UtcNow)
+		var model = JsonSerializer.Deserialize<RefreshTokenModel>(json);
+
+		var entity = await _repository.GetAsync(model.Id, cancellationToken);
+
+		if (entity == null || entity.IsDeleted)
 		{
-			throw new NotFoundException("无效的Token");
+			throw new NotFoundException("用户名或密码错误");
 		}
 
-		var refreshToken = await GenerateRefreshTokenAsync(entity.Id, entity.Username);
+		var refreshToken = GenerateRefreshToken(entity.Id);
 
-		var (accessToken, expiresAt) = GenerateAccessToken(entity.UserId, entity.Username);
+		var (accessToken, expiresAt) = GenerateAccessToken(entity.Id, entity.Username);
 
 		var response = new LoginResponseDto
 		{
@@ -136,16 +125,10 @@ public class UserApplicationService : IUserApplicationService
 			throw new BadRequestException("Id必须大于0");
 		}
 
-		var entity = await Policy.Handle<Exception>()
-		                         .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		                         .ExecuteAsync(() =>
-			                         _client.From<UserEntity>()
-			                                .Where(t => t.Id == id)
-			                                .Single(cancellationToken)
-		                         );
+		var entity = await _repository.GetAsync(id, cancellationToken);
 		if (entity == null)
 		{
-			throw new RowNotInTableException();
+			throw new NotFoundException();
 		}
 
 		return entity;
@@ -160,13 +143,7 @@ public class UserApplicationService : IUserApplicationService
 
 		username = username.Trim().ToLower(CultureInfo.CurrentCulture);
 
-		var entity = await Policy.Handle<Exception>()
-		                         .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		                         .ExecuteAsync(() =>
-			                         _client.From<UserEntity>()
-			                                .Where(t => t.Username == username)
-			                                .Single(cancellationToken)
-		                         );
+		var entity = await _repository.GetAsync(t => t.Username == username, cancellationToken);
 		if (entity == null)
 		{
 			throw new NotFoundException();
@@ -182,13 +159,7 @@ public class UserApplicationService : IUserApplicationService
 			throw new BadRequestException("Id必须大于0");
 		}
 
-		var entity = await Policy.Handle<Exception>()
-		                         .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		                         .ExecuteAsync(() =>
-			                         _client.From<UserEntity>()
-			                                .Where(t => t.Id == id)
-			                                .Single(cancellationToken)
-		                         );
+		var entity = await _repository.GetAsync(id, cancellationToken);
 
 		if (entity == null || entity.IsDeleted)
 		{
@@ -240,31 +211,25 @@ public class UserApplicationService : IUserApplicationService
 		return Tuple.Create(tokenString, expiresAt);
 	}
 
-	private async Task<string> GenerateRefreshTokenAsync(int userId, string userName)
+	private static string GenerateRefreshToken(int userId)
 	{
-		var token = RandomUtility.CreateUniqueId();
 		var expiresAt = DateTime.UtcNow.AddDays(30);
-		var entity = new RefreshTokenEntity
+		var obj = new RefreshTokenModel
 		{
-			UserId = userId,
-			Username = userName,
-			Token = token,
-			ExpiredAt = expiresAt,
-			IsValid = true
+			Id = userId,
+			Expiry = new DateTimeOffset(expiresAt).ToUnixTimeSeconds(),
+			Rdm = Guid.NewGuid().ToString()
 		};
-
-		await Policy.Handle<Exception>()
-		            .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		            .ExecuteAsync(() =>
-			            _client.From<RefreshTokenEntity>()
-			                   .Insert(entity)
-		            );
-
-		return token;
+		var json = JsonSerializer.Serialize(obj);
+		return Cryptography.AES.Encrypt(json);
 	}
 
-	private void OnRetry(Exception exception, TimeSpan timeSpan, int retryCount, object context)
+	public class RefreshTokenModel
 	{
-		_logger.LogError(exception, "第{RetryCount}次重试，等待{TimeSpan}后重试", retryCount, timeSpan);
+		public int Id { get; set; }
+
+		public long Expiry { get; set; }
+
+		public string Rdm { get; set; }
 	}
 }

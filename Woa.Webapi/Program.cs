@@ -30,7 +30,7 @@ try
 	builder.Services.AddAuthentication(builder.Configuration);
 	builder.Services.AddControllers();
 
-	builder.Services.AddApplicationServices();
+	builder.Services.AddApplicationServices().AddDomainServices();
 
 	builder.Services.AddMemoryCache();
 

@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using Quartz;
 using Woa.Webapi.Jobs;
 using Woa.Webapi.Application;
+using Woa.Webapi.Domain;
 
 namespace Woa.Webapi;
 
@@ -92,6 +93,11 @@ internal static class ServiceCollectionExtensions
 		}
 
 		return services;
+	}
+
+	public static IServiceCollection AddDomainServices(this IServiceCollection services)
+	{
+		return services.AddTransient(typeof(IRepository<,>), typeof(SupabaseRepository<,>));
 	}
 
 	public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)

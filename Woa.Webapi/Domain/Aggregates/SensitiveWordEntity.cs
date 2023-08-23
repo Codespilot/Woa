@@ -9,29 +9,29 @@ namespace Woa.Webapi.Domain;
 /// 敏感词
 /// </summary>
 [Table("sensitive_words")]
-public class SensitiveWordEntity : BaseModel
+public class SensitiveWordEntity : BaseModel, IEntity<int>
 {
-    /// <summary>
-    /// Id
-    /// </summary>
-    [PrimaryKey("id")]
-    public int Id { get; set; }
+	/// <summary>
+	/// Id
+	/// </summary>
+	[PrimaryKey("id")]
+	public int Id { get; set; }
 
-    /// <summary>
-    /// 内容
-    /// </summary>
-    [Column("content")]
-    public string Content { get; set; }
+	/// <summary>
+	/// 内容
+	/// </summary>
+	[Column("content")]
+	public string Content { get; set; }
 
-    /// <summary>
-    /// 是否有效
-    /// </summary>
-    [Column("is_valid")]
-    public bool IsValid { get; set; }
+	/// <summary>
+	/// 是否有效
+	/// </summary>
+	[Column("is_valid")]
+	public bool IsValid { get; set; }
 
-    /// <summary>
-    /// 创建时间
-    /// </summary>
-    [Column("create_time")]
-    public DateTime CreateTime { get; set; }
+	/// <summary>
+	/// 创建时间
+	/// </summary>
+	[Column("create_time")]
+	public DateTime CreateTime { get; set; }
 }

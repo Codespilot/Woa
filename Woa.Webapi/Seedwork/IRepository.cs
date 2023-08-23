@@ -3,28 +3,28 @@
 namespace Woa.Webapi;
 
 public interface IRepository<TEntity, in TKey>
-    where TEntity : class, IEntity<TKey>
-    where TKey : IEquatable<TKey>
+	where TEntity : class, IEntity<TKey>
+	where TKey : IEquatable<TKey>
 {
-    Task<TEntity> GetAsync(TKey id, CancellationToken cancellationToken = default);
+	Task<TEntity> GetAsync(TKey id, CancellationToken cancellationToken = default);
 
-    Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
+	Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 
-    Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken = default);
+	Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken = default);
 
-    Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default);
+	Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default);
 
-    Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default);
+	Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default);
 
-    Task DeleteAsync(TKey id, CancellationToken cancellationToken = default);
+	Task DeleteAsync(TKey id, CancellationToken cancellationToken = default);
 
-    Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
+	Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 
-    Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
+	Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 
-    Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, int offset, int count, CancellationToken cancellationToken = default);
+	Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, int offset, int count, CancellationToken cancellationToken = default);
 
-    Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, int offset, int count, Expression<Func<TEntity, object>> orderBy, bool ascending, CancellationToken cancellationToken = default);
+	Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, int offset, int count, Expression<Func<TEntity, object>> orderBy, bool ascending, CancellationToken cancellationToken = default);
 
-    Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
+	Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 }

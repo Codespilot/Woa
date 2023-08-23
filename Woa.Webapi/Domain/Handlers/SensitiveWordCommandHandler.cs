@@ -33,16 +33,9 @@ public class SensitiveWordCommandHandler : ICommandHandler<SensitiveWordCreateCo
 		            .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
 		            .ExecuteAsync(async () =>
 		            {
-			            var entity = await _client.From<SensitiveWordEntity>()
-			                                      .Where(t => t.Id == request.SensitiveWordId)
-			                                      .Single(cancellationToken);
-
-			            if (entity == null)
-			            {
-				            throw new NotFoundException("敏感词不存在");
-			            }
-
-			            await _client.From<SensitiveWordEntity>().Delete(entity, cancellationToken: cancellationToken);
+			            await _client.From<SensitiveWordEntity>()
+			                         .Where(t => t.Id == request.SensitiveWordId)
+			                         .Delete(cancellationToken: cancellationToken);
 		            });
 	}
 
