@@ -42,13 +42,13 @@ Chatbot的代码为何要分离出来呢？当然是为了异地单独部署咯�
 
 开发过程中需要不断地进行调试，作为一名正常的程序员，我们不可能每次更改都要打包发布到公网服务器进行测试，即麻烦也不靠谱，最好的办法就是使用内网穿透，把微信服务的请求映射到我们自己的电脑上。
 
-实现内网穿透的工具很多，例如GoProxy，ngrok等等，然而这两者都需要自己搭建一台服务器，实施过程也比较麻烦。我推荐的方案是使用natapp（官网地址：https://natapp.cn/），NATAPP提供免费隧道和收费隧道两种，并且可以自己注册固定的二级域名。
+实现内网穿透的工具很多，例如GoProxy，ngrok等等，然而这两者都需要自己搭建一台服务器，实施过程也比较麻烦。我推荐的方案是使用natapp（官网地址：[https://natapp.cn](https://natapp.cn)），NATAPP提供免费隧道和收费隧道两种，并且可以自己注册固定的二级域名。
 
 ### 准备Supabase服务
 
 #### 1. 注册Supabase账号
 
-Supabase账号注册比较简单，打开官网（https://supabase.com/）点击右上角Sign in按钮进入到登录界面，然后点击[Sign Up Now](https://supabase.com/dashboard/sign-up)并且填写好邮箱、密码提交注册即可。别忘了到邮箱里面查看一下supabase发送的账号激活邮件。
+Supabase账号注册比较简单，打开官网（[https://supabase.com](https://supabase.com)）点击右上角Sign in按钮进入到登录界面，然后点击[Sign Up Now](https://supabase.com/dashboard/sign-up)并且填写好邮箱、密码提交注册即可。别忘了到邮箱里面查看一下supabase发送的账号激活邮件。
 
 #### 2. 创建项目
 
@@ -170,7 +170,7 @@ dotnet run
 
 ### 微信公众号的缩写为什么是MP？
 
-> 微信公众平台的网址是mp.weixin.qq.com，这里面的mp其实是Media platform的缩写，可以理解为媒体平台，用于进行个人或企业等文化活动的宣传营销。事实上微信公众号的功能、用途和media platform的意思是完全契合的。
+> 微信公众平台的网址是[mp.weixin.qq.com](https://mp.weixin.qq.com)，这里面的mp其实是Media platform的缩写，可以理解为媒体平台，用于进行个人或企业等文化活动的宣传营销。事实上微信公众号的功能、用途和media platform的意思是完全契合的。
 
 ### Worker Service是什么？
 
