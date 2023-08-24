@@ -2,6 +2,9 @@
 
 namespace Woa.Common;
 
+/// <summary>
+/// 服务器内部错误异常
+/// </summary>
 public class InternalServerException : Exception
 {
 	public InternalServerException()

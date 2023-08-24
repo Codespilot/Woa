@@ -1,8 +1,7 @@
 ﻿namespace Woa.Webapi.Domain;
 
 public class UserEventHandler : IEventHandler<UserLoginFaultEvent>,
-                                IEventHandler<UserLoginSuccessEvent>,
-                                IEventHandler<RefreshTokenUsedEvent>
+                                IEventHandler<UserLoginSuccessEvent>
 {
 	private readonly SupabaseClient _client;
 	private readonly ILogger<UserEventHandler> _logger;
@@ -49,21 +48,6 @@ public class UserEventHandler : IEventHandler<UserLoginFaultEvent>,
 			             .Set(t => t.AccessFailedCount, 0)
 			             .Set(t => t.LockoutTime, null)
 			             .Update(cancellationToken: cancellationToken);
-		}
-		catch (Exception exception)
-		{
-			_logger.LogError(exception, "更新用户登录信息失败");
-		}
-	}
-
-	public async Task Handle(RefreshTokenUsedEvent notification, CancellationToken cancellationToken)
-	{
-		try
-		{
-			// 删除RefreshToken
-			await _client.From<RefreshTokenEntity>()
-			             .Where(t => t.Token == notification.Token)
-			             .Delete(cancellationToken: cancellationToken);
 		}
 		catch (Exception exception)
 		{

@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Security.Authentication;
+using System.Text.Json;
 using Woa.Common;
 
 namespace Woa.Webapi.Host;
@@ -47,9 +48,16 @@ internal sealed class ExceptionHandlingMiddleware : IMiddleware
 		return exception switch
 		{
 			BadRequestException => StatusCodes.Status400BadRequest,
+			AuthenticationException => StatusCodes.Status401Unauthorized,
+			UnauthorizedAccessException => StatusCodes.Status403Forbidden,
 			NotFoundException => StatusCodes.Status404NotFound,
+			ConflictException => StatusCodes.Status409Conflict,
 			ValidationException => StatusCodes.Status422UnprocessableEntity,
 			InternalServerException => StatusCodes.Status500InternalServerError,
+			NotImplementedException => StatusCodes.Status501NotImplemented,
+			BadGatewayException => StatusCodes.Status502BadGateway,
+			ServiceUnavailableException => StatusCodes.Status503ServiceUnavailable,
+			RequestTimeoutException => StatusCodes.Status504GatewayTimeout,
 			_ => StatusCodes.Status500InternalServerError
 		};
 	}

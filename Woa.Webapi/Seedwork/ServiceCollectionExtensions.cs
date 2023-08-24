@@ -10,7 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using Quartz;
 using Woa.Webapi.Jobs;
 using Woa.Webapi.Application;
-using Supabase;
+using Woa.Webapi.Domain;
 
 namespace Woa.Webapi;
 
@@ -29,7 +29,8 @@ internal static class ServiceCollectionExtensions
 		        .AddObjectValidation();
 
 		services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-		return services.AddScoped<IUserService, UserService>();
+		return services.AddScoped<IUserApplicationService, UserApplicationService>()
+		               .AddScoped<ISensitiveWordApplicationService, SensitiveWordApplicationService>();
 	}
 
 	public static IServiceCollection AddObjectMapping(this IServiceCollection services, Action<MapperConfigurationExpression> config = null)
@@ -92,6 +93,11 @@ internal static class ServiceCollectionExtensions
 		}
 
 		return services;
+	}
+
+	public static IServiceCollection AddDomainServices(this IServiceCollection services)
+	{
+		return services.AddTransient(typeof(IRepository<,>), typeof(SupabaseRepository<,>));
 	}
 
 	public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)

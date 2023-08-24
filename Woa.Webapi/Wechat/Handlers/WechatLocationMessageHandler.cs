@@ -2,6 +2,9 @@
 
 namespace Woa.Webapi.Wechat;
 
+/// <summary>
+/// 
+/// </summary>
 [WechatMessageHandle(WechatMessageType.Location)]
 public class WechatLocationMessageHandler : WechatUserMessageHandler
 {
