@@ -24,9 +24,9 @@
         <PackageReference Include="Serilog" Version="3.0.1" />
         <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
 		<PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
-        <PackageReference Include="supabase-csharp" Version="0.12.2" />
+        <PackageReference Include="supabase-csharp" Version="0.13.1" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.32.1" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.32.2" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.10" />
 	</ItemGroup>
 
@@ -41,9 +41,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Content Include="..\.dockerignore">
-	    <Link>.dockerignore</Link>
-	  </Content>
+	    <Content Include="..\.dockerignore">
+	        <Link>.dockerignore</Link>
+	    </Content>
 	</ItemGroup>
 
 	<Import Project="..\Woa.Shared\Woa.Shared.projitems" Label="Shared" />
