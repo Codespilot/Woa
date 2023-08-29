@@ -2,7 +2,6 @@
 using Quartz;
 using Quartz.Impl;
 using Quartz.Spi;
-using Woa.Webapi.Jobs;
 
 namespace Woa.Webapi.Host;
 

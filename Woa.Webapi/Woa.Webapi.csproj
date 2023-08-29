@@ -46,6 +46,7 @@
 	    </Content>
 	</ItemGroup>
 
+
 	<Import Project="..\Woa.Shared\Woa.Shared.projitems" Label="Shared" />
 	
 </Project>
