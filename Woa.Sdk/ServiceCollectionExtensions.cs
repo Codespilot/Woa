@@ -15,6 +15,13 @@ namespace Woa.Sdk;
 
 internal static class ServiceCollectionExtensions
 {
+	/// <summary>
+	/// 注册OpenAI API
+	/// </summary>
+	/// <param name="services"></param>
+	/// <param name="configuration"></param>
+	/// <returns></returns>
+	/// <exception cref="InvalidOperationException"></exception>
 	internal static IServiceCollection AddOpenAiApi(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.Configure<OpenAiOptions>(configuration);
@@ -36,6 +43,13 @@ internal static class ServiceCollectionExtensions
 		return services;
 	}
 
+	/// <summary>
+	/// 注册Claude API
+	/// </summary>
+	/// <param name="services"></param>
+	/// <param name="configuration"></param>
+	/// <returns></returns>
+	/// <exception cref="InvalidOperationException"></exception>
 	internal static IServiceCollection AddClaudeApi(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.Configure<ClaudeOptions>(configuration);
@@ -56,6 +70,13 @@ internal static class ServiceCollectionExtensions
 		return services;
 	}
 
+	/// <summary>
+	/// 注册微信API
+	/// </summary>
+	/// <param name="services"></param>
+	/// <param name="configuration"></param>
+	/// <returns></returns>
+	/// <exception cref="InvalidOperationException"></exception>
 	internal static IServiceCollection AddWechatApi(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.Configure<WechatOptions>(configuration);
@@ -70,12 +91,19 @@ internal static class ServiceCollectionExtensions
 				        throw new InvalidOperationException($"{nameof(WechatOptions)} is not configured");
 			        }
 
-			        client.BaseAddress = new Uri("https://api.weixin.qq.com");
+			        client.BaseAddress = new Uri(options.Host);
 		        });
 
 		return services;
 	}
 
+	/// <summary>
+	/// 注册微信消息处理器
+	/// </summary>
+	/// <typeparam name="TStore"></typeparam>
+	/// <param name="services"></param>
+	/// <param name="handlerTypesFactory"></param>
+	/// <returns></returns>
 	internal static IServiceCollection AddWechatMessageHandler<TStore>(this IServiceCollection services, Func<IEnumerable<Type>> handlerTypesFactory)
 		where TStore : class, IWechatUserMessageStore
 	{
@@ -83,6 +111,13 @@ internal static class ServiceCollectionExtensions
 		return services.AddWechatMessageHandler<TStore>(handlerTypes);
 	}
 
+	/// <summary>
+	/// 注册微信消息处理器
+	/// </summary>
+	/// <typeparam name="TStore"></typeparam>
+	/// <param name="services"></param>
+	/// <param name="handlerTypes"></param>
+	/// <returns></returns>
 	internal static IServiceCollection AddWechatMessageHandler<TStore>(this IServiceCollection services, IEnumerable<Type> handlerTypes)
 		where TStore : class, IWechatUserMessageStore
 	{
@@ -109,6 +144,13 @@ internal static class ServiceCollectionExtensions
 		return services;
 	}
 
+	/// <summary>
+	/// 注册微信消息处理器
+	/// </summary>
+	/// <typeparam name="TStore"></typeparam>
+	/// <param name="services"></param>
+	/// <param name="assembly"></param>
+	/// <returns></returns>
 	internal static IServiceCollection AddWechatMessageHandler<TStore>(this IServiceCollection services, Assembly assembly)
 		where TStore : class, IWechatUserMessageStore
 	{
@@ -116,6 +158,11 @@ internal static class ServiceCollectionExtensions
 		return services.AddWechatMessageHandler<TStore>(handlerTypes);
 	}
 
+	/// <summary>
+	/// 获取微信消息处理器类型字典
+	/// </summary>
+	/// <param name="handlerTypes"></param>
+	/// <returns></returns>
 	private static Dictionary<string, Type> GetWechatMessageHandlers(IEnumerable<Type> handlerTypes)
 	{
 		var handlers = new Dictionary<string, Type>();
