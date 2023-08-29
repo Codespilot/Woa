@@ -5,17 +5,13 @@ using Woa.Webapi.Dtos;
 
 namespace Woa.Webapi.Application;
 
-public class SensitiveWordApplicationService : ISensitiveWordApplicationService
+public class SensitiveWordApplicationService : BaseApplicationService, ISensitiveWordApplicationService
 {
 	private readonly IRepository<SensitiveWordEntity, int> _repository;
-	private readonly IMapper _mapper;
-	private readonly IMediator _mediator;
 
-	public SensitiveWordApplicationService(IRepository<SensitiveWordEntity, int> repository, IMapper mapper, IMediator mediator)
+	public SensitiveWordApplicationService(IRepository<SensitiveWordEntity, int> repository)
 	{
 		_repository = repository;
-		_mapper = mapper;
-		_mediator = mediator;
 	}
 
 	public async Task<List<SensitiveWordItemDto>> SearchAsync(string keyword, int page, int size, CancellationToken cancellationToken = default)
@@ -23,7 +19,7 @@ public class SensitiveWordApplicationService : ISensitiveWordApplicationService
 		var offset = (page - 1) * size;
 
 		var entities = await _repository.FindAsync(t => t.Content.Contains(keyword), offset, size, cancellationToken);
-		var result = _mapper.Map<List<SensitiveWordItemDto>>(entities);
+		var result = Mapper.Map<List<SensitiveWordItemDto>>(entities);
 		return result;
 	}
 
@@ -36,12 +32,12 @@ public class SensitiveWordApplicationService : ISensitiveWordApplicationService
 	public async Task CreateAsync(SensitiveWordCreateDto request, CancellationToken cancellationToken = default)
 	{
 		var command = new SensitiveWordCreateCommand(request.Content);
-		await _mediator.Send(command, cancellationToken);
+		await Mediator.Send(command, cancellationToken);
 	}
 
 	public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
 	{
 		var command = new SensitiveWordDeleteCommand(id);
-		await _mediator.Send(command, cancellationToken);
+		await Mediator.Send(command, cancellationToken);
 	}
 }

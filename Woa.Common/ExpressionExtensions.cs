@@ -175,4 +175,10 @@ public static class ExpressionExtensions
         // create a merged lambda expression with parameters from the first expression
         return Expression.Lambda<T>(merge(first.Body, secondBody), first.Parameters);
     }
+    
+    public static Expression<Func<T, bool>> Aggregate<T>(this IEnumerable<Expression<Func<T, bool>>> expressions, string link = "And")
+    {
+	    var predicate = expressions.Aggregate<Expression<Func<T, bool>>, Expression<Func<T, bool>>>(t => link == "And", (current, next) => link == "And" ? current.And(next) : current.Or(next));
+	    return predicate;
+    }
 }

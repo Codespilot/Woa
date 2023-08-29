@@ -3,7 +3,7 @@ using Woa.Webapi.Dtos;
 
 namespace Woa.Webapi.Application;
 
-public interface IUserApplicationService
+public interface IUserApplicationService : IApplicationService
 {
 	Task<LoginResponseDto> AuthenticateAsync(string username, string password, CancellationToken cancellationToken = default);
 
