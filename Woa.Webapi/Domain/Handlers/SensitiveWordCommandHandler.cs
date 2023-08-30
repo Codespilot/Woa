@@ -1,18 +1,13 @@
-﻿using Polly;
-using Woa.Common;
-
-namespace Woa.Webapi.Domain;
+﻿namespace Woa.Webapi.Domain;
 
 public class SensitiveWordCommandHandler : ICommandHandler<SensitiveWordCreateCommand>,
                                            ICommandHandler<SensitiveWordDeleteCommand>
 {
-	private readonly SupabaseClient _client;
-	private readonly ILogger<SensitiveWordCommandHandler> _logger;
+	private readonly IRepository<SensitiveWordEntity, int> _repository;
 
-	public SensitiveWordCommandHandler(SupabaseClient client, ILoggerFactory logger)
+	public SensitiveWordCommandHandler(IRepository<SensitiveWordEntity, int> repository)
 	{
-		_client = client;
-		_logger = logger.CreateLogger<SensitiveWordCommandHandler>();
+		_repository = repository;
 	}
 
 	public async Task Handle(SensitiveWordCreateCommand request, CancellationToken cancellationToken)
@@ -22,25 +17,11 @@ public class SensitiveWordCommandHandler : ICommandHandler<SensitiveWordCreateCo
 			Content = request.Content
 		};
 
-		await Policy.Handle<Exception>()
-		            .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		            .ExecuteAsync(() => _client.From<SensitiveWordEntity>().Insert(entity, cancellationToken: cancellationToken));
+		await _repository.InsertAsync(entity, cancellationToken);
 	}
 
 	public async Task Handle(SensitiveWordDeleteCommand request, CancellationToken cancellationToken)
 	{
-		await Policy.Handle<Exception>()
-		            .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		            .ExecuteAsync(async () =>
-		            {
-			            await _client.From<SensitiveWordEntity>()
-			                         .Where(t => t.Id == request.SensitiveWordId)
-			                         .Delete(cancellationToken: cancellationToken);
-		            });
-	}
-
-	private void OnRetry(Exception exception, TimeSpan timeSpan, int retryCount, object context)
-	{
-		_logger.LogError(exception, "第{RetryCount}次重试，等待{TimeSpan}后重试", retryCount, timeSpan);
+		await _repository.DeleteAsync(request.SensitiveWordId, cancellationToken);
 	}
 }

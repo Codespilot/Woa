@@ -1,20 +1,16 @@
 ﻿using System.Linq.Expressions;
 using System.Text;
-using Polly;
-using Postgrest;
 using Woa.Common;
 
 namespace Woa.Webapi.Domain;
 
 public class UserCommandHandler : ICommandHandler<UserCreateCommand, int>
 {
-	private readonly SupabaseClient _client;
-	private readonly ILogger<UserCommandHandler> _logger;
+	private readonly IRepository<UserEntity, int> _repository;
 
-	public UserCommandHandler(SupabaseClient client, ILoggerFactory logger)
+	public UserCommandHandler(IRepository<UserEntity, int> repository)
 	{
-		_client = client;
-		_logger = logger.CreateLogger<UserCommandHandler>();
+		_repository = repository;
 	}
 
 	public async Task<int> Handle(UserCreateCommand request, CancellationToken cancellationToken)
@@ -57,29 +53,12 @@ public class UserCommandHandler : ICommandHandler<UserCreateCommand, int>
 			IsDeleted = false,
 		};
 
-		var result = await Policy.Handle<Exception>()
-		                         .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		                         .ExecuteAsync(() =>
-			                         _client.From<UserEntity>()
-			                                .Insert(entity, cancellationToken: cancellationToken)
-		                         );
-		return result?.Model?.Id ?? 0;
+		var result = await _repository.InsertAsync(entity, cancellationToken);
+		return result.Id;
 	}
 
 	private async Task<bool> CheckExistsAsync(Expression<Func<UserEntity, bool>> predicate)
 	{
-		var result = await Policy.Handle<Exception>()
-		                         .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		                         .ExecuteAsync(() =>
-			                         _client.From<UserEntity>()
-			                                .Where(predicate)
-			                                .Count(Constants.CountType.Exact)
-		                         );
-		return result > 0;
-	}
-
-	private void OnRetry(Exception exception, TimeSpan timeSpan, int retryCount, object context)
-	{
-		_logger.LogError(exception, "第{RetryCount}次重试，等待{TimeSpan}后重试", retryCount, timeSpan);
+		return await _repository.ExistsAsync(predicate);
 	}
 }

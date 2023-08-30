@@ -12,13 +12,13 @@ namespace Woa.Webapi.Wechat;
 [WechatMessageHandle(WechatMessageType.Text)]
 public class WechatTextMessageHandler : WechatUserMessageHandler
 {
-	private readonly SupabaseClient _client;
+	private readonly IRepository<WechatFollowerEntity, long> _repository;
 	private readonly WechatOptions _options;
 
-	public WechatTextMessageHandler(IWechatUserMessageStore store, SupabaseClient client, IOptions<WechatOptions> options)
+	public WechatTextMessageHandler(IWechatUserMessageStore store, IRepository<WechatFollowerEntity, long> repository, IOptions<WechatOptions> options)
 		: base(store)
 	{
-		_client = client;
+		_repository = repository;
 		_options = options.Value;
 	}
 
@@ -32,10 +32,8 @@ public class WechatTextMessageHandler : WechatUserMessageHandler
 			return WechatMessage.Text("无法识别内容");
 		}
 
-		var user = await _client.From<WechatFollowerEntity>()
-		                        .Where(t => t.OpenId == openId)
-		                        .Single(cancellationToken);
-		if (user?.IsChatbotEnabled == true)
+		var follower = await _repository.GetAsync(t => t.OpenId == openId, cancellationToken);
+		if (follower?.IsChatbotEnabled == true)
 		{
 			WeakReferenceMessenger.Default.Send(new ChatbotBroadcast { OpenId = openId, MessageId = message.MessageId, MessageContent = messageContent });
 
