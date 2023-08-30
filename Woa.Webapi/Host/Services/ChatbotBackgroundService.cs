@@ -55,7 +55,7 @@ public class ChatbotBackgroundService : BackgroundService
 
 		async void SendBroadcastMessage(object sender, ChatbotBroadcast message)
 		{
-			await channel.Send(Constants.ChannelEventName.Broadcast, null, message);
+			await channel.Send(RealtimeConstants.ChannelEventName.Broadcast, null, message);
 		}
 	}
 

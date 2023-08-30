@@ -30,14 +30,13 @@ public class WechatAccessTokenGrantJob : IJob
 				return;
 			}
 
-			_cache.Set("Wechat:AccessToken", response.Content.Token, TimeSpan.FromSeconds(response.Content.Expiry - 1800));
+			_cache.Set(Constants.Cache.WechatAccessToken, response.Content.Token, TimeSpan.FromSeconds(response.Content.Expiry - 1800));
 
 			_logger.LogDebug("WechatAccessToken:{Token}", response.Content.Token);
 		}
 		catch (Exception exception)
 		{
 			_logger.LogError(exception, "{Message}", exception.Message);
-			// ignored
 		}
 	}
 }
