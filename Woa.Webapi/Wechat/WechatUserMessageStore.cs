@@ -1,17 +1,16 @@
-﻿using Postgrest;
-using Woa.Sdk.Wechat;
+﻿using Woa.Sdk.Wechat;
 using Woa.Webapi.Domain;
 
 namespace Woa.Webapi.Wechat;
 
 public class WechatUserMessageStore : IWechatUserMessageStore
 {
-	private readonly SupabaseClient _client;
+	private readonly IRepository<WechatMessageEntity, long> _repository;
 	private readonly ILogger<WechatUserMessageStore> _logger;
 
-	public WechatUserMessageStore(SupabaseClient client, ILoggerFactory logger)
+	public WechatUserMessageStore(IRepository<WechatMessageEntity, long> repository, ILoggerFactory logger)
 	{
-		_client = client;
+		_repository = repository;
 		_logger = logger.CreateLogger<WechatUserMessageStore>();
 	}
 
@@ -19,10 +18,7 @@ public class WechatUserMessageStore : IWechatUserMessageStore
 	{
 		try
 		{
-			var exists = await _client.From<WechatMessageEntity>()
-			                          .Where(t => t.Id == message.MessageId)
-			                          .Count(Constants.CountType.Exact, cancellationToken)
-			                          .ContinueWith(task => task.Result > 0, cancellationToken);
+			var exists = await _repository.ExistsAsync(t => t.Id == message.MessageId, cancellationToken);
 			if (exists)
 			{
 				return;
@@ -37,8 +33,7 @@ public class WechatUserMessageStore : IWechatUserMessageStore
 				Payload = message.GetOriginXml()
 			};
 
-			await _client.From<WechatMessageEntity>()
-			             .Insert(entity, cancellationToken: cancellationToken);
+			await _repository.InsertAsync(entity, cancellationToken);
 		}
 		catch (Exception exception)
 		{

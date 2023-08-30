@@ -1,6 +1,5 @@
 ﻿using System.Linq.Expressions;
 using Polly;
-using Postgrest;
 using Postgrest.Models;
 
 namespace Woa.Webapi.Domain;
@@ -90,7 +89,7 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 		                           .ExecuteAsync(() =>
 			                           _client.From<TEntity>()
 			                                  .Where(predicate)
-			                                  .Count(Constants.CountType.Planned, cancellationToken)
+			                                  .Count(PostgrestConstants.CountType.Planned, cancellationToken)
 		                           );
 		return response > 0;
 	}
@@ -123,7 +122,7 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 
 	public async Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, int offset, int count, Expression<Func<TEntity, object>> orderBy, bool ascending, CancellationToken cancellationToken = default)
 	{
-		var ordering = ascending ? Constants.Ordering.Ascending : Constants.Ordering.Descending;
+		var ordering = ascending ? PostgrestConstants.Ordering.Ascending : PostgrestConstants.Ordering.Descending;
 
 		var response = await Policy.Handle<Exception>()
 		                           .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
@@ -144,7 +143,7 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 		                   .ExecuteAsync(() =>
 			                   _client.From<TEntity>()
 			                          .Where(predicate)
-			                          .Count(Constants.CountType.Planned, cancellationToken)
+			                          .Count(PostgrestConstants.CountType.Planned, cancellationToken)
 		                   );
 	}
 

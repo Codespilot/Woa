@@ -4,10 +4,10 @@ namespace Woa.Webapi.Domain;
 
 public class UserLoginFaultEvent : IEvent
 {
-	public UserLoginFaultEvent(long userId)
+	public UserLoginFaultEvent(int userId)
 	{
 		UserId = userId;
 	}
 
-	public long UserId { get; }
+	public int UserId { get; }
 }

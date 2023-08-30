@@ -12,13 +12,13 @@ namespace Woa.Webapi.Wechat;
 [WechatMessageHandle(WechatMessageType.Voice)]
 public class WechatVoiceMessageHandler : WechatUserMessageHandler
 {
-	private readonly SupabaseClient _client;
+	private readonly IRepository<WechatFollowerEntity, long> _repository;
 	private readonly WechatOptions _options;
 
-	public WechatVoiceMessageHandler(IWechatUserMessageStore store, SupabaseClient client, IOptions<WechatOptions> options)
+	public WechatVoiceMessageHandler(IWechatUserMessageStore store, IRepository<WechatFollowerEntity, long> repository, IOptions<WechatOptions> options)
 		: base(store)
 	{
-		_client = client;
+		_repository = repository;
 		_options = options.Value;
 	}
 
@@ -35,11 +35,9 @@ public class WechatVoiceMessageHandler : WechatUserMessageHandler
 			};
 		}
 
-		var user = await _client.From<WechatFollowerEntity>()
-		                        .Where(t => t.OpenId == openId)
-		                        .Single(cancellationToken);
+		var follower = await _repository.GetAsync(t => t.OpenId == openId, cancellationToken);
 
-		if (user?.IsChatbotEnabled == true)
+		if (follower?.IsChatbotEnabled == true)
 		{
 			WeakReferenceMessenger.Default.Send(new ChatbotBroadcast { OpenId = openId, MessageId = message.MessageId, MessageContent = messageContent });
 

@@ -8,18 +8,31 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Quartz;
-using Woa.Webapi.Jobs;
+using Woa.Webapi.Host;
 using Woa.Webapi.Application;
 using Woa.Webapi.Domain;
+using Woa.Common;
+using System.Collections;
 
 namespace Woa.Webapi;
 
+/// <summary>
+/// 依赖注入扩展方法
+/// </summary>
 internal static class ServiceCollectionExtensions
 {
 	private static readonly List<Type> _types = typeof(Program).Assembly.GetTypes().ToList();
 
+	/// <summary>
+	/// 注册应用服务
+	/// </summary>
+	/// <param name="services"></param>
+	/// <returns></returns>
+	/// <exception cref="InvalidOperationException"></exception>
 	public static IServiceCollection AddApplicationServices(this IServiceCollection services)
 	{
+		services.AddTransient<LazyServiceProvider>();
+
 		services.AddMediatR(config =>
 		        {
 			        config.Lifetime = ServiceLifetime.Scoped;
@@ -29,11 +42,99 @@ internal static class ServiceCollectionExtensions
 		        .AddObjectValidation();
 
 		services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-		return services.AddScoped<IUserApplicationService, UserApplicationService>()
-		               .AddScoped<ISensitiveWordApplicationService, SensitiveWordApplicationService>();
+
+		var serviceTypes = _types.Where(type => typeof(IApplicationService).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract)
+		                         .ToList();
+
+		foreach (var serviceType in serviceTypes)
+		{
+			services.AddScoped(serviceType);
+			var interfaceTypes = serviceType.GetInterfaces()
+			                                .Where(t => t != typeof(IApplicationService))
+			                                .ToList();
+			foreach (var interfaceType in interfaceTypes)
+			{
+				services.AddScoped(interfaceType, provider =>
+				{
+					var implementation = provider.GetService(serviceType);
+					if (implementation is BaseApplicationService service)
+					{
+						service.Provider = provider.GetService<LazyServiceProvider>();
+					}
+
+					var properties = interfaceType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+					                              .Where(t => t.CanWrite && t.GetCustomAttribute<InjectAttribute>() != null);
+
+					foreach (var property in properties)
+					{
+						if (property.PropertyType is { IsClass: false, IsInterface: false })
+						{
+							throw new InvalidOperationException("自动注入的属性类型必须是类或者接口");
+						}
+
+						if (property.PropertyType.GetInterfaces().Contains(typeof(IEnumerable))) //判断是否是获取多个实现实例
+						{
+							Type genericType;
+
+							if (property.PropertyType.IsArray)
+							{
+								var baseInterfaceType = property.PropertyType.GetInterface("IEnumerable`1");
+
+								if (baseInterfaceType == null)
+								{
+									throw new InvalidOperationException("类型错误");
+								}
+
+								if (baseInterfaceType.GenericTypeArguments.Length != 1)
+								{
+									throw new InvalidOperationException("仅允许一个泛型参数");
+								}
+
+								genericType = baseInterfaceType.GenericTypeArguments[0];
+							}
+							else
+							{
+								genericType = property.PropertyType.GenericTypeArguments[0];
+							}
+
+							if (!genericType.IsClass && !genericType.IsInterface)
+							{
+								throw new InvalidOperationException("自动注入的属性类型必须是类或者接口");
+							}
+
+							var values = provider.GetServices(genericType);
+
+							var resultType = typeof(List<>).MakeGenericType(genericType);
+
+							var resultInstance = Activator.CreateInstance(resultType);
+
+							resultType!.GetMethod("AddRange")!.Invoke(resultInstance, new object[] { values });
+
+							property.SetValue(implementation, resultInstance);
+						}
+						else
+						{
+							var value = provider.GetService(property.PropertyType);
+							property.SetValue(implementation, value);
+						}
+					}
+
+					return implementation;
+				});
+			}
+		}
+
+		return services;
 	}
 
-	public static IServiceCollection AddObjectMapping(this IServiceCollection services, Action<MapperConfigurationExpression> config = null)
+	// ReSharper disable once MemberCanBePrivate.Global
+	/// <summary>
+	/// 注册对象映射服务
+	/// </summary>
+	/// <param name="services"></param>
+	/// <param name="config"></param>
+	/// <returns></returns>
+	internal static IServiceCollection AddObjectMapping(this IServiceCollection services, Action<MapperConfigurationExpression> config = null)
 	{
 		var expression = new MapperConfigurationExpression();
 
@@ -59,7 +160,13 @@ internal static class ServiceCollectionExtensions
 		return services;
 	}
 
-	public static IServiceCollection AddObjectValidation(this IServiceCollection services)
+	// ReSharper disable once MemberCanBePrivate.Global
+	/// <summary>
+	/// 注册对象验证服务
+	/// </summary>
+	/// <param name="services"></param>
+	/// <returns></returns>
+	internal static IServiceCollection AddObjectValidation(this IServiceCollection services)
 	{
 		if (_types == null)
 		{
@@ -95,12 +202,18 @@ internal static class ServiceCollectionExtensions
 		return services;
 	}
 
+	/// <summary>
+	/// 注册领域服务
+	/// </summary>
+	/// <param name="services"></param>
+	/// <returns></returns>
 	public static IServiceCollection AddDomainServices(this IServiceCollection services)
 	{
-		return services.AddTransient(typeof(IRepository<,>), typeof(SupabaseRepository<,>));
+		services.AddScoped<IRepositoryContext, SupabaseRepositoryContext>();
+		return services.AddScoped(typeof(IRepository<,>), typeof(SupabaseRepository<,>));
 	}
 
-	public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
+	public static IServiceCollection AddAuthentication(this IServiceCollection services, IConfiguration configuration)
 	{
 		JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
@@ -140,9 +253,11 @@ internal static class ServiceCollectionExtensions
 				IssuerSigningKey = new SymmetricSecurityKey(key)
 			};
 		});
+
+		return services;
 	}
 
-	public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+	public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
 	{
 		var bearerOptions = configuration.GetSection(nameof(JwtBearerOptions)).Get<JwtBearerOptions>();
 		var issuer = configuration.GetValue<string>("JwtBearerOptions:TokenIssuer");
@@ -163,8 +278,15 @@ internal static class ServiceCollectionExtensions
 				        ValidateAudience = false
 			        };
 		        });
+
+		return services;
 	}
 
+	/// <summary>
+	/// 注册背景任务服务
+	/// </summary>
+	/// <param name="services"></param>
+	/// <returns></returns>
 	public static IServiceCollection AddRecurringJobService(this IServiceCollection services)
 	{
 		services.AddTransient<WechatAccessTokenGrantJob>();

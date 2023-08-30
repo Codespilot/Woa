@@ -5,7 +5,7 @@ namespace Woa.Webapi.Application;
 /// <summary>
 /// 敏感词应用服务
 /// </summary>
-public interface ISensitiveWordApplicationService
+public interface ISensitiveWordApplicationService : IApplicationService
 {
 	/// <summary>
 	/// 搜索敏感词
@@ -24,7 +24,7 @@ public interface ISensitiveWordApplicationService
 	/// <param name="cancellationToken"></param>
 	/// <returns></returns>
 	Task<int> CountAsync(string keyword, CancellationToken cancellationToken = default);
-	
+
 	/// <summary>
 	/// 新增敏感词
 	/// </summary>

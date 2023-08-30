@@ -3,12 +3,12 @@
 public class UserEventHandler : IEventHandler<UserLoginFaultEvent>,
                                 IEventHandler<UserLoginSuccessEvent>
 {
-	private readonly SupabaseClient _client;
+	private readonly IRepository<UserEntity, int> _repository;
 	private readonly ILogger<UserEventHandler> _logger;
 
-	public UserEventHandler(SupabaseClient client, ILoggerFactory logger)
+	public UserEventHandler(IRepository<UserEntity, int> repository, ILoggerFactory logger)
 	{
-		_client = client;
+		_repository = repository;
 		_logger = logger.CreateLogger<UserEventHandler>();
 	}
 
@@ -16,9 +16,7 @@ public class UserEventHandler : IEventHandler<UserLoginFaultEvent>,
 	{
 		try
 		{
-			var entity = await _client.From<UserEntity>()
-			                          .Where(t => t.Id == notification.UserId)
-			                          .Single(cancellationToken);
+			var entity = await _repository.GetAsync(notification.UserId, cancellationToken);
 			if (entity == null)
 			{
 				return;
@@ -31,7 +29,7 @@ public class UserEventHandler : IEventHandler<UserLoginFaultEvent>,
 				entity.LockoutTime = DateTime.UtcNow.AddMinutes(5 * Math.Pow(2, seed));
 			}
 
-			await _client.From<UserEntity>().Update(entity, cancellationToken: cancellationToken);
+			await _repository.UpdateAsync(entity, cancellationToken);
 		}
 		catch (Exception exception)
 		{
@@ -43,11 +41,16 @@ public class UserEventHandler : IEventHandler<UserLoginFaultEvent>,
 	{
 		try
 		{
-			await _client.From<UserEntity>()
-			             .Where(t => t.Id == notification.UserId)
-			             .Set(t => t.AccessFailedCount, 0)
-			             .Set(t => t.LockoutTime, null)
-			             .Update(cancellationToken: cancellationToken);
+			var entity = await _repository.GetAsync(notification.UserId, cancellationToken);
+			if (entity == null)
+			{
+				return;
+			}
+
+			entity.AccessFailedCount = 0;
+			entity.LockoutTime = null;
+
+			await _repository.UpdateAsync(entity, cancellationToken);
 		}
 		catch (Exception exception)
 		{

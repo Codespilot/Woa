@@ -13,7 +13,7 @@ using Woa.Webapi.Dtos;
 
 namespace Woa.Webapi.Application;
 
-public class UserApplicationService : IUserApplicationService
+public class UserApplicationService : BaseApplicationService, IUserApplicationService
 {
 	private readonly IRepository<UserEntity, int> _repository;
 	private readonly IMediator _mediator;
