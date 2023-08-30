@@ -2,7 +2,7 @@
 
 namespace Woa.Sdk.Wechat;
 
-public sealed class WechatAccessToken
+public sealed class WechatAccessToken : WechatResponse
 {
 	/// <summary>
 	/// 获取到的凭证
@@ -15,16 +15,4 @@ public sealed class WechatAccessToken
 	/// </summary>
 	[JsonProperty("expires_in")]
 	public int Expiry { get; set; }
-
-	/// <summary>
-	/// 错误代码
-	/// </summary>
-	[JsonProperty("errcode")]
-	public int ErrorCode { get; set; }
-
-	/// <summary>
-	/// 错误消息
-	/// </summary>
-	[JsonProperty("errmsg")]
-	public string ErrorMessage { get; set; }
 }
