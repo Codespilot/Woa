@@ -33,6 +33,8 @@
 	<ItemGroup>
 		<Using Include="Supabase.Client" Alias="SupabaseClient" />
 		<Using Include="Supabase.Realtime.Client" Alias="RealtimeClient" />
+        <Using Include="Supabase.Realtime.Constants" Alias="RealtimeConstants" />
+        <Using Include="Postgrest.Constants" Alias="PostgrestConstants" />
 	</ItemGroup>
 
 	<ItemGroup>
