@@ -3,9 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using AutoMapper;
 using IdentityModel;
-using MediatR;
 using Microsoft.IdentityModel.Tokens;
 using Woa.Common;
 using Woa.Webapi.Domain;
@@ -16,15 +14,11 @@ namespace Woa.Webapi.Application;
 public class UserApplicationService : BaseApplicationService, IUserApplicationService
 {
 	private readonly IRepository<UserEntity, int> _repository;
-	private readonly IMediator _mediator;
-	private readonly IMapper _mapper;
 	private readonly IConfiguration _configuration;
 
-	public UserApplicationService(IRepository<UserEntity, int> repository, IMediator mediator, IMapper mapper, IConfiguration configuration)
+	public UserApplicationService(IRepository<UserEntity, int> repository, IConfiguration configuration)
 	{
 		_repository = repository;
-		_mediator = mediator;
-		_mapper = mapper;
 		_configuration = configuration;
 	}
 
@@ -56,13 +50,13 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 		var hash = Cryptography.DES.Encrypt(password, Encoding.UTF8.GetBytes(entity.PasswordSalt));
 		if (!string.Equals(entity.PasswordHash, hash))
 		{
-			await _mediator.Publish(new UserLoginFaultEvent(entity.Id), cancellationToken);
+			await Mediator.Publish(new UserLoginFaultEvent(entity.Id), cancellationToken);
 			throw new InvalidOperationException("用户名或密码错误");
 		}
 
 		var refreshToken = GenerateRefreshToken(entity.Id);
 
-		await _mediator.Publish(new UserLoginSuccessEvent(entity.Id), cancellationToken);
+		await Mediator.Publish(new UserLoginSuccessEvent(entity.Id), cancellationToken);
 
 		var (token, expiresAt) = GenerateAccessToken(entity.Id, entity.Username);
 
@@ -180,7 +174,7 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 			throw new NotFoundException("用户不存在");
 		}
 
-		return _mapper.Map<UserProfileDto>(entity);
+		return Mapper.Map<UserProfileDto>(entity);
 	}
 
 	public async Task<int> CreateAsync(UserRegisterDto model, CancellationToken cancellationToken = default)
@@ -190,8 +184,8 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 			throw new BadRequestException("参数不能为空");
 		}
 
-		var command = _mapper.Map<UserCreateCommand>(model);
-		var id = await _mediator.Send(command, cancellationToken);
+		var command = Mapper.Map<UserCreateCommand>(model);
+		var id = await Mediator.Send(command, cancellationToken);
 		if (id <= 0)
 		{
 			throw new InternalServerException("创建用户失败");
