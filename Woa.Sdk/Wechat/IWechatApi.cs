@@ -26,6 +26,16 @@ public interface IWechatApi
 	Task<IApiResponse> SendCustomMessageAsync([Query] [AliasAs("access_token")] string token, [Body] WechatMessage message, CancellationToken cancellationToken = default);
 
 	/// <summary>
+	/// 获取临时素材
+	/// </summary>
+	/// <param name="token">调用接口凭证</param>
+	/// <param name="mediaId">媒体文件ID</param>
+	/// <param name="cancellationToken"></param>
+	/// <returns></returns>
+	[Get("/cgi-bin/media/get")]
+	Task<IApiResponse<Dictionary<string, string>>> GetTemporaryMediaAsync([Query] [AliasAs("access_token")] string token, [Query] [AliasAs("media_id")] string mediaId, CancellationToken cancellationToken = default);
+
+	/// <summary>
 	/// 上传临时素材
 	/// </summary>
 	/// <param name="media">form-data中媒体文件标识，有filename、filelength、content-type等信息</param>
@@ -70,7 +80,7 @@ public interface IWechatApi
 	/// <returns></returns>
 	[Post("/cgi-bin/menu/create")]
 	Task<IApiResponse<WechatResponse>> CreateMenuAsync([Body] WechatMenuUpdateRequest request, [Query] [AliasAs("access_token")] string token, CancellationToken cancellationToken = default);
-	
+
 	/// <summary>
 	/// 删除自定义菜单
 	/// </summary>
