@@ -228,13 +228,13 @@ public class Cryptography
 					count = reader.ReadByte();
 					break;
 				case 0x82:
-				{
-					var highByte = reader.ReadByte();
-					var lowByte = reader.ReadByte();
-					byte[] value = { lowByte, highByte, 0x00, 0x00 };
-					count = BitConverter.ToInt32(value, 0);
-					break;
-				}
+					{
+						var highByte = reader.ReadByte();
+						var lowByte = reader.ReadByte();
+						byte[] value = { lowByte, highByte, 0x00, 0x00 };
+						count = BitConverter.ToInt32(value, 0);
+						break;
+					}
 				default:
 					count = @byte;
 					break;
@@ -494,6 +494,19 @@ public class Cryptography
 			}
 
 			return builder.ToString();
+		}
+	}
+
+	public class Base64
+	{ 
+		public static string Encrypt(string source)
+		{
+			return Convert.ToBase64String(Encoding.UTF8.GetBytes(source));
+		}
+
+		public static string Decrypt(string source)
+		{
+			return Encoding.UTF8.GetString(Convert.FromBase64String(source));
 		}
 	}
 }

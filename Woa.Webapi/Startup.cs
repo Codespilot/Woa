@@ -80,7 +80,7 @@ public class Startup
 			});
 		}
 
-		//app.UseExceptionHandler();
+		app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 		app.UseHttpsRedirection();
 

@@ -70,7 +70,8 @@ public class LazyServiceProvider
 	/// <inheritdoc />
 	public virtual object GetService(Type serviceType)
 	{
-		return CachedServices.GetOrAdd(serviceType, () => ServiceProvider.GetService(serviceType));
+		var service = CachedServices.GetOrAdd(serviceType, _ => ServiceProvider.GetService(serviceType));
+		return service;
 	}
 
 	/// <inheritdoc />
