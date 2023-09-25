@@ -6,5 +6,9 @@ public class WechatMessageItemDto
 
 	public string Type { get; set; }
 
-	public string UserId { get; set; }
+	public string OpenId { get; set; }
+
+	public DateTime CreateTime { get; set; }
+
+	public bool HasReply { get; set; }
 }

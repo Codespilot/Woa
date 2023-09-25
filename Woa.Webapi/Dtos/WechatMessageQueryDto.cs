@@ -1,10 +1,22 @@
 ﻿namespace Woa.Webapi.Dtos;
 
+/// <summary>
+/// 微信消息查询对象
+/// </summary>
 public class WechatMessageQueryDto
 {
+	/// <summary>
+	/// 消息类型
+	/// </summary>
 	public string Type { get; set; }
 
-	public string UserId { get; set; }
+	/// <summary>
+	/// 用户open id
+	/// </summary>
+	public string OpenId { get; set; }
 
-	public string AppId { get; set; }
+	/// <summary>
+	/// 微信公众号Id
+	/// </summary>
+	public string AccountId { get; set; }
 }

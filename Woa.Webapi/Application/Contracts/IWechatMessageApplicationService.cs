@@ -12,7 +12,7 @@ public interface IWechatMessageApplicationService : IApplicationService
 	/// <param name="size">数量</param>
 	/// <param name="cancellationToken">操作取消令牌</param>
 	/// <returns>符合条件的微信消息列表对象集合</returns>
-	Task<List<WechatMessageItemDto>> SearchAsync(WechatMenuQueryDto condition, int page, int size, CancellationToken cancellationToken = default);
+	Task<List<WechatMessageItemDto>> SearchAsync(WechatMessageQueryDto condition, int page, int size, CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// 获取微信消息详情
@@ -29,4 +29,21 @@ public interface IWechatMessageApplicationService : IApplicationService
 	/// <param name="cancellationToken">操作取消令牌</param>
 	/// <returns></returns>
 	Task<string> GetReplyAsync(long id, CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// 回复微信消息
+	/// </summary>
+	/// <param name="id"></param>
+	/// <param name="content"></param>
+	/// <param name="cancellationToken"></param>
+	/// <returns></returns>
+	Task ReplyAsync(long id, string content, CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// 删除微信消息
+	/// </summary>
+	/// <param name="id"></param>
+	/// <param name="cancellationToken"></param>
+	/// <returns></returns>
+	Task DeleteAsync(long id, CancellationToken cancellationToken = default);
 }
