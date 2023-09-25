@@ -29,6 +29,7 @@ public class WechatUserMessageStore : IWechatUserMessageStore
 				Id = message.MessageId,
 				CreateTime = message.CreateTime,
 				OpenId = message.GetValue<string>(WechatMessageKey.FromUserName),
+				AccountId = message.GetValue<string>(WechatMessageKey.ToUserName),
 				Type = message.MessageType.ToString(),
 				Payload = message.GetOriginXml()
 			};

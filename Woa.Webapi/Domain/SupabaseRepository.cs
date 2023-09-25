@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Polly;
 using Postgrest.Models;
+using Woa.Common;
 
 namespace Woa.Webapi.Domain;
 
@@ -19,11 +20,12 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 
 	public async Task<TEntity> GetAsync(TKey id, CancellationToken cancellationToken = default)
 	{
+		var predicate = ExpressionHelper.BuildPropertyEqualsExpression<TEntity, TKey>(id, "Id");
 		return await Policy.Handle<Exception>()
 		                   .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
 		                   .ExecuteAsync(() =>
 			                   _client.From<TEntity>()
-			                          .Where(t => t.Id.Equals(id))
+			                          .Where(predicate)
 			                          .Single(cancellationToken)
 		                   );
 	}
@@ -59,6 +61,13 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 			                                  .Update(entity, cancellationToken: cancellationToken)
 		                           );
 		return response.Model;
+	}
+
+	public async Task<TEntity> UpdateAsync(TKey id, Action<TEntity> updateAction, CancellationToken cancellationToken = default)
+	{
+		var entity = await GetAsync(id, cancellationToken);
+		updateAction(entity);
+		return await UpdateAsync(entity, cancellationToken);
 	}
 
 	public async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)

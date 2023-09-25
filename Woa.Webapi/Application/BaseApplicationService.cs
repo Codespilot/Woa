@@ -1,16 +1,21 @@
 ﻿using AutoMapper;
 using MediatR;
+using Microsoft.Extensions.Caching.Memory;
 using Woa.Common;
 
 namespace Woa.Webapi.Application;
 
 public abstract class BaseApplicationService : IApplicationService
 {
-	protected internal LazyServiceProvider Provider { get; set; }
+	protected internal LazyServiceProvider ServiceProvider { get; set; }
 
-	protected IMediator Mediator => Provider.GetService<IMediator>();
+	protected IMediator Mediator => ServiceProvider.GetService<IMediator>();
 
-	protected IMapper Mapper => Provider.GetService<IMapper>();
+	protected IMapper Mapper => ServiceProvider.GetService<IMapper>();
 
-	protected IRepositoryContext Context => Provider.GetService<IRepositoryContext>();
+	protected IRepositoryContext Context => ServiceProvider.GetService<IRepositoryContext>();
+
+	protected IMemoryCache Cache => ServiceProvider.GetService<IMemoryCache>();
+
+	protected ILogger Logger => ServiceProvider.GetService<ILoggerFactory>().CreateLogger(GetType());
 }

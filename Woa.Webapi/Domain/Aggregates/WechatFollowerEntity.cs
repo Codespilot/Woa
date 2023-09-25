@@ -21,6 +21,12 @@ public class WechatFollowerEntity : BaseModel, IEntity<long>
 	public string OpenId { get; set; }
 
 	/// <summary>
+	/// 微信公众号Id
+	/// </summary>
+	[Column("account_id")]
+	public string AccountId { get; set; }
+
+	/// <summary>
 	/// 用户昵称
 	/// </summary>
 	[Column("nick_name")]

@@ -59,7 +59,7 @@ internal static class ServiceCollectionExtensions
 					var implementation = provider.GetService(serviceType);
 					if (implementation is BaseApplicationService service)
 					{
-						service.Provider = provider.GetService<LazyServiceProvider>();
+						service.ServiceProvider = provider.GetService<LazyServiceProvider>();
 					}
 
 					var properties = interfaceType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
