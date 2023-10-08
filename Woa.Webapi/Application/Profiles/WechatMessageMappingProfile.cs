@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Woa.Sdk.Wechat;
+using Woa.Sdk.Tencent;
 using Woa.Webapi.Domain;
 using Woa.Webapi.Dtos;
 

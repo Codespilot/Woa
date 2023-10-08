@@ -4,7 +4,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Woa.Common;
-using Woa.Sdk.Wechat;
+using Woa.Sdk.Tencent;
 using Woa.Webapi.Application;
 
 namespace Woa.Webapi.Controllers;

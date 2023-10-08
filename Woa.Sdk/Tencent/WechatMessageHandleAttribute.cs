@@ -1,4 +1,4 @@
-﻿namespace Woa.Sdk.Wechat;
+﻿namespace Woa.Sdk.Tencent;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public class WechatMessageHandleAttribute : Attribute

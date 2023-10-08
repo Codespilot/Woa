@@ -1,4 +1,4 @@
-﻿using Woa.Sdk.Wechat;
+﻿using Woa.Sdk.Tencent;
 
 namespace Woa.Webapi.Wechat;
 

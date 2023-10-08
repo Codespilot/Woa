@@ -1,4 +1,4 @@
-﻿namespace Woa.Sdk.Wechat;
+﻿namespace Woa.Sdk.Tencent;
 
 public interface IWechatUserMessageStore
 {

@@ -9,7 +9,7 @@ using Refit;
 using Woa.Common;
 using Woa.Sdk.Claude;
 using Woa.Sdk.OpenAi;
-using Woa.Sdk.Wechat;
+using Woa.Sdk.Tencent;
 
 namespace Woa.Sdk;
 

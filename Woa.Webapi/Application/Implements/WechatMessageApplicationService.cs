@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.Extensions.Caching.Memory;
 using Woa.Common;
-using Woa.Sdk.Wechat;
+using Woa.Sdk.Tencent;
 using Woa.Webapi.Domain;
 using Woa.Webapi.Dtos;
 
