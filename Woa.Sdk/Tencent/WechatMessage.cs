@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Xml.Linq;
 
-namespace Woa.Sdk.Wechat;
+namespace Woa.Sdk.Tencent;
 
 /// <summary>
 /// 微信消息对象

@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Caching.Memory;
 using Supabase.Realtime;
 using Supabase.Realtime.Models;
-using Woa.Sdk.Wechat;
+using Woa.Sdk.Tencent;
 using Woa.Shared;
 using Woa.Webapi.Domain;
 

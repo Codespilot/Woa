@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Quartz;
-using Woa.Sdk.Wechat;
+using Woa.Sdk.Tencent;
 
 namespace Woa.Webapi.Host;
 

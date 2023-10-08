@@ -1,4 +1,4 @@
-﻿namespace Woa.Sdk.Wechat;
+﻿namespace Woa.Sdk.Tencent;
 
 /// <summary>
 /// 微信图文消息

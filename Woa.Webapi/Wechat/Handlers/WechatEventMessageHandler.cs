@@ -1,5 +1,5 @@
 ﻿using System.Globalization;
-using Woa.Sdk.Wechat;
+using Woa.Sdk.Tencent;
 using Woa.Webapi.Domain;
 
 namespace Woa.Webapi.Wechat;

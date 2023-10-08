@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Options;
-using Woa.Sdk.Wechat;
+using Woa.Sdk.Tencent;
 using Woa.Shared;
 using Woa.Webapi.Domain;
 

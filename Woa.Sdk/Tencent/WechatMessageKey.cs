@@ -1,4 +1,4 @@
-﻿namespace Woa.Sdk.Wechat;
+﻿namespace Woa.Sdk.Tencent;
 
 /// <summary>
 /// 微信公众号消息Xml节点Key
