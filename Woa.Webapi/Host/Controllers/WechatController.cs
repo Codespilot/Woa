@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.Security.Cryptography;
-using System.Text;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Woa.Common;
@@ -47,21 +45,9 @@ public class WechatController : ControllerBase
 	{
 		var token = _configuration.GetValue<string>("Wechat:Token");
 
-		var parameters = new List<string> { token, timestamp, nonce };
-		parameters.Sort();
+		var isValid = Utility.VerifySignature(signature, timestamp, nonce, token);
 
-		var res = string.Join("", parameters);
-
-		var asciiBytes = Encoding.ASCII.GetBytes(res);
-		var hashBytes = ((HashAlgorithm)CryptoConfig.CreateFromName("SHA1")!).ComputeHash(asciiBytes);
-		var builder = new StringBuilder();
-		foreach (var @byte in hashBytes)
-		{
-			builder.Append(@byte.ToString("x2"));
-		}
-
-		var result = BitConverter.ToString(hashBytes).Replace("-", string.Empty).ToLower();
-		if (string.Equals(result, signature, StringComparison.OrdinalIgnoreCase))
+		if (isValid)
 		{
 			return await Task.FromResult(Ok(echostr));
 		}
@@ -83,7 +69,6 @@ public class WechatController : ControllerBase
 	[HttpPost]
 	public async Task<IActionResult> Receive(string signature, string timestamp, string nonce, string openid)
 	{
-		Debug.WriteLine(DateTime.Now);
 		var requestBody = await new StreamReader(Request.Body).ReadToEndAsync();
 
 		var message = WechatMessage.Parse(requestBody);
