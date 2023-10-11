@@ -38,12 +38,12 @@ public class WechatController : ControllerBase
 	/// 验证消息的确来自微信服务器
 	/// </summary>
 	/// <param name="signature">微信加密签名，signature结合了开发者填写的token参数和请求中的timestamp参数、nonce参数。</param>
-	/// <param name="echostr">随机字符串</param>
-	/// <param name="nonce">随机数</param>
 	/// <param name="timestamp">时间戳</param>
+	/// <param name="nonce">随机数</param>
+	/// <param name="echostr">随机字符串</param>
 	/// <returns></returns>
 	[HttpGet]
-	public async Task<IActionResult> Handle(string signature, string echostr, string nonce, string timestamp)
+	public async Task<IActionResult> Verify(string signature, string timestamp, string nonce, string echostr)
 	{
 		var token = _configuration.GetValue<string>("Wechat:Token");
 
@@ -75,9 +75,13 @@ public class WechatController : ControllerBase
 	/// <summary>
 	/// 接收微信消息
 	/// </summary>
+	/// <param name="signature">微信加密签名，signature结合了开发者填写的token参数和请求中的timestamp参数、nonce参数。</param>
+	/// <param name="timestamp">时间戳</param>
+	/// <param name="nonce">随机数</param>
+	/// <param name="openid"></param>
 	/// <returns></returns>
 	[HttpPost]
-	public async Task<IActionResult> Handle()
+	public async Task<IActionResult> Receive(string signature, string timestamp, string nonce, string openid)
 	{
 		Debug.WriteLine(DateTime.Now);
 		var requestBody = await new StreamReader(Request.Body).ReadToEndAsync();
