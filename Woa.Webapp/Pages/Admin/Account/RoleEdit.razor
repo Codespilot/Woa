@@ -1,0 +1,34 @@
+﻿<Modal Title="@Title" Visible="@IsVisible" OnOk="SubmitAsync">
+    <Form Model="@Model" LabelColSpan="8" WrapperColSpan="16">
+        <FormItem Label="角色代码">
+            <Input @bind-Value="@context.Code" />
+        </FormItem>
+        <FormItem Label="角色名称">
+            <Input @bind-Value="@context.Name" />
+        </FormItem>
+    </Form>
+</Modal>
+
+@using Woa.Webapp.Models.Admin
+
+@code
+{
+    [Parameter]
+    public long Id { get; set; }
+
+    [Parameter]
+    public bool IsVisible { get; set; }
+
+    [Parameter]
+    public EventCallback OnClosed { get; set; }
+
+    private string Title => Id == 0 ? "新增角色" : "编辑角色";
+
+    private RoleEditViewmodel Model { get; } = new();
+
+    private async Task SubmitAsync(MouseEventArgs args)
+    {
+        Debug.WriteLine(Model.Code);
+        await OnClosed.InvokeAsync();
+    }
+}

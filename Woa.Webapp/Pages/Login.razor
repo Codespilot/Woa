@@ -1,0 +1,67 @@
+﻿@page "/login"
+
+@using Woa.Webapp.Models
+
+<div class="container container-bg-img">
+    <div style="text-align:center;width:368px;margin:32px auto;box-shadow:none;">
+        <div class="header">
+            <a>
+                <img alt="logo" class="logo" src="assets/logo.svg">
+                <span class="title">Ant Design</span>
+            </a>
+        </div>
+        <div class="desc">Ant Design Blazor</div>
+    </div>
+
+    <div style="width: 368px; margin:0 auto;padding:16px;">
+        <div>
+            <Form Model="@Model">
+                <Tabs ActiveKey="@context.LoginType">
+                    <TabPane Key="password" Tab="密码登录">
+                        <FormItem>
+                            <AntDesign.Input Placeholder="用户名" Size="large" @bind-Value="@context.Username">
+                                <Prefix><Icon Type="user" /></Prefix>
+                            </AntDesign.Input>
+                        </FormItem>
+                        <FormItem>
+                            <AntDesign.Input Placeholder="登录密码" Size="large" @bind-Value="@context.Password" Type="password">
+                                <Prefix><Icon Type="lock" /></Prefix>
+                            </AntDesign.Input>
+                        </FormItem>
+                    </TabPane>
+
+                    <TabPane Key="pincode" Tab="验证码登录">
+                        <FormItem>
+                            <AntDesign.Input Placeholder="手机号" Size="large" @bind-Value="@context.Phone">
+                                <Prefix><Icon Type="mobile" /></Prefix>
+                            </AntDesign.Input>
+                        </FormItem>
+                        <FormItem>
+                            <Row Gutter="8">
+                                <AntDesign.Col Span="16">
+                                    <AntDesign.Input Placeholder="验证码" Size="large" @bind-Value="@context.Pin">
+                                        <Prefix><Icon Type="mail" /></Prefix>
+                                    </AntDesign.Input>
+                                </AntDesign.Col>
+                                <AntDesign.Col Span="8">
+                                    <Button Size="large" Block>Verify</Button>
+                                </AntDesign.Col>
+                            </Row>
+                        </FormItem>
+                    </TabPane>
+                </Tabs>
+
+                <div>
+                    <a style="float: right;">
+                        Forgot Password
+                    </a>
+                </div>
+                <Button Type="primary" HtmlType="submit" Class="submit" Size="large" Block>登录</Button>
+            </Form>
+        </div>
+    </div>
+</div>
+
+@code {
+    private UserLoginViewmodel Model { get; } = new();
+}
