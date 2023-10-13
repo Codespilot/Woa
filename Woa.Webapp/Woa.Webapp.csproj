@@ -10,8 +10,10 @@
         <PackageReference Include="AntDesign" Version="0.15.5" />
         <PackageReference Include="AntDesign.Components.Authentication" Version="0.15.5" />
         <PackageReference Include="AntDesign.ProLayout" Version="0.15.5" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.12" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.12" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="*" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="*" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="*" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="*" />
     </ItemGroup>
 
     <ItemGroup>

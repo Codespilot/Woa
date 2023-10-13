@@ -1,6 +1,8 @@
+using AntDesign;
 using AntDesign.ProLayout;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Woa.Webapp;
 
@@ -14,15 +16,7 @@ public class Program
 
 		builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 		builder.Services.AddAntDesign();
-		builder.Services.Configure<ProSettings>(settings =>
-		{
-			settings.FixedHeader = true;
-			settings.FixSiderbar = true;
-			settings.FooterRender = false;
-			settings.ContentWidth = "Fluid";
-			settings.Layout = Layout.Mix.Name;
-			settings.PrimaryColor = "#F5222D";
-		});
+		builder.Services.Configure<ProSettings>(builder.Configuration.GetSection("LayoutSettings"));
 
 		await builder.Build().RunAsync();
 	}

@@ -1,21 +1,15 @@
-@using Layout = AntDesign.ProLayout.Layout
 @inherits LayoutComponentBase
 
 <PageTitle>管理后台</PageTitle>
 
-<AntDesign.ProLayout.BasicLayout Theme="MenuTheme.Dark" 
-                                 Title="Woa" 
-                                 BaseURL="/admin" 
-                                 MenuData="@MenuData"
-                                 Layout="Layout.Mix" 
-                                 PrimaryColor="#F5222D" ContentStyle="Fluid" Pure="true">
+<BasicLayout Theme="MenuTheme.Dark" BaseURL="/admin" MenuData="@MenuData" >
     <ChildContent>
         @Body
     </ChildContent>
     <FooterRender>
         <FooterView Copyright="2022 Nerosoft" />
     </FooterRender>
-</AntDesign.ProLayout.BasicLayout>
+</BasicLayout>
 
 @code
 {
