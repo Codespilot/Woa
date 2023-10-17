@@ -2,3 +2,5 @@
 
 [assembly: InternalsVisibleTo("Woa.Webapi")]
 [assembly: InternalsVisibleTo("Woa.Chatbot")]
+[assembly: InternalsVisibleTo("Woa.Webapp")]
+[assembly: InternalsVisibleTo("Woa.Sdk")]
