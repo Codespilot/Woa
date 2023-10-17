@@ -2,8 +2,8 @@
 using IdentityModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Woa.Webapi.Dtos;
 using Woa.Webapi.Application;
+using Woa.Transit;
 
 namespace Woa.Webapi.Controllers;
 

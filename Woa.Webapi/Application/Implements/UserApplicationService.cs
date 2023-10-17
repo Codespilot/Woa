@@ -6,8 +6,8 @@ using System.Text.Json;
 using IdentityModel;
 using Microsoft.IdentityModel.Tokens;
 using Woa.Common;
+using Woa.Transit;
 using Woa.Webapi.Domain;
-using Woa.Webapi.Dtos;
 
 namespace Woa.Webapi.Application;
 

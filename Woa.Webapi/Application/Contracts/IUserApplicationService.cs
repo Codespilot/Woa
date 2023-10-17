@@ -1,5 +1,5 @@
-﻿using Woa.Webapi.Domain;
-using Woa.Webapi.Dtos;
+﻿using Woa.Transit;
+using Woa.Webapi.Domain;
 
 namespace Woa.Webapi.Application;
 

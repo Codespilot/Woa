@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Woa.Webapi.Dtos;
+namespace Woa.Transit;
 
 public class LoginResponseDto
 {

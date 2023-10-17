@@ -40,6 +40,7 @@
 	<ItemGroup>
 	  	<ProjectReference Include="..\Woa.Common\Woa.Common.csproj" />
 	  	<ProjectReference Include="..\Woa.Sdk\Woa.Sdk.csproj" />
+	  	<ProjectReference Include="..\Woa.Transit\Woa.Transit.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
