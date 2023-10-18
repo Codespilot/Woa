@@ -1,14 +1,13 @@
 @inherits LayoutComponentBase
 
+@attribute [Authorize]
+
 <PageTitle>管理后台</PageTitle>
 
 <BasicLayout Theme="MenuTheme.Dark" BaseURL="/admin" MenuData="@MenuData" >
     <ChildContent>
         @Body
     </ChildContent>
-    <FooterRender>
-        <FooterView Copyright="2022 Nerosoft" />
-    </FooterRender>
 </BasicLayout>
 
 @code
@@ -62,7 +61,8 @@
                 new MenuDataItem
                 {
                     Name = "消息管理",
-                    Icon = "message"
+                    Icon = "message",
+                    Path = "admin/wechat/message",
                 },
                 new MenuDataItem
                 {

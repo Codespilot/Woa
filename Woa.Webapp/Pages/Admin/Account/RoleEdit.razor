@@ -1,5 +1,5 @@
-﻿<Modal Title="@Title" Visible="@IsVisible" OnOk="SubmitAsync">
-    <Form Model="@Model" LabelColSpan="8" WrapperColSpan="16">
+﻿<Modal Title="@Title" Visible="@IsVisible" OnOk="SubmitAsync" OnCancel="CloseAsync" DestroyOnClose="true">
+    <Form Model="@Model" LabelColSpan="8" WrapperColSpan="16" Loading="@Loading">
         <FormItem Label="角色代码">
             <Input @bind-Value="@context.Code" />
         </FormItem>
@@ -26,9 +26,17 @@
 
     private RoleEditViewmodel Model { get; } = new();
 
+    private bool Loading{ get; set; }
+
     private async Task SubmitAsync(MouseEventArgs args)
     {
         Debug.WriteLine(Model.Code);
+        Loading = true;
+        await OnClosed.InvokeAsync();
+    }
+
+    private async Task CloseAsync(MouseEventArgs args)
+    {
         await OnClosed.InvokeAsync();
     }
 }
