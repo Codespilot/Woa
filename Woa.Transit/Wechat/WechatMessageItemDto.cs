@@ -3,7 +3,7 @@
 /// <summary>
 /// 微信消息列表对象
 /// </summary>
-internal class WechatMessageItemDto
+public class WechatMessageItemDto
 {
 	/// <summary>
 	/// 消息Id

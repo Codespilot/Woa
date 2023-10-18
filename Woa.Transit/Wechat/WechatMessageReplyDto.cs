@@ -1,3 +1,3 @@
-﻿namespace Woa.Webapi.Dtos;
+﻿namespace Woa.Transit;
 
 public record WechatMessageReplyDto(string Content);

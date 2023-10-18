@@ -1,4 +1,4 @@
-﻿namespace Woa.Webapi.Dtos;
+﻿namespace Woa.Transit;
 
 /// <summary>
 /// 微信菜单编辑Dto

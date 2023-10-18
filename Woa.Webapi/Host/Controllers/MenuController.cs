@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Woa.Transit;
 using Woa.Webapi.Application;
-using Woa.Webapi.Dtos;
 
 namespace Woa.Webapi.Controllers;
 

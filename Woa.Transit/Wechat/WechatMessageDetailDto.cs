@@ -1,4 +1,4 @@
-﻿namespace Woa.Webapi.Dtos;
+﻿namespace Woa.Transit;
 
 /// <summary>
 /// 微信消息明细对象

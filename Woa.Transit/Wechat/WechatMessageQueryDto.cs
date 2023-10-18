@@ -3,7 +3,7 @@
 /// <summary>
 /// 微信消息查询对象
 /// </summary>
-internal class WechatMessageQueryDto
+public class WechatMessageQueryDto
 {
 	/// <summary>
 	/// 消息类型

@@ -1,4 +1,4 @@
-﻿using Woa.Webapi.Dtos;
+﻿using Woa.Transit;
 
 namespace Woa.Webapi.Application;
 

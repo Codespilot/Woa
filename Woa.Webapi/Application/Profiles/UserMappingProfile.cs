@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
 using AutoMapper;
+using Woa.Transit;
 using Woa.Webapi.Domain;
-using Woa.Webapi.Dtos;
 
 namespace Woa.Webapi.Application;
 

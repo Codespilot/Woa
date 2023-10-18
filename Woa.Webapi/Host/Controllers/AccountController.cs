@@ -7,6 +7,9 @@ using Woa.Transit;
 
 namespace Woa.Webapi.Controllers;
 
+/// <summary>
+/// 账号控制器
+/// </summary>
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
@@ -19,6 +22,10 @@ public class AccountController : ControllerBase
 		_applicationService = applicationService;
 	}
 
+	/// <summary>
+	/// 获取用户信息
+	/// </summary>
+	/// <returns></returns>
 	[HttpGet]
 	public async Task<IActionResult> GetAsync()
 	{
@@ -27,6 +34,11 @@ public class AccountController : ControllerBase
 		return Ok(entity);
 	}
 
+	/// <summary>
+	/// 获取Token
+	/// </summary>
+	/// <param name="model"></param>
+	/// <returns></returns>
 	[HttpPost("login")]
 	[AllowAnonymous]
 	public async Task<IActionResult> GrantAsync([FromBody] LoginRequestDto model)
@@ -47,6 +59,11 @@ public class AccountController : ControllerBase
 		}
 	}
 
+	/// <summary>
+	/// 刷新Token
+	/// </summary>
+	/// <param name="token"></param>
+	/// <returns></returns>
 	[HttpGet("refresh")]
 	[AllowAnonymous]
 	public async Task<IActionResult> RefreshAsync(string token)
@@ -66,6 +83,11 @@ public class AccountController : ControllerBase
 		}
 	}
 
+	/// <summary>
+	/// 新增用户
+	/// </summary>
+	/// <param name="model"></param>
+	/// <returns></returns>
 	[HttpPost]
 	[AllowAnonymous]
 	public async Task<IActionResult> CreateAsync([FromBody] UserRegisterDto model)
