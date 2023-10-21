@@ -80,13 +80,19 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 		            );
 	}
 
-	public async Task DeleteAsync(TKey id, CancellationToken cancellationToken = default)
+	public Task DeleteAsync(TKey id, CancellationToken cancellationToken = default)
+	{
+		var predicate = ExpressionHelper.BuildPropertyEqualsExpression<TEntity, TKey>(id, "Id");
+		return DeleteAsync(predicate, cancellationToken);
+	}
+
+	public async Task DeleteAsync(Expression<Func<TEntity,bool>> predicate, CancellationToken cancellationToken = default)
 	{
 		await Policy.Handle<Exception>()
 		            .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
 		            .ExecuteAsync(() =>
 			            _client.From<TEntity>()
-			                   .Where(t => t.Id.Equals(id))
+			                   .Where(predicate)
 			                   .Delete(cancellationToken: cancellationToken)
 		            );
 	}
