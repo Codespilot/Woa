@@ -16,6 +16,7 @@ public class UserMappingProfile : Profile
 			.ForMember(dest => dest.Phone, opt => opt.MapFrom(dto => TrimString(dto.Phone)));
 
 		CreateMap<UserEntity, UserProfileDto>();
+		CreateMap<UserEntity, UserDetailDto>();
 
 		CreateMap<RoleEntity, RoleInfoDto>();
 		CreateMap<RoleEditDto, RoleCreateCommand>();

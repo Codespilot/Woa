@@ -131,7 +131,7 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 		}
 	}
 
-	public async Task<UserEntity> GetAsync(int id, CancellationToken cancellationToken = default)
+	public async Task<UserDetailDto> GetAsync(int id, CancellationToken cancellationToken = default)
 	{
 		if (id <= 0)
 		{
@@ -144,10 +144,12 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 			throw new NotFoundException();
 		}
 
-		return entity;
+		var dto = Mapper.Map<UserDetailDto>(entity);
+		dto.Roles = await GetRolesAsync(id, cancellationToken).ContinueWith(task => task.Result.ToList(), cancellationToken);
+		return dto;
 	}
 
-	public async Task<UserEntity> GetAsync(string username, CancellationToken cancellationToken = default)
+	public async Task<UserDetailDto> GetAsync(string username, CancellationToken cancellationToken = default)
 	{
 		if (string.IsNullOrWhiteSpace(username))
 		{
@@ -162,7 +164,9 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 			throw new NotFoundException();
 		}
 
-		return entity;
+		var dto = Mapper.Map<UserDetailDto>(entity);
+		dto.Roles = await GetRolesAsync(entity.Id, cancellationToken).ContinueWith(task => task.Result.ToList(), cancellationToken);
+		return dto;
 	}
 
 	public async Task<UserProfileDto> GetProfileAsync(int id, CancellationToken cancellationToken = default)

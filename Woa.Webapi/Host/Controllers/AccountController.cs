@@ -92,19 +92,8 @@ public class AccountController : ControllerBase
 	[Authorize(Roles = "SA")]
 	public async Task<IActionResult> CreateAsync([FromBody] UserRegisterDto model)
 	{
-		try
-		{
-			var result = await _service.CreateAsync(model, HttpContext.RequestAborted);
-			Response.Headers.Add("x-entry-id", result.ToString());
-			return Ok();
-		}
-		catch (ArgumentException exception)
-		{
-			return BadRequest(new { exception.Message });
-		}
-		catch (Exception exception)
-		{
-			return StatusCode(500, new { exception.Message });
-		}
+		var result = await _service.CreateAsync(model, HttpContext.RequestAborted);
+		Response.Headers.Add("x-entry-id", result.ToString());
+		return Ok();
 	}
 }

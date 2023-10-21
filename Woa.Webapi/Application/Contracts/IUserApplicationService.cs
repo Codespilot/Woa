@@ -9,9 +9,9 @@ public interface IUserApplicationService : IApplicationService
 
 	Task<LoginResponseDto> AuthenticateAsync(string token, CancellationToken cancellationToken = default);
 
-	Task<UserEntity> GetAsync(int id, CancellationToken cancellationToken = default);
+	Task<UserDetailDto> GetAsync(int id, CancellationToken cancellationToken = default);
 
-	Task<UserEntity> GetAsync(string username, CancellationToken cancellationToken = default);
+	Task<UserDetailDto> GetAsync(string username, CancellationToken cancellationToken = default);
 
 	Task<UserProfileDto> GetProfileAsync(int id, CancellationToken cancellationToken = default);
 

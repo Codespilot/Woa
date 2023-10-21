@@ -25,14 +25,14 @@ public class UserController : ControllerBase
 		return Ok(result);
 	}
 
-	[HttpGet("{id}")]
+	[HttpGet("{id:int}")]
 	public async Task<IActionResult> GetAsync(int id)
 	{
 		var result = await _service.GetAsync(id, HttpContext.RequestAborted);
 		return Ok(result);
 	}
 
-	[HttpPut("{id}")]
+	[HttpPut("{id:int}")]
 	public async Task<IActionResult> SetRoleAsync(int id, [FromBody] List<int> roles)
 	{
 		return Ok();
