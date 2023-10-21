@@ -16,6 +16,10 @@ public class UserMappingProfile : Profile
 			.ForMember(dest => dest.Phone, opt => opt.MapFrom(dto => TrimString(dto.Phone)));
 
 		CreateMap<UserEntity, UserProfileDto>();
+
+		CreateMap<RoleEntity, RoleInfoDto>();
+		CreateMap<RoleEditDto, RoleCreateCommand>();
+		CreateMap<RoleEditDto, RoleUpdateCommand>();
 	}
 
 	private static string TrimString(string value)
