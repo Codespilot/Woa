@@ -55,11 +55,13 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 			throw new InvalidOperationException("用户名或密码错误");
 		}
 
+		var roles = await GetRolesAsync(entity.Id, cancellationToken);
+
 		var refreshToken = GenerateRefreshToken(entity.Id);
 
 		await Mediator.Publish(new UserLoginSuccessEvent(entity.Id), cancellationToken);
 
-		var (token, expiresAt) = GenerateAccessToken(entity.Id, entity.Username);
+		var (token, expiresAt) = GenerateAccessToken(entity.Id, entity.Username, roles);
 
 		var response = new LoginResponseDto
 		{
@@ -104,9 +106,11 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 			throw new NotFoundException("用户名或密码错误");
 		}
 
+		var roles = await GetRolesAsync(entity.Id, cancellationToken);
+
 		var refreshToken = GenerateRefreshToken(entity.Id);
 
-		var (accessToken, expiresAt) = GenerateAccessToken(entity.Id, entity.Username);
+		var (accessToken, expiresAt) = GenerateAccessToken(entity.Id, entity.Username, roles);
 
 		var response = new LoginResponseDto
 		{
@@ -214,7 +218,7 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 				break;
 		}
 
-		var predicate = expressions.Aggregate(t => t.Id > 0, "And");
+		var predicate = expressions.Aggregate(t => t.Id > 0);
 
 		var entities = await _repository.FindAsync(predicate, page, size, cancellationToken);
 		return Mapper.Map<List<UserItemDto>>(entities);
@@ -225,8 +229,9 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 	/// </summary>
 	/// <param name="userId"></param>
 	/// <param name="userName"></param>
+	/// <param name="roles"></param>
 	/// <returns></returns>
-	private Tuple<string, DateTime> GenerateAccessToken(int userId, string userName)
+	private Tuple<string, DateTime> GenerateAccessToken(int userId, string userName, IEnumerable<string> roles = null)
 	{
 		var authTime = DateTime.UtcNow;
 		var expiresAt = authTime.AddDays(1);
@@ -245,6 +250,13 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 			Expires = expiresAt,
 			SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
 		};
+		if (roles?.Any() == true)
+		{
+			foreach (var role in roles)
+			{
+				tokenDescriptor.Subject.AddClaim(new Claim(JwtClaimTypes.Role, role));
+			}
+		}
 
 		var token = tokenHandler.CreateToken(tokenDescriptor);
 		var tokenString = tokenHandler.WriteToken(token);
@@ -267,5 +279,22 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 		};
 		var json = JsonSerializer.Serialize(model);
 		return Cryptography.AES.Encrypt(json);
+	}
+
+	private async Task<IEnumerable<string>> GetRolesAsync(int userId, CancellationToken cancellationToken = default)
+	{
+		var relationRepository = ServiceProvider.GetRequiredService<IRepository<UserRoleEntity, int>>();
+		var relations = await relationRepository.FindAsync(t => t.UserId == userId, cancellationToken);
+		if (relations.Count == 0)
+		{
+			return Array.Empty<string>();
+		}
+
+		var roleIds = relations.Select(t => t.RoleId);
+
+		var roleRepository = ServiceProvider.GetRequiredService<IRepository<RoleEntity, int>>();
+
+		var roles = await roleRepository.FindAsync(t => roleIds.Contains(t.Id), cancellationToken);
+		return roles.Select(t => t.Code);
 	}
 }

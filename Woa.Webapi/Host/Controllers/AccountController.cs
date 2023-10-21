@@ -15,11 +15,11 @@ namespace Woa.Webapi.Controllers;
 [Authorize]
 public class AccountController : ControllerBase
 {
-	private readonly IUserApplicationService _applicationService;
+	private readonly IUserApplicationService _service;
 
-	public AccountController(IUserApplicationService applicationService)
+	public AccountController(IUserApplicationService service)
 	{
-		_applicationService = applicationService;
+		_service = service;
 	}
 
 	/// <summary>
@@ -30,7 +30,7 @@ public class AccountController : ControllerBase
 	public async Task<IActionResult> GetAsync()
 	{
 		var id = int.Parse(User.FindFirstValue(JwtClaimTypes.Subject)!);
-		var entity = await _applicationService.GetProfileAsync(id, HttpContext.RequestAborted);
+		var entity = await _service.GetProfileAsync(id, HttpContext.RequestAborted);
 		return Ok(entity);
 	}
 
@@ -45,7 +45,7 @@ public class AccountController : ControllerBase
 	{
 		try
 		{
-			var response = await _applicationService.AuthenticateAsync(model.Username, model.Password, HttpContext.RequestAborted);
+			var response = await _service.AuthenticateAsync(model.Username, model.Password, HttpContext.RequestAborted);
 
 			return Ok(response);
 		}
@@ -70,7 +70,7 @@ public class AccountController : ControllerBase
 	{
 		try
 		{
-			var response = await _applicationService.AuthenticateAsync(token, HttpContext.RequestAborted);
+			var response = await _service.AuthenticateAsync(token, HttpContext.RequestAborted);
 			return Ok(response);
 		}
 		catch (ArgumentException exception)
@@ -89,12 +89,12 @@ public class AccountController : ControllerBase
 	/// <param name="model"></param>
 	/// <returns></returns>
 	[HttpPost]
-	[AllowAnonymous]
+	[Authorize(Roles = "SA")]
 	public async Task<IActionResult> CreateAsync([FromBody] UserRegisterDto model)
 	{
 		try
 		{
-			var result = await _applicationService.CreateAsync(model, HttpContext.RequestAborted);
+			var result = await _service.CreateAsync(model, HttpContext.RequestAborted);
 			Response.Headers.Add("x-entry-id", result.ToString());
 			return Ok();
 		}
