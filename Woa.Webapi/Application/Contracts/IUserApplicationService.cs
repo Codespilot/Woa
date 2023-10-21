@@ -16,4 +16,6 @@ public interface IUserApplicationService : IApplicationService
 	Task<UserProfileDto> GetProfileAsync(int id, CancellationToken cancellationToken = default);
 
 	Task<int> CreateAsync(UserRegisterDto model, CancellationToken cancellationToken = default);
+
+	Task<List<UserItemDto>> SearchAsync(UserQueryDto condition, int page, int size, CancellationToken cancellationToken = default);
 }

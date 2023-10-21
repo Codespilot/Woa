@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -192,6 +193,31 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 		}
 
 		return id;
+	}
+
+	public async Task<List<UserItemDto>> SearchAsync(UserQueryDto condition, int page, int size, CancellationToken cancellationToken = default)
+	{
+		var expressions = new List<Expression<Func<UserEntity, bool>>>();
+
+		if (!string.IsNullOrWhiteSpace(condition.Keywords))
+		{
+			expressions.Add(t => t.Username.Contains(condition.Keywords) || t.Email.Contains(condition.Keywords) || t.Phone.Contains(condition.Keywords));
+		}
+
+		switch (condition.Locked)
+		{
+			case true:
+				expressions.Add(t => t.LockoutTime > DateTime.UtcNow);
+				break;
+			case false:
+				expressions.Add(t => t.LockoutTime == null || t.LockoutTime < DateTime.UtcNow);
+				break;
+		}
+
+		var predicate = expressions.Aggregate(t => t.Id > 0, "And");
+
+		var entities = await _repository.FindAsync(predicate, page, size, cancellationToken);
+		return Mapper.Map<List<UserItemDto>>(entities);
 	}
 
 	/// <summary>
