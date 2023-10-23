@@ -1,4 +1,4 @@
-﻿@inject NavigationManager navigation
+﻿@inject NavigationManager Navigation
 
 @code
 {
@@ -13,6 +13,6 @@
 
     protected override void OnInitialized()
     {
-        navigation.NavigateTo(Uri, ForceLoad, Replace);
+        Navigation.NavigateTo(Uri, ForceLoad, Replace);
     }
 }
