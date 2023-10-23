@@ -4,8 +4,8 @@ using Woa.Common;
 namespace Woa.Webapi.Domain;
 
 public class WechatMenuCommandHandler : ICommandHandler<WechatMenuCreateCommand, int>,
-										ICommandHandler<WechatMenuUpdateCommand>,
-										ICommandHandler<WechatMenuDeleteCommand>
+                                        ICommandHandler<WechatMenuUpdateCommand>,
+                                        ICommandHandler<WechatMenuDeleteCommand>
 {
 	private readonly IRepository<WechatMenuEntity, int> _repository;
 	private readonly IMediator _mediator;
@@ -50,8 +50,6 @@ public class WechatMenuCommandHandler : ICommandHandler<WechatMenuCreateCommand,
 				throw new BadRequestException("一级菜单最多只能有3个");
 			}
 		}
-
-
 
 		var entity = new WechatMenuEntity
 		{

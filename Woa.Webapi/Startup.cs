@@ -75,7 +75,7 @@ public class Startup
 				builder.WithOrigins(corsOrigins);
 				builder.AllowAnyHeader();
 				builder.AllowAnyMethod();
-				builder.AllowCredentials();
+				//builder.AllowCredentials();
 			});
 		});
 	}
