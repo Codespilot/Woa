@@ -16,9 +16,19 @@ public class WechatMessageItemDto
 	public string Type { get; set; }
 
 	/// <summary>
+	/// 消息类型名称
+	/// </summary>
+	public string TypeName { get; set; }
+
+	/// <summary>
 	/// 用户Open Id
 	/// </summary>
 	public string OpenId { get; set; }
+
+	/// <summary>
+	/// 消息内容
+	/// </summary>
+	public sbyte Content { get; set; }
 
 	/// <summary>
 	/// 消息发送时间
