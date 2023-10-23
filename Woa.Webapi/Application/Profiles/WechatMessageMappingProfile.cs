@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Woa.Sdk.Tencent;
+using Woa.Transit;
 using Woa.Webapi.Domain;
-using Woa.Webapi.Dtos;
 
 namespace Woa.Webapi.Application;
 

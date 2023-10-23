@@ -1,0 +1,46 @@
+﻿@layout AdminLayout
+@page "/admin/role"
+
+@using Woa.Webapp.Models.Admin
+
+<PageTitle>角色管理</PageTitle>
+
+<div>
+    <PageContainer>
+        <Breadcrumb>
+            <Breadcrumb>
+                <BreadcrumbItem>首页</BreadcrumbItem>
+                <BreadcrumbItem>角色管理</BreadcrumbItem>
+            </Breadcrumb>
+        </Breadcrumb>
+
+        <ChildContent>
+            <Card Title="角色列表">
+                <Extra>
+                    <Search Placeholder="输入关键字搜索" />
+                </Extra>
+                <ChildContent>
+                    <Button Type="dashed" Style="width: 100%; margin-bottom: 8px;" OnClick="()=>ShowEdit=true">
+                        <Icon Type="plus" Theme="outline" /> 新增角色
+                    </Button>
+
+                    <AntList TItem="RoleItemDatamodel" ItemLayout="ListItemLayout.Horizontal">
+
+                    </AntList>
+                </ChildContent>
+            </Card>
+        </ChildContent>
+    </PageContainer>
+
+    <RoleEdit IsVisible="@ShowEdit" OnClosed="HandleModalClosedAsync"/>
+</div>
+
+@code
+{
+    private bool ShowEdit { get; set; } = false;
+
+    private async Task HandleModalClosedAsync()
+    {
+        ShowEdit = false;
+    }
+}

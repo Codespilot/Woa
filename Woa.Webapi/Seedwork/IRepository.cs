@@ -20,6 +20,8 @@ public interface IRepository<TEntity, in TKey>
 
 	Task DeleteAsync(TKey id, CancellationToken cancellationToken = default);
 
+	Task DeleteAsync(Expression<Func<TEntity,bool>> predicate, CancellationToken cancellationToken = default);
+
 	Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 
 	Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);

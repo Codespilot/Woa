@@ -1,13 +1,14 @@
 ﻿using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using IdentityModel;
 using Microsoft.IdentityModel.Tokens;
 using Woa.Common;
+using Woa.Transit;
 using Woa.Webapi.Domain;
-using Woa.Webapi.Dtos;
 
 namespace Woa.Webapi.Application;
 
@@ -54,11 +55,13 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 			throw new InvalidOperationException("用户名或密码错误");
 		}
 
+		var roles = await GetRolesAsync(entity.Id, cancellationToken);
+
 		var refreshToken = GenerateRefreshToken(entity.Id);
 
 		await Mediator.Publish(new UserLoginSuccessEvent(entity.Id), cancellationToken);
 
-		var (token, expiresAt) = GenerateAccessToken(entity.Id, entity.Username);
+		var (token, expiresAt) = GenerateAccessToken(entity.Id, entity.Username, roles);
 
 		var response = new LoginResponseDto
 		{
@@ -103,9 +106,11 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 			throw new NotFoundException("用户名或密码错误");
 		}
 
+		var roles = await GetRolesAsync(entity.Id, cancellationToken);
+
 		var refreshToken = GenerateRefreshToken(entity.Id);
 
-		var (accessToken, expiresAt) = GenerateAccessToken(entity.Id, entity.Username);
+		var (accessToken, expiresAt) = GenerateAccessToken(entity.Id, entity.Username, roles);
 
 		var response = new LoginResponseDto
 		{
@@ -126,7 +131,7 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 		}
 	}
 
-	public async Task<UserEntity> GetAsync(int id, CancellationToken cancellationToken = default)
+	public async Task<UserDetailDto> GetAsync(int id, CancellationToken cancellationToken = default)
 	{
 		if (id <= 0)
 		{
@@ -139,10 +144,12 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 			throw new NotFoundException();
 		}
 
-		return entity;
+		var dto = Mapper.Map<UserDetailDto>(entity);
+		dto.Roles = await GetRolesAsync(id, cancellationToken).ContinueWith(task => task.Result.ToList(), cancellationToken);
+		return dto;
 	}
 
-	public async Task<UserEntity> GetAsync(string username, CancellationToken cancellationToken = default)
+	public async Task<UserDetailDto> GetAsync(string username, CancellationToken cancellationToken = default)
 	{
 		if (string.IsNullOrWhiteSpace(username))
 		{
@@ -157,7 +164,9 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 			throw new NotFoundException();
 		}
 
-		return entity;
+		var dto = Mapper.Map<UserDetailDto>(entity);
+		dto.Roles = await GetRolesAsync(entity.Id, cancellationToken).ContinueWith(task => task.Result.ToList(), cancellationToken);
+		return dto;
 	}
 
 	public async Task<UserProfileDto> GetProfileAsync(int id, CancellationToken cancellationToken = default)
@@ -177,7 +186,7 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 		return Mapper.Map<UserProfileDto>(entity);
 	}
 
-	public async Task<int> CreateAsync(UserRegisterDto model, CancellationToken cancellationToken = default)
+	public async Task<int> CreateAsync(UserCreateDto model, CancellationToken cancellationToken = default)
 	{
 		if (model == null)
 		{
@@ -194,13 +203,39 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 		return id;
 	}
 
+	public async Task<List<UserItemDto>> SearchAsync(UserQueryDto condition, int page, int size, CancellationToken cancellationToken = default)
+	{
+		var expressions = new List<Expression<Func<UserEntity, bool>>>();
+
+		if (!string.IsNullOrWhiteSpace(condition.Keywords))
+		{
+			expressions.Add(t => t.Username.Contains(condition.Keywords) || t.Email.Contains(condition.Keywords) || t.Phone.Contains(condition.Keywords));
+		}
+
+		switch (condition.Locked)
+		{
+			case true:
+				expressions.Add(t => t.LockoutTime > DateTime.UtcNow);
+				break;
+			case false:
+				expressions.Add(t => t.LockoutTime == null || t.LockoutTime < DateTime.UtcNow);
+				break;
+		}
+
+		var predicate = expressions.Aggregate(t => t.Id > 0);
+
+		var entities = await _repository.FindAsync(predicate, page, size, cancellationToken);
+		return Mapper.Map<List<UserItemDto>>(entities);
+	}
+
 	/// <summary>
 	/// 生成Access Token
 	/// </summary>
 	/// <param name="userId"></param>
 	/// <param name="userName"></param>
+	/// <param name="roles"></param>
 	/// <returns></returns>
-	private Tuple<string, DateTime> GenerateAccessToken(int userId, string userName)
+	private Tuple<string, DateTime> GenerateAccessToken(int userId, string userName, IEnumerable<string> roles = null)
 	{
 		var authTime = DateTime.UtcNow;
 		var expiresAt = authTime.AddDays(1);
@@ -219,6 +254,13 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 			Expires = expiresAt,
 			SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
 		};
+		if (roles?.Any() == true)
+		{
+			foreach (var role in roles)
+			{
+				tokenDescriptor.Subject.AddClaim(new Claim(JwtClaimTypes.Role, role));
+			}
+		}
 
 		var token = tokenHandler.CreateToken(tokenDescriptor);
 		var tokenString = tokenHandler.WriteToken(token);
@@ -241,5 +283,22 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 		};
 		var json = JsonSerializer.Serialize(model);
 		return Cryptography.AES.Encrypt(json);
+	}
+
+	private async Task<IEnumerable<string>> GetRolesAsync(int userId, CancellationToken cancellationToken = default)
+	{
+		var relationRepository = ServiceProvider.GetRequiredService<IRepository<UserRoleEntity, int>>();
+		var relations = await relationRepository.FindAsync(t => t.UserId == userId, cancellationToken);
+		if (relations.Count == 0)
+		{
+			return Array.Empty<string>();
+		}
+
+		var roleIds = relations.Select(t => t.RoleId);
+
+		var roleRepository = ServiceProvider.GetRequiredService<IRepository<RoleEntity, int>>();
+
+		var roles = await roleRepository.FindAsync(t => roleIds.Contains(t.Id), cancellationToken);
+		return roles.Select(t => t.Code);
 	}
 }

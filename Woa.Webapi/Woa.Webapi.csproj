@@ -14,9 +14,9 @@
         <PackageReference Include="FluentValidation" Version="11.7.1" />
 		<PackageReference Include="IdentityModel" Version="6.2.0" />
 		<PackageReference Include="MediatR" Version="12.1.1" />
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.11" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.12" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
-		<PackageReference Include="Polly" Version="7.2.4" />
+		<PackageReference Include="Polly" Version="8.0.0" />
 		<PackageReference Include="Quartz" Version="3.7.0" />
 		<PackageReference Include="Quartz.AspNetCore" Version="3.7.0" />
 		<PackageReference Include="Quartz.Extensions.DependencyInjection" Version="3.7.0" />
@@ -24,10 +24,10 @@
         <PackageReference Include="Serilog" Version="3.0.1" />
         <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
 		<PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
-        <PackageReference Include="supabase-csharp" Version="0.13.3" />
+        <PackageReference Include="supabase-csharp" Version="0.13.5" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.11" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.12" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -40,6 +40,7 @@
 	<ItemGroup>
 	  	<ProjectReference Include="..\Woa.Common\Woa.Common.csproj" />
 	  	<ProjectReference Include="..\Woa.Sdk\Woa.Sdk.csproj" />
+	  	<ProjectReference Include="..\Woa.Transit\Woa.Transit.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

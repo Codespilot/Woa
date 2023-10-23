@@ -1,14 +1,15 @@
 ﻿namespace Woa.Webapi.Domain;
 
 public class UserEventHandler : IEventHandler<UserLoginFaultEvent>,
-                                IEventHandler<UserLoginSuccessEvent>
+								IEventHandler<UserLoginSuccessEvent>,
+								IEventHandler<RoleDeletedEvent>
 {
-	private readonly IRepository<UserEntity, int> _repository;
+	private readonly IServiceProvider _provider;
 	private readonly ILogger<UserEventHandler> _logger;
 
-	public UserEventHandler(IRepository<UserEntity, int> repository, ILoggerFactory logger)
+	public UserEventHandler(IServiceProvider provider, ILoggerFactory logger)
 	{
-		_repository = repository;
+		_provider = provider;
 		_logger = logger.CreateLogger<UserEventHandler>();
 	}
 
@@ -16,7 +17,9 @@ public class UserEventHandler : IEventHandler<UserLoginFaultEvent>,
 	{
 		try
 		{
-			var entity = await _repository.GetAsync(notification.UserId, cancellationToken);
+			var repository = _provider.GetService<IRepository<UserEntity, int>>();
+
+			var entity = await repository.GetAsync(notification.UserId, cancellationToken);
 			if (entity == null)
 			{
 				return;
@@ -29,7 +32,7 @@ public class UserEventHandler : IEventHandler<UserLoginFaultEvent>,
 				entity.LockoutTime = DateTime.UtcNow.AddMinutes(5 * Math.Pow(2, seed));
 			}
 
-			await _repository.UpdateAsync(entity, cancellationToken);
+			await repository.UpdateAsync(entity, cancellationToken);
 		}
 		catch (Exception exception)
 		{
@@ -41,7 +44,9 @@ public class UserEventHandler : IEventHandler<UserLoginFaultEvent>,
 	{
 		try
 		{
-			var entity = await _repository.GetAsync(notification.UserId, cancellationToken);
+			var repository = _provider.GetService<IRepository<UserEntity, int>>();
+
+			var entity = await repository.GetAsync(notification.UserId, cancellationToken);
 			if (entity == null)
 			{
 				return;
@@ -50,11 +55,24 @@ public class UserEventHandler : IEventHandler<UserLoginFaultEvent>,
 			entity.AccessFailedCount = 0;
 			entity.LockoutTime = null;
 
-			await _repository.UpdateAsync(entity, cancellationToken);
+			await repository.UpdateAsync(entity, cancellationToken);
 		}
 		catch (Exception exception)
 		{
 			_logger.LogError(exception, "更新用户登录信息失败");
+		}
+	}
+
+	public async Task Handle(RoleDeletedEvent notification, CancellationToken cancellationToken)
+	{
+		try
+		{
+			var repository = _provider.GetService<IRepository<UserRoleEntity, int>>();
+			await repository.DeleteAsync(t => t.RoleId == notification.Id, cancellationToken);
+		}
+		catch(Exception exception)
+		{
+			_logger.LogError(exception, "更新用户角色信息失败");
 		}
 	}
 }

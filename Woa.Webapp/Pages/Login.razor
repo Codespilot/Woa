@@ -1,0 +1,94 @@
+﻿@page "/login"
+
+@inject NavigationManager navigation
+@inject IdentityAuthenticationStateProvider authentication
+@inject IAccountApi accountApi
+@inject IJSRuntime script;
+
+<div class="container container-bg-img">
+    <div style="text-align:center;width:368px;margin:32px auto;box-shadow:none;">
+        <div class="header">
+            <a>
+                <img alt="logo" class="logo" src="assets/logo.svg">
+                <span class="title">WOA</span>
+            </a>
+        </div>
+        <div class="desc">微信公众号管理</div>
+    </div>
+
+    <div style="width: 368px; margin:0 auto;padding:16px;">
+        <div>
+            <Form Model="@Model" Loading="@Loading">
+                <Tabs ActiveKey="@context.LoginType">
+                    <TabPane Key="password" Tab="密码登录">
+                        <FormItem>
+                            <AntDesign.Input Placeholder="用户名" Size="large" @bind-Value="@context.Username">
+                                <Prefix><Icon Type="user" /></Prefix>
+                            </AntDesign.Input>
+                        </FormItem>
+                        <FormItem>
+                            <AntDesign.Input Placeholder="登录密码" Size="large" @bind-Value="@context.Password" Type="password">
+                                <Prefix><Icon Type="lock" /></Prefix>
+                            </AntDesign.Input>
+                        </FormItem>
+                    </TabPane>
+
+                    <TabPane Key="pincode" Tab="验证码登录" Disabled>
+                        <FormItem>
+                            <AntDesign.Input Placeholder="手机号" Size="large" @bind-Value="@context.Phone">
+                                <Prefix><Icon Type="mobile" /></Prefix>
+                            </AntDesign.Input>
+                        </FormItem>
+                        <FormItem>
+                            <Row Gutter="8">
+                                <AntDesign.Col Span="16">
+                                    <AntDesign.Input Placeholder="验证码" Size="large" @bind-Value="@context.Pin">
+                                        <Prefix><Icon Type="mail" /></Prefix>
+                                    </AntDesign.Input>
+                                </AntDesign.Col>
+                                <AntDesign.Col Span="8">
+                                    <Button Size="large" Block>Verify</Button>
+                                </AntDesign.Col>
+                            </Row>
+                        </FormItem>
+                    </TabPane>
+                </Tabs>
+                <Button Type="primary" HtmlType="submit" Class="submit" Size="large" Block OnClick="SubmitAsync">登录</Button>
+            </Form>
+        </div>
+    </div>
+</div>
+
+@code {
+    private UserLoginViewmodel Model { get; } = new();
+
+    private bool Loading { get; set; }
+
+    private async Task SubmitAsync(MouseEventArgs args)
+    {
+        var request = new LoginRequestDto
+            {
+                Username = Model.Username,
+                Password = Model.Password
+            };
+
+        var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+
+        try
+        {
+            Loading = true;
+            var response = await accountApi.GrantAsync(request, cancellationToken.Token)
+            .ContinueWith(x => x.Result.EnsureSuccess<LoginResponseDto>(), cancellationToken.Token);
+
+            await authentication.SetAuthenticationStateAsync(response.AccessToken, response.RefreshToken);
+        }
+        catch (Exception exception)
+        {
+            await script.InvokeVoidAsync("console.log", cancellationToken.Token, exception.GetPromptMessage());
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+}

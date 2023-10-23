@@ -1,0 +1,75 @@
+@inherits LayoutComponentBase
+
+@attribute [Authorize]
+
+<PageTitle>管理后台</PageTitle>
+
+<BasicLayout Theme="MenuTheme.Dark" BaseURL="/admin" MenuData="@MenuData" >
+    <ChildContent>
+        @Body
+    </ChildContent>
+</BasicLayout>
+
+@code
+{
+    private MenuDataItem[] MenuData { get; set; } = new[]
+    {
+        new MenuDataItem
+        {
+            Name = "首页",
+            Path = "/admin",
+            Key = "admin.index",
+            Icon = "home"
+        },
+        new MenuDataItem
+        {
+            Name = "用户账号",
+            Key = "admin.account",
+            Icon = "profile",
+            Children = new[]
+            {
+                new MenuDataItem
+                {
+                    Name = "用户管理",
+                    Path = "/admin/user",
+                    Key = "admin.user",
+                    Icon = "user"
+                },
+                new MenuDataItem
+                {
+                    Name = "角色管理",
+                    Path = "/admin/role",
+                    Key = "admin.role",
+                    Icon = "idcard"
+                }
+            }
+        },
+        new MenuDataItem
+        {
+            Name = "公众号",
+            Key = "admin.wechat",
+            Icon = "wechat",
+            Children = new MenuDataItem[]
+            {
+                new MenuDataItem
+                {
+                    Name ="公众号管理",
+                    Path = "/admin/wechat",
+                    Icon = "team",
+                    Key = "admin.wechat.index",
+                },
+                new MenuDataItem
+                {
+                    Name = "消息管理",
+                    Icon = "message",
+                    Path = "admin/wechat/message",
+                },
+                new MenuDataItem
+                {
+                    Name = "菜单管理",
+                    Icon = "unordered-list"
+                }
+            }
+        }
+    };
+}

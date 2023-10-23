@@ -32,7 +32,7 @@ internal sealed class ExceptionHandlingMiddleware : IMiddleware
 		{
 			title = GetTitle(exception),
 			status = statusCode,
-			detail = exception.Message,
+			message = exception.Message,
 			errors = GetErrors(exception)
 		};
 

@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.Security.Cryptography;
-using System.Text;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Woa.Common;
@@ -38,30 +36,18 @@ public class WechatController : ControllerBase
 	/// 验证消息的确来自微信服务器
 	/// </summary>
 	/// <param name="signature">微信加密签名，signature结合了开发者填写的token参数和请求中的timestamp参数、nonce参数。</param>
-	/// <param name="echostr">随机字符串</param>
-	/// <param name="nonce">随机数</param>
 	/// <param name="timestamp">时间戳</param>
+	/// <param name="nonce">随机数</param>
+	/// <param name="echostr">随机字符串</param>
 	/// <returns></returns>
 	[HttpGet]
-	public async Task<IActionResult> Handle(string signature, string echostr, string nonce, string timestamp)
+	public async Task<IActionResult> Verify(string signature, string timestamp, string nonce, string echostr)
 	{
 		var token = _configuration.GetValue<string>("Wechat:Token");
 
-		var parameters = new List<string> { token, timestamp, nonce };
-		parameters.Sort();
+		var isValid = Utility.VerifySignature(signature, timestamp, nonce, token);
 
-		var res = string.Join("", parameters);
-
-		var asciiBytes = Encoding.ASCII.GetBytes(res);
-		var hashBytes = ((HashAlgorithm)CryptoConfig.CreateFromName("SHA1")!).ComputeHash(asciiBytes);
-		var builder = new StringBuilder();
-		foreach (var @byte in hashBytes)
-		{
-			builder.Append(@byte.ToString("x2"));
-		}
-
-		var result = BitConverter.ToString(hashBytes).Replace("-", string.Empty).ToLower();
-		if (string.Equals(result, signature, StringComparison.OrdinalIgnoreCase))
+		if (isValid)
 		{
 			return await Task.FromResult(Ok(echostr));
 		}
@@ -75,11 +61,14 @@ public class WechatController : ControllerBase
 	/// <summary>
 	/// 接收微信消息
 	/// </summary>
+	/// <param name="signature">微信加密签名，signature结合了开发者填写的token参数和请求中的timestamp参数、nonce参数。</param>
+	/// <param name="timestamp">时间戳</param>
+	/// <param name="nonce">随机数</param>
+	/// <param name="openid"></param>
 	/// <returns></returns>
 	[HttpPost]
-	public async Task<IActionResult> Handle()
+	public async Task<IActionResult> Receive(string signature, string timestamp, string nonce, string openid)
 	{
-		Debug.WriteLine(DateTime.Now);
 		var requestBody = await new StreamReader(Request.Body).ReadToEndAsync();
 
 		var message = WechatMessage.Parse(requestBody);

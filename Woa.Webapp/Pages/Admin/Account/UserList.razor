@@ -1,0 +1,36 @@
+@layout AdminLayout
+
+@page "/admin/user"
+
+@using Woa.Webapp.Models.Admin
+
+<PageTitle>用户列表</PageTitle>
+
+<div>
+    <PageContainer>
+        <Breadcrumb>
+            <Breadcrumb>
+                <BreadcrumbItem>首页</BreadcrumbItem>
+                <BreadcrumbItem>用户管理</BreadcrumbItem>
+            </Breadcrumb>
+        </Breadcrumb>
+
+        <ChildContent>
+            <Card Title="用户列表">
+                <Extra>
+                    <Search Placeholder="输入关键字搜索" />
+                </Extra>
+                <ChildContent>
+                    <AntList TItem="UserItemDatamodel" ItemLayout="ListItemLayout.Horizontal">
+
+                    </AntList>
+                </ChildContent>
+            </Card>
+        </ChildContent>
+    </PageContainer>
+</div>
+
+@code
+{
+    
+}

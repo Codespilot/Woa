@@ -66,6 +66,18 @@ public class Startup
 				}
 			});
 		});
+		
+		var corsOrigins = Configuration.GetSection("CorsOrigins").Get<string[]>();
+		services.AddCors(options =>
+		{
+			options.AddDefaultPolicy(builder =>
+			{
+				builder.WithOrigins(corsOrigins);
+				builder.AllowAnyHeader();
+				builder.AllowAnyMethod();
+				builder.AllowCredentials();
+			});
+		});
 	}
 
 	public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -84,7 +96,12 @@ public class Startup
 
 		app.UseHttpsRedirection();
 
-		app.UseRouting();
+		app.UseRouting()
+		   .UseCors();
+		   // .UseCors(config =>
+		   // {
+			  //  config.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+		   // });
 
 		app.UseAuthentication();
 		app.UseAuthorization();

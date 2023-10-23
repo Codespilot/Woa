@@ -1,0 +1,60 @@
+﻿@layout AdminLayout
+
+@page "/admin/wechat/message"
+@using Woa.Common
+
+@inject IWechatMessageApi WechatMessageApi
+
+<PageTitle>消息管理</PageTitle>
+
+<div>
+    <PageContainer>
+        <Breadcrumb>
+            <Breadcrumb>
+                <BreadcrumbItem>首页</BreadcrumbItem>
+                <BreadcrumbItem>公众号</BreadcrumbItem>
+                <BreadcrumbItem>消息管理</BreadcrumbItem>
+            </Breadcrumb>
+        </Breadcrumb>
+
+        <ChildContent>
+            <Card Title="消息列表">
+                <Extra>
+                    <Search Placeholder="输入关键字搜索"/>
+                </Extra>
+                <ChildContent>
+                    <AntList TItem="WechatMessageItemDto" ItemLayout="ListItemLayout.Horizontal" DataSource="Items">
+
+                    </AntList>
+                </ChildContent>
+            </Card>
+        </ChildContent>
+    </PageContainer>
+</div>
+
+@code {
+
+    private string Keyword { get; set; }
+
+    private WechatMessageQueryDto Condition { get; } = new();
+
+    private ObservableRangeCollection<WechatMessageItemDto> Items { get; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        await SearchAsync();
+    }
+
+    private async Task SearchAsync()
+    {
+        await WechatMessageApi.SearchAsync(Condition)
+                              .ContinueWith(task =>
+                              {
+                                  var result = task.Result.EnsureSuccess();
+                                  Items.AddRange(result);
+                              });
+    }
+
+}

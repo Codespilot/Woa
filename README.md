@@ -6,17 +6,21 @@ Woa（Wechat Official Account）是一个基于.net 7开发的微信公众平台
 graph TD
     Woa.Webapi --> Woa.Shared
 	Woa.Chatbot --> Woa.Shared
-	Woa.Webapi --> Woa.Common
+	Woa.Webapp --> Woa.Transit
 	Woa.Chatbot --> Woa.Common
 	Woa.Webapi --> Woa.Sdk
 	Woa.Chatbot --> Woa.Sdk
 	Woa.Sdk --> Woa.Common
+    Woa.Webapi --> Woa.Transit
+    Woa.Transit --> Woa.Common
 ```
 
 - **Woa.Webapi：** 微信公众平台接口及其他WebApi接口。
+- **Woa.Webapp：** 前端Web应用，用于管理公众号数据。
 - **Woa.Chatbot：** 聊天机器人，提供Chat GPT、Claude2等聊天机器人接入。项目类型为Worker Service。
 - **Woa.Sdk：** 微信公众平台、OpenAI、Claude接口Api封装。
 - **Woa.Common：** 公共基础类库。
+- **Woa.Transit：** 数据传输对象。
 
 Chatbot的代码为何要分离出来呢？当然是为了异地单独部署咯！备案（国内服务器）和访问OpenAI，**只能选一个**。
 

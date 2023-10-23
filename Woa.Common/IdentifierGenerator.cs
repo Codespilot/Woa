@@ -1,6 +1,6 @@
 ﻿namespace Woa.Common;
 
-public static class IdentifierGenerator
+internal static class IdentifierGenerator
 {
     private static readonly string[] _chars =
     {

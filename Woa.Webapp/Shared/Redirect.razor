@@ -1,0 +1,18 @@
+﻿@inject NavigationManager navigation
+
+@code
+{
+    [Parameter]
+    public string Uri { get; set; }
+
+    [Parameter]
+    public bool ForceLoad { get; set; } = false;
+
+    [Parameter]
+    public bool Replace { get; set; } = false;
+
+    protected override void OnInitialized()
+    {
+        navigation.NavigateTo(Uri, ForceLoad, Replace);
+    }
+}

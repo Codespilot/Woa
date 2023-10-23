@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
 using AutoMapper;
+using Woa.Transit;
 using Woa.Webapi.Domain;
-using Woa.Webapi.Dtos;
 
 namespace Woa.Webapi.Application;
 
@@ -10,12 +10,17 @@ public class UserMappingProfile : Profile
 {
 	public UserMappingProfile()
 	{
-		CreateMap<UserRegisterDto, UserCreateCommand>()
+		CreateMap<UserCreateDto, UserCreateCommand>()
 			.ForMember(dest => dest.Username, opt => opt.MapFrom(dto => TrimString(dto.Username)))
 			.ForMember(dest => dest.Email, opt => opt.MapFrom(dto => TrimString(dto.Email)))
 			.ForMember(dest => dest.Phone, opt => opt.MapFrom(dto => TrimString(dto.Phone)));
 
 		CreateMap<UserEntity, UserProfileDto>();
+		CreateMap<UserEntity, UserDetailDto>();
+
+		CreateMap<RoleEntity, RoleInfoDto>();
+		CreateMap<RoleEditDto, RoleCreateCommand>();
+		CreateMap<RoleEditDto, RoleUpdateCommand>();
 	}
 
 	private static string TrimString(string value)
