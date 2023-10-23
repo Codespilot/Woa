@@ -51,6 +51,12 @@ public class UserEntity : BaseModel, IEntity<int>
     public string Fullname { get; set; }
 
     /// <summary>
+    /// 简介
+    /// </summary>
+    [Column("biography")]
+    public string Biography { get; set; }
+
+    /// <summary>
     /// Gets or sets the avatar URL.
     /// </summary>
     [Column("avatar")]

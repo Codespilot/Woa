@@ -12,6 +12,11 @@ public class UserDetailDto
 
 	public string Fullname { get; set; }
 
+	/// <summary>
+    /// 简介
+    /// </summary>
+    public string Biography { get; set; }
+
 	public string Avatar { get; set; }
 
 	public DateTime? LockoutTime { get; set; }
