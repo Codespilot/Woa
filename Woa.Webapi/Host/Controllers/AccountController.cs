@@ -82,18 +82,4 @@ public class AccountController : ControllerBase
 			return Unauthorized(new { exception.Message });
 		}
 	}
-
-	/// <summary>
-	/// 新增用户
-	/// </summary>
-	/// <param name="model"></param>
-	/// <returns></returns>
-	[HttpPost]
-	[Authorize(Roles = "SA")]
-	public async Task<IActionResult> CreateAsync([FromBody] UserRegisterDto model)
-	{
-		var result = await _service.CreateAsync(model, HttpContext.RequestAborted);
-		Response.Headers.Add("x-entry-id", result.ToString());
-		return Ok();
-	}
 }

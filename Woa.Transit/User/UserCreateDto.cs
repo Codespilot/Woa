@@ -1,6 +1,6 @@
 ﻿namespace Woa.Transit;
 
-public class UserRegisterDto
+public class UserCreateDto
 {
     public string Username { get; set; }
 

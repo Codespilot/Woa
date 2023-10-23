@@ -186,7 +186,7 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 		return Mapper.Map<UserProfileDto>(entity);
 	}
 
-	public async Task<int> CreateAsync(UserRegisterDto model, CancellationToken cancellationToken = default)
+	public async Task<int> CreateAsync(UserCreateDto model, CancellationToken cancellationToken = default)
 	{
 		if (model == null)
 		{

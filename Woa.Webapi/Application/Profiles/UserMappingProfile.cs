@@ -10,7 +10,7 @@ public class UserMappingProfile : Profile
 {
 	public UserMappingProfile()
 	{
-		CreateMap<UserRegisterDto, UserCreateCommand>()
+		CreateMap<UserCreateDto, UserCreateCommand>()
 			.ForMember(dest => dest.Username, opt => opt.MapFrom(dto => TrimString(dto.Username)))
 			.ForMember(dest => dest.Email, opt => opt.MapFrom(dto => TrimString(dto.Email)))
 			.ForMember(dest => dest.Phone, opt => opt.MapFrom(dto => TrimString(dto.Phone)));

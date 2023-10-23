@@ -32,6 +32,20 @@ public class UserController : ControllerBase
 		return Ok(result);
 	}
 
+	/// <summary>
+	/// 新增用户
+	/// </summary>
+	/// <param name="model"></param>
+	/// <returns></returns>
+	[HttpPost]
+	[Authorize(Roles = "SA")]
+	public async Task<IActionResult> CreateAsync([FromBody] UserCreateDto model)
+	{
+		var result = await _service.CreateAsync(model, HttpContext.RequestAborted);
+		Response.Headers.Add("x-entry-id", result.ToString());
+		return Ok();
+	}
+
 	[HttpPut("{id:int}")]
 	public async Task<IActionResult> SetRoleAsync(int id, [FromBody] List<int> roles)
 	{
