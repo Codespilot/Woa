@@ -1,4 +1,6 @@
 ﻿using System.Linq.Expressions;
+using System.Net;
+using System.Net.WebSockets;
 using Polly;
 using Postgrest.Models;
 using Woa.Common;
@@ -21,45 +23,37 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	public async Task<TEntity> GetAsync(TKey id, CancellationToken cancellationToken = default)
 	{
 		var predicate = ExpressionHelper.BuildPropertyEqualsExpression<TEntity, TKey>(id, "Id");
-		return await Policy.Handle<Exception>()
-		                   .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		                   .ExecuteAsync(() =>
-			                   _client.From<TEntity>()
-			                          .Where(predicate)
-			                          .Single(cancellationToken)
-		                   );
+		return await ExecuteAsync(() =>
+			_client.From<TEntity>()
+			       .Where(predicate)
+			       .Single(cancellationToken)
+		);
 	}
 
 	public async Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
 	{
-		return await Policy.Handle<Exception>()
-		                   .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		                   .ExecuteAsync(() =>
-			                   _client.From<TEntity>()
-			                          .Where(predicate)
-			                          .Single(cancellationToken)
-		                   );
+		return await ExecuteAsync(() =>
+			_client.From<TEntity>()
+			       .Where(predicate)
+			       .Single(cancellationToken)
+		);
 	}
 
 	public async Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken = default)
 	{
-		var response = await Policy.Handle<Exception>()
-		                           .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		                           .ExecuteAsync(() =>
-			                           _client.From<TEntity>()
-			                                  .Insert(entity, cancellationToken: cancellationToken)
-		                           );
+		var response = await ExecuteAsync(() =>
+			_client.From<TEntity>()
+			       .Insert(entity, cancellationToken: cancellationToken)
+		);
 		return response.Model;
 	}
 
 	public async Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
 	{
-		var response = await Policy.Handle<Exception>()
-		                           .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		                           .ExecuteAsync(() =>
-			                           _client.From<TEntity>()
-			                                  .Update(entity, cancellationToken: cancellationToken)
-		                           );
+		var response = await ExecuteAsync(() =>
+			_client.From<TEntity>()
+			       .Update(entity, cancellationToken: cancellationToken)
+		);
 		return response.Model;
 	}
 
@@ -72,12 +66,10 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 
 	public async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
 	{
-		await Policy.Handle<Exception>()
-		            .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		            .ExecuteAsync(() =>
-			            _client.From<TEntity>()
-			                   .Delete(entity, cancellationToken: cancellationToken)
-		            );
+		await ExecuteAsync(() =>
+			_client.From<TEntity>()
+			       .Delete(entity, cancellationToken: cancellationToken)
+		);
 	}
 
 	public Task DeleteAsync(TKey id, CancellationToken cancellationToken = default)
@@ -86,52 +78,43 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 		return DeleteAsync(predicate, cancellationToken);
 	}
 
-	public async Task DeleteAsync(Expression<Func<TEntity,bool>> predicate, CancellationToken cancellationToken = default)
+	public async Task DeleteAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
 	{
-		await Policy.Handle<Exception>()
-		            .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		            .ExecuteAsync(() =>
-			            _client.From<TEntity>()
-			                   .Where(predicate)
-			                   .Delete(cancellationToken: cancellationToken)
-		            );
+		await ExecuteAsync(() =>
+			_client.From<TEntity>()
+			       .Where(predicate)
+			       .Delete(cancellationToken: cancellationToken)
+		);
 	}
 
 	public async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
 	{
-		var response = await Policy.Handle<Exception>()
-		                           .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		                           .ExecuteAsync(() =>
-			                           _client.From<TEntity>()
-			                                  .Where(predicate)
-			                                  .Count(PostgrestConstants.CountType.Planned, cancellationToken)
-		                           );
+		var response = await ExecuteAsync(() =>
+			_client.From<TEntity>()
+			       .Where(predicate)
+			       .Count(PostgrestConstants.CountType.Planned, cancellationToken)
+		);
 		return response > 0;
 	}
 
 	public async Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
 	{
-		var response = await Policy.Handle<Exception>()
-		                           .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		                           .ExecuteAsync(() =>
-			                           _client.From<TEntity>()
-			                                  .Where(predicate)
-			                                  .Range(0, 1000)
-			                                  .Get(cancellationToken)
-		                           );
+		var response = await ExecuteAsync(() =>
+			_client.From<TEntity>()
+			       .Where(predicate)
+			       .Get(cancellationToken)
+		);
 		return response.Models;
 	}
 
 	public async Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, int offset, int count, CancellationToken cancellationToken = default)
 	{
-		var response = await Policy.Handle<Exception>()
-		                           .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		                           .ExecuteAsync(() =>
-			                           _client.From<TEntity>()
-			                                  .Where(predicate)
-			                                  .Range(offset, offset + count - 1)
-			                                  .Get(cancellationToken)
-		                           );
+		var response = await ExecuteAsync(() =>
+			_client.From<TEntity>()
+			       .Where(predicate)
+			       .Range(offset, offset + count)
+			       .Get(cancellationToken)
+		);
 		return response.Models;
 	}
 
@@ -139,27 +122,45 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	{
 		var ordering = ascending ? PostgrestConstants.Ordering.Ascending : PostgrestConstants.Ordering.Descending;
 
-		var response = await Policy.Handle<Exception>()
-		                           .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		                           .ExecuteAsync(() =>
-			                           _client.From<TEntity>()
-			                                  .Where(predicate)
-			                                  .Range(offset, offset + count - 1)
-			                                  .Order(orderBy, ordering)
-			                                  .Get(cancellationToken)
-		                           );
+		var response = await ExecuteAsync(() =>
+			_client.From<TEntity>()
+			       .Where(predicate)
+			       .Range(offset, offset + count)
+			       .Order(orderBy, ordering)
+			       .Get(cancellationToken)
+		);
 		return response.Models;
 	}
 
 	public async Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
 	{
-		return await Policy.Handle<Exception>()
-		                   .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		                   .ExecuteAsync(() =>
-			                   _client.From<TEntity>()
-			                          .Where(predicate)
-			                          .Count(PostgrestConstants.CountType.Planned, cancellationToken)
-		                   );
+		return await ExecuteAsync(() =>
+			_client.From<TEntity>()
+			       .Where(predicate)
+			       .Count(PostgrestConstants.CountType.Planned, cancellationToken)
+		);
+	}
+
+	private Task<TResult> ExecuteAsync<TResult>(Func<Task<TResult>> handle)
+	{
+		return Policy.Handle<OperationCanceledException>()
+		             .Or<HttpRequestException>()
+		             .Or<WebSocketException>()
+		             .Or<WebException>()
+		             .Or<TimeoutException>()
+		             .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
+		             .ExecuteAsync(handle);
+	}
+
+	private Task ExecuteAsync(Func<Task> handle)
+	{
+		return Policy.Handle<OperationCanceledException>()
+		             .Or<HttpRequestException>()
+		             .Or<WebSocketException>()
+		             .Or<WebException>()
+		             .Or<TimeoutException>()
+		             .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
+		             .ExecuteAsync(handle);
 	}
 
 	private void OnRetry(Exception exception, TimeSpan timeSpan, int retryCount, object context)

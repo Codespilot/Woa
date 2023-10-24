@@ -20,11 +20,15 @@
         <ChildContent>
             <Card Title="消息列表">
                 <Extra>
-                    <Search Placeholder="输入关键字搜索"/>
+                    <Search Placeholder="输入关键字搜索" />
                 </Extra>
                 <ChildContent>
                     <AntList TItem="WechatMessageItemDto" ItemLayout="ListItemLayout.Horizontal" DataSource="Items">
-
+                        <ListItem>
+                            <ListItemMeta Description="@context.TypeName">
+                                <TitleTemplate>@context.Content</TitleTemplate>
+                            </ListItemMeta>
+                        </ListItem>
                     </AntList>
                 </ChildContent>
             </Card>

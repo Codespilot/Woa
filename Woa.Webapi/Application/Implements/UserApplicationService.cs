@@ -55,7 +55,7 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 			throw new InvalidOperationException("用户名或密码错误");
 		}
 
-		var roles = await GetRolesAsync(entity.Id, cancellationToken);
+		var roles = await GetRolesAsync(entity.Id, t => t.Code, cancellationToken);
 
 		var refreshToken = GenerateRefreshToken(entity.Id);
 
@@ -106,7 +106,7 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 			throw new NotFoundException("用户名或密码错误");
 		}
 
-		var roles = await GetRolesAsync(entity.Id, cancellationToken);
+		var roles = await GetRolesAsync(entity.Id, t => t.Code, cancellationToken);
 
 		var refreshToken = GenerateRefreshToken(entity.Id);
 
@@ -145,7 +145,7 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 		}
 
 		var dto = Mapper.Map<UserDetailDto>(entity);
-		dto.Roles = await GetRolesAsync(id, cancellationToken).ContinueWith(task => task.Result.ToList(), cancellationToken);
+		dto.Roles = await GetRolesAsync(id, t => t.Name, cancellationToken).ContinueWith(task => task.Result.ToList(), cancellationToken);
 		return dto;
 	}
 
@@ -165,7 +165,8 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 		}
 
 		var dto = Mapper.Map<UserDetailDto>(entity);
-		dto.Roles = await GetRolesAsync(entity.Id, cancellationToken).ContinueWith(task => task.Result.ToList(), cancellationToken);
+		dto.Roles = await GetRolesAsync(entity.Id, t => t.Name, cancellationToken)
+			.ContinueWith(task => task.Result.ToList(), cancellationToken);
 		return dto;
 	}
 
@@ -285,20 +286,23 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 		return Cryptography.AES.Encrypt(json);
 	}
 
-	private async Task<IEnumerable<string>> GetRolesAsync(int userId, CancellationToken cancellationToken = default)
+	private async Task<IEnumerable<TOutput>> GetRolesAsync<TOutput>(int userId, Func<RoleEntity, TOutput> selector, CancellationToken cancellationToken = default)
 	{
 		var relationRepository = ServiceProvider.GetRequiredService<IRepository<UserRoleEntity, int>>();
 		var relations = await relationRepository.FindAsync(t => t.UserId == userId, cancellationToken);
 		if (relations.Count == 0)
 		{
-			return Array.Empty<string>();
+			return Array.Empty<TOutput>();
 		}
 
 		var roleIds = relations.Select(t => t.RoleId);
 
 		var roleRepository = ServiceProvider.GetRequiredService<IRepository<RoleEntity, int>>();
 
-		var roles = await roleRepository.FindAsync(t => roleIds.Contains(t.Id), cancellationToken);
-		return roles.Select(t => t.Code);
+		var roles = new List<RoleEntity>();
+		var tasks = roleIds.Select(roleId => roleRepository.GetAsync(roleId, cancellationToken).ContinueWith(t => roles.Add(t.Result), cancellationToken)).ToList();
+
+		await Task.WhenAll(tasks);
+		return roles.Select(selector);
 	}
 }

@@ -2,7 +2,10 @@
 
 @page "/admin/user"
 
-@using Woa.Webapp.Models.Admin
+@using Woa.Common
+
+@inject IUserApi Api
+@inject IMessageService MessageService
 
 <PageTitle>用户列表</PageTitle>
 
@@ -18,10 +21,10 @@
         <ChildContent>
             <Card Title="用户列表">
                 <Extra>
-                    <Search Placeholder="输入关键字搜索" />
+                    <Search Placeholder="输入关键字搜索"/>
                 </Extra>
                 <ChildContent>
-                    <AntList TItem="UserItemDatamodel" ItemLayout="ListItemLayout.Horizontal">
+                    <AntList TItem="UserItemDto" ItemLayout="ListItemLayout.Horizontal">
 
                     </AntList>
                 </ChildContent>
@@ -32,5 +35,44 @@
 
 @code
 {
-    
+    private ObservableRangeCollection<UserItemDto> Items { get; } = new();
+
+    private string Keywords { get; set; }
+
+    private int PageNumber { get; set; }
+
+    private CancellationObject Cancellation { get; } = new(TimeSpan.FromSeconds(10));
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await SearchAsync();
+    }
+
+    private async Task SearchAsync()
+    {
+        Cancellation.Cancel();
+
+        var condition = new UserQueryDto()
+        {
+            Keywords = Keywords
+        };
+
+        try
+        {
+            var page = PageNumber + 1;
+            var response = await Api.SearchAsync(condition, page, 10, Cancellation.Token);
+            var result = response.EnsureSuccess();
+            Items.ReplaceRange(result);
+            PageNumber = page;
+        }
+        catch (Exception exception)
+        {
+            await MessageService.Error(exception.Message);
+        }
+        finally
+        {
+            Cancellation.Reset();
+        }
+    }
 }

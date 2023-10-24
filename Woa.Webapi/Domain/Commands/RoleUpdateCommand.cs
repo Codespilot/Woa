@@ -4,10 +4,15 @@ namespace Woa.Webapi.Domain;
 
 public sealed class RoleUpdateCommand : ICommand
 {
+    public RoleUpdateCommand(int id)
+    {
+        Id = id;
+    }
+
     /// <summary>
     /// 角色ID
     /// </summary>
-    public int Id { get; set; }
+    public int Id { get; }
 
     /// <summary>
     /// 角色编码

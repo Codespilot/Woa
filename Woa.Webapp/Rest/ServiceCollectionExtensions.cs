@@ -37,6 +37,7 @@ public static class ServiceCollectionExtensions
 
 		services.AddTransient(provider => provider.GetRestService<IAccountApi>("woa"))
 		        .AddTransient(provider => provider.GetRestService<IUserApi>("woa"))
+		        .AddTransient(provider => provider.GetRestService<IRoleApi>("woa"))
 		        .AddTransient(provider => provider.GetRestService<IWechatMessageApi>("woa"));
 
 		services.AddHttpClient("woa", (provider, client) =>
@@ -61,7 +62,7 @@ public static class ServiceCollectionExtensions
 		        .AddHttpMessageHandler<AuthorizationHandler>()
 		        .AddHttpMessageHandler<LoggingHandler>()
 		        .AddHttpMessageHandler<SlowRequestHandler>()
-				.AddHttpMessageHandler<ProgressMessageHandler>();
+		        .AddHttpMessageHandler<ProgressMessageHandler>();
 
 		return services;
 	}

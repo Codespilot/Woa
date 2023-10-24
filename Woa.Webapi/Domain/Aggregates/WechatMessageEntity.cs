@@ -42,6 +42,12 @@ public class WechatMessageEntity : BaseModel, IEntity<long>
 	[Column("payload")]
 	public string Payload { get; set; }
 
+	/// <summary>
+	/// 消息内容
+	/// </summary>
+	[Column("content")]
+	public string Content { get; set; }
+
 	[Column("reply")]
 	public string Reply { get; set; }
 }

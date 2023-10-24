@@ -7,7 +7,7 @@ public class LazyServiceProvider
 	/// <summary>
 	/// 
 	/// </summary>
-	protected ConcurrentDictionary<Type, object> CachedServices { get; set; }
+	private ConcurrentDictionary<Type, object> CachedServices { get; set; }
 
 	/// <summary>
 	/// 
@@ -24,7 +24,6 @@ public class LazyServiceProvider
 		CachedServices = new ConcurrentDictionary<Type, object>();
 	}
 
-	/// <inheritdoc />
 	public virtual T GetRequiredService<T>()
 	{
 		return (T)GetRequiredService(typeof(T));
@@ -39,60 +38,54 @@ public class LazyServiceProvider
 	/// <exception cref="NullReferenceException"></exception>
 	public virtual object GetRequiredService(Type serviceType)
 	{
-		return CachedServices.GetOrAdd(serviceType, () =>
+		return CachedServices.GetOrAdd(serviceType, type =>
 		{
 			if (ServiceProvider == null)
 			{
 				throw new ArgumentNullException(nameof(ServiceProvider));
 			}
 
-			if (serviceType == null)
+			if (type == null)
 			{
-				throw new ArgumentNullException(nameof(serviceType));
+				throw new ArgumentNullException(nameof(type));
 			}
 
-			var service = ServiceProvider.GetService(serviceType);
+			var service = ServiceProvider.GetService(type);
 			if (service == null)
 			{
-				throw new NullReferenceException(nameof(serviceType));
+				throw new NullReferenceException(nameof(type));
 			}
 
 			return service;
 		});
 	}
 
-	/// <inheritdoc />
 	public virtual T GetService<T>()
 	{
 		return (T)GetService(typeof(T));
 	}
 
-	/// <inheritdoc />
 	public virtual object GetService(Type serviceType)
 	{
-		var service = CachedServices.GetOrAdd(serviceType, _ => ServiceProvider.GetService(serviceType));
+		var service = CachedServices.GetOrAdd(serviceType, type => ServiceProvider.GetService(type));
 		return service;
 	}
 
-	/// <inheritdoc />
 	public virtual T GetService<T>(T defaultValue)
 	{
 		return (T)GetService(typeof(T), defaultValue);
 	}
 
-	/// <inheritdoc />
 	public virtual object GetService(Type serviceType, object defaultValue)
 	{
 		return GetService(serviceType) ?? defaultValue;
 	}
 
-	/// <inheritdoc />
 	public virtual T GetService<T>(Func<IServiceProvider, object> factory)
 	{
 		return (T)GetService(typeof(T), factory);
 	}
 
-	/// <inheritdoc />
 	public virtual object GetService(Type serviceType, Func<IServiceProvider, object> factory)
 	{
 		return CachedServices.GetOrAdd(serviceType, () => factory(ServiceProvider));

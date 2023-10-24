@@ -1,8 +1,6 @@
 ﻿@layout AdminLayout
 @page "/admin/role"
 
-@using Woa.Webapp.Models.Admin
-
 <PageTitle>角色管理</PageTitle>
 
 <div>
@@ -24,7 +22,7 @@
                         <Icon Type="plus" Theme="outline" /> 新增角色
                     </Button>
 
-                    <AntList TItem="RoleItemDatamodel" ItemLayout="ListItemLayout.Horizontal">
+                    <AntList TItem="RoleInfoDto" ItemLayout="ListItemLayout.Horizontal">
 
                     </AntList>
                 </ChildContent>

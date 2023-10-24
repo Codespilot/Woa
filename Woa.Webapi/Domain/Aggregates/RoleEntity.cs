@@ -1,4 +1,5 @@
 ﻿using Postgrest.Attributes;
+using Postgrest.Models;
 
 namespace Woa.Webapi.Domain;
 
@@ -6,7 +7,7 @@ namespace Woa.Webapi.Domain;
 /// 角色实体
 /// </summary>
 [Table("roles")]
-public class RoleEntity : IEntity<int>
+public class RoleEntity : BaseModel, IEntity<int>
 {
 	[PrimaryKey("id")]
 	public int Id { get; set; }

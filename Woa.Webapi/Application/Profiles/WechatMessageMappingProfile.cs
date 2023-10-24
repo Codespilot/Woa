@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Woa.Common;
 using Woa.Sdk.Tencent;
 using Woa.Transit;
 using Woa.Webapi.Domain;
@@ -10,7 +11,8 @@ public class WechatMessageMappingProfile : Profile
 	public WechatMessageMappingProfile()
 	{
 		CreateMap<WechatMessageEntity, WechatMessageItemDto>()
-			.ForMember(dest => dest.HasReply, options => options.MapFrom(src => string.IsNullOrWhiteSpace(src.Reply)));
+			.ForMember(dest => dest.HasReply, options => options.MapFrom(src => string.IsNullOrWhiteSpace(src.Reply)))
+			.ForMember(dest => dest.TypeName, options => options.MapFrom(src => Enum.Parse<WechatMessageType>(src.Type, true).GetDescription()));
 		CreateMap<WechatMessageEntity, WechatMessageDetailDto>();
 		//.ForMember(dest => dest.Detail, options => options.MapFrom(GetMessageDetail));
 	}
