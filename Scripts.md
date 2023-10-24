@@ -1,3 +1,80 @@
+### 用户
+
+``` sql
+CREATE TABLE "public"."users" (
+  "id" int4 NOT NULL GENERATED ALWAYS AS IDENTITY (
+INCREMENT 1
+MINVALUE  1
+MAXVALUE 2147483647
+START 1000001
+CACHE 1
+),
+  "username" varchar(50) COLLATE "pg_catalog"."default" NOT NULL,
+  "password_hash" varchar(512) COLLATE "pg_catalog"."default" NOT NULL,
+  "password_salt" varchar(256) COLLATE "pg_catalog"."default" NOT NULL,
+  "email" varchar(255) COLLATE "pg_catalog"."default",
+  "phone" varchar(20) COLLATE "pg_catalog"."default",
+  "fullname" varchar(50) COLLATE "pg_catalog"."default",
+  "avatar" varchar(255) COLLATE "pg_catalog"."default",
+  "biography" text COLLATE "pg_catalog"."default",
+  "lockout_time" timestamp(6),
+  "access_failed_count" int4 NOT NULL DEFAULT 0,
+  "create_time" timestamp(6) NOT NULL,
+  "update_time" timestamp(6),
+  "delete_time" timestamp(6),
+  "is_deleted" bool NOT NULL DEFAULT false,
+  PRIMARY KEY ("id")
+)
+;
+
+CREATE UNIQUE INDEX "IDX_EMAIL" ON "public"."users" USING btree (
+  "email" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
+
+CREATE UNIQUE INDEX "IDX_PHONE" ON "public"."users" USING btree (
+  "phone" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
+
+CREATE UNIQUE INDEX "IDX_USERNAME" ON "public"."users" USING btree (
+  "username" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
+
+ALTER TABLE "public"."users" 
+  OWNER TO "postgres";
+
+COMMENT ON COLUMN "public"."users"."id" IS '主键';
+
+COMMENT ON COLUMN "public"."users"."username" IS '用户名';
+
+COMMENT ON COLUMN "public"."users"."password_hash" IS '密码Hash';
+
+COMMENT ON COLUMN "public"."users"."password_salt" IS '密码Salt';
+
+COMMENT ON COLUMN "public"."users"."email" IS '邮件';
+
+COMMENT ON COLUMN "public"."users"."phone" IS '手机号';
+
+COMMENT ON COLUMN "public"."users"."fullname" IS '真实姓名';
+
+COMMENT ON COLUMN "public"."users"."avatar" IS '头像';
+
+COMMENT ON COLUMN "public"."users"."lockout_time" IS '锁定截止时间';
+
+COMMENT ON COLUMN "public"."users"."access_failed_count" IS '认证失败次数';
+
+COMMENT ON COLUMN "public"."users"."create_time" IS '创建时间';
+
+COMMENT ON COLUMN "public"."users"."update_time" IS '更新时间';
+
+COMMENT ON COLUMN "public"."users"."delete_time" IS '删除时间';
+
+COMMENT ON COLUMN "public"."users"."is_deleted" IS '是否删除';
+
+COMMENT ON COLUMN "public"."users"."biography" IS '个人简介';
+
+COMMENT ON TABLE "public"."users" IS '用户';
+```
+
 ### 角色
 
 ``` sql
@@ -6,7 +83,7 @@ CREATE TABLE "public"."roles" (
 INCREMENT 1
 MINVALUE  1
 MAXVALUE 2147483647
-START 1
+START 1000001
 CACHE 1
 ),
   "code" varchar(50) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
