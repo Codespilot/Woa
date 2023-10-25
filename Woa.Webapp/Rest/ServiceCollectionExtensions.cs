@@ -4,9 +4,7 @@ using Polly;
 using System.Net.Sockets;
 using Refit;
 using System.Net;
-using System.Security.Authentication;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Http;
 using System.Net.Http.Handlers;
 
 namespace Woa.Webapp.Rest;
@@ -62,7 +60,15 @@ public static class ServiceCollectionExtensions
 		        .AddHttpMessageHandler<AuthorizationHandler>()
 		        .AddHttpMessageHandler<LoggingHandler>()
 		        .AddHttpMessageHandler<SlowRequestHandler>()
-		        .AddHttpMessageHandler<ProgressMessageHandler>();
+		        .AddHttpMessageHandler(provider =>
+		        {
+			        var handler = new ProgressMessageHandler();
+			        handler.HttpSendProgress += (sender, args) =>
+			        {
+				        Console.WriteLine($"Send progress: {args.ProgressPercentage}");
+			        };
+			        return handler;
+		        });
 
 		return services;
 	}
