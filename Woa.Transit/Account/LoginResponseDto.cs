@@ -1,22 +1,22 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
 namespace Woa.Transit;
 
 public class LoginResponseDto
 {
-    [JsonPropertyName("access_token")]
+    [JsonProperty("access_token")]
     public string AccessToken { get; set; }
 
-    [JsonPropertyName("refresh_token")]
+    [JsonProperty("refresh_token")]
     public string RefreshToken { get; set; }
 
-    [JsonPropertyName("token_type")]
+    [JsonProperty("token_type")]
     public string TokenType { get; set; }
 
     public int Id { get; set; }
 
     public string Username { get; set; }
 
-    [JsonPropertyName("expires_at")]
+    [JsonProperty("expires_at")]
     public long ExpiresAt { get; set; }
 }

@@ -23,7 +23,7 @@ public class Startup
 
 		services.AddApplicationServices().AddDomainServices();
 
-		services.AddControllers();
+		services.AddControllers().AddNewtonsoftJson();
 
 		services.AddMemoryCache()
 		        .AddSupabaseClient(Configuration)
@@ -97,11 +97,11 @@ public class Startup
 		app.UseHttpsRedirection();
 
 		app.UseRouting()
-		   .UseCors();
-		   // .UseCors(config =>
-		   // {
-			  //  config.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-		   // });
+		   //.UseCors();
+		   .UseCors(config =>
+		   {
+			   config.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+		   });
 
 		app.UseAuthentication();
 		app.UseAuthorization();
