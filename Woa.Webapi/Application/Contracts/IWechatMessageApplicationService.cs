@@ -15,6 +15,14 @@ public interface IWechatMessageApplicationService : IApplicationService
 	Task<List<WechatMessageItemDto>> SearchAsync(WechatMessageQueryDto condition, int page, int size, CancellationToken cancellationToken = default);
 
 	/// <summary>
+	/// 获取微信消息数量
+	/// </summary>
+	/// <param name="condition">查询条件</param>
+	/// <param name="cancellationToken"></param>
+	/// <returns></returns>
+	Task<int> CountAsync(WechatMessageQueryDto condition, CancellationToken cancellationToken = default);
+
+	/// <summary>
 	/// 获取微信消息详情
 	/// </summary>
 	/// <param name="id">微信消息Id</param>

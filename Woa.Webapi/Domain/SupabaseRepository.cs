@@ -26,8 +26,8 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 		var predicate = ExpressionHelper.BuildPropertyEqualsExpression<TEntity, TKey>(id, "Id");
 		return await ExecuteAsync(() =>
 			_client.From<TEntity>()
-			       .Where(predicate)
-			       .Single(cancellationToken)
+				   .Where(predicate)
+				   .Single(cancellationToken)
 		);
 	}
 
@@ -35,8 +35,8 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	{
 		return await ExecuteAsync(() =>
 			_client.From<TEntity>()
-			       .Where(predicate)
-			       .Single(cancellationToken)
+				   .Where(predicate)
+				   .Single(cancellationToken)
 		);
 	}
 
@@ -44,7 +44,7 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	{
 		var response = await ExecuteAsync(() =>
 			_client.From<TEntity>()
-			       .Insert(entity, cancellationToken: cancellationToken)
+				   .Insert(entity, cancellationToken: cancellationToken)
 		);
 		return response.Model;
 	}
@@ -53,7 +53,7 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	{
 		var response = await ExecuteAsync(() =>
 			_client.From<TEntity>()
-			       .Update(entity, cancellationToken: cancellationToken)
+				   .Update(entity, cancellationToken: cancellationToken)
 		);
 		return response.Model;
 	}
@@ -69,7 +69,7 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	{
 		await ExecuteAsync(() =>
 			_client.From<TEntity>()
-			       .Delete(entity, cancellationToken: cancellationToken)
+				   .Delete(entity, cancellationToken: cancellationToken)
 		);
 	}
 
@@ -83,8 +83,8 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	{
 		await ExecuteAsync(() =>
 			_client.From<TEntity>()
-			       .Where(predicate)
-			       .Delete(cancellationToken: cancellationToken)
+				   .Where(predicate)
+				   .Delete(cancellationToken: cancellationToken)
 		);
 	}
 
@@ -92,8 +92,8 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	{
 		var response = await ExecuteAsync(() =>
 			_client.From<TEntity>()
-			       .Where(predicate)
-			       .Count(PostgrestConstants.CountType.Planned, cancellationToken)
+				   .Where(predicate)
+				   .Count(PostgrestConstants.CountType.Planned, cancellationToken)
 		);
 		return response > 0;
 	}
@@ -102,8 +102,8 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	{
 		var response = await ExecuteAsync(() =>
 			_client.From<TEntity>()
-			       .Where(predicate)
-			       .Get(cancellationToken)
+				   .Where(predicate)
+				   .Get(cancellationToken)
 		);
 		return response.Models;
 	}
@@ -112,9 +112,9 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	{
 		var response = await ExecuteAsync(() =>
 			_client.From<TEntity>()
-			       .Where(predicate)
-			       .Range(offset, offset + count)
-			       .Get(cancellationToken)
+				   .Where(predicate)
+				   .Range(offset, offset + count - 1)
+				   .Get(cancellationToken)
 		);
 		return response.Models;
 	}
@@ -125,10 +125,10 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 
 		var response = await ExecuteAsync(() =>
 			_client.From<TEntity>()
-			       .Where(predicate)
-			       .Range(offset, offset + count)
-			       .Order(orderBy, ordering)
-			       .Get(cancellationToken)
+				   .Where(predicate)
+				   .Range(offset, offset + count - 1)
+				   .Order(orderBy, ordering)
+				   .Get(cancellationToken)
 		);
 		return response.Models;
 	}
@@ -147,8 +147,8 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	{
 		return ExecuteAsync(() =>
 			_client.From<TEntity>()
-			       .Where(predicate)
-			       .Count(PostgrestConstants.CountType.Planned, cancellationToken)
+				   .Where(predicate)
+				   .Count(PostgrestConstants.CountType.Planned, cancellationToken)
 		);
 	}
 
@@ -164,23 +164,23 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	private Task<TResult> ExecuteAsync<TResult>(Func<Task<TResult>> handle)
 	{
 		return Policy.Handle<OperationCanceledException>()
-		             .Or<HttpRequestException>()
-		             .Or<WebSocketException>()
-		             .Or<WebException>()
-		             .Or<TimeoutException>()
-		             .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		             .ExecuteAsync(handle);
+					 .Or<HttpRequestException>()
+					 .Or<WebSocketException>()
+					 .Or<WebException>()
+					 .Or<TimeoutException>()
+					 .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
+					 .ExecuteAsync(handle);
 	}
 
 	private Task ExecuteAsync(Func<Task> handle)
 	{
 		return Policy.Handle<OperationCanceledException>()
-		             .Or<HttpRequestException>()
-		             .Or<WebSocketException>()
-		             .Or<WebException>()
-		             .Or<TimeoutException>()
-		             .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-		             .ExecuteAsync(handle);
+					 .Or<HttpRequestException>()
+					 .Or<WebSocketException>()
+					 .Or<WebException>()
+					 .Or<TimeoutException>()
+					 .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
+					 .ExecuteAsync(handle);
 	}
 
 	private void OnRetry(Exception exception, TimeSpan timeSpan, int retryCount, object context)

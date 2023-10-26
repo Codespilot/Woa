@@ -32,10 +32,22 @@ public class WechatMessageController : Controller
 	/// <param name="page"></param>
 	/// <param name="size"></param>
 	/// <returns></returns>
-	[HttpGet]
+	[HttpGet("list")]
 	public async Task<IActionResult> SearchAsync([FromQuery] WechatMessageQueryDto condition, [FromQuery] int page = 1, [FromQuery] int size = 20)
 	{
 		var result = await _service.SearchAsync(condition, page, size, HttpContext.RequestAborted);
+		return Ok(result);
+	}
+
+	/// <summary>
+	/// 获取微信消息数量
+	/// </summary>
+	/// <param name="condition"></param>
+	/// <returns></returns>
+	[HttpGet("count")]
+	public async Task<IActionResult> CountAsync([FromQuery] WechatMessageQueryDto condition)
+	{
+		var result = await _service.CountAsync(condition, HttpContext.RequestAborted);
 		return Ok(result);
 	}
 

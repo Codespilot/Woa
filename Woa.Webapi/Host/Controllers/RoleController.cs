@@ -28,10 +28,22 @@ public class RoleController : ControllerBase
 	/// <param name="page">页码</param>
 	/// <param name="size">数量</param>
 	/// <returns></returns>
-	[HttpGet]
+	[HttpGet("list")]
 	public async Task<IActionResult> SearchAsync([FromQuery] RoleQueryDto condition, int page, int size)
 	{
 		var result = await _service.SearchAsync(condition, page, size, HttpContext.RequestAborted);
+		return Ok(result);
+	}
+
+	/// <summary>
+	/// 获取角色数量
+	/// </summary>
+	/// <param name="condition"></param>
+	/// <returns></returns>
+	[HttpGet("count")]
+	public async Task<IActionResult> CountAsync([FromQuery] RoleQueryDto condition)
+	{
+		var result = await _service.CountAsync(condition, HttpContext.RequestAborted);
 		return Ok(result);
 	}
 
