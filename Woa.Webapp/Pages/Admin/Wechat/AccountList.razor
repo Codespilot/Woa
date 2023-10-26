@@ -1,5 +1,10 @@
-﻿@page "/admin/wechat/account"
-<h3>AccountList</h3>
+﻿@layout AdminLayout
+
+@page "/admin/wechat/account"
+
+@namespace Woa.Webapp.Pages.Admin
+
+@attribute [Authorize]
 
 @code {
     

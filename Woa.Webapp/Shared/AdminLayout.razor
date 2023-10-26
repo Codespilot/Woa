@@ -54,20 +54,46 @@
                 new MenuDataItem
                 {
                     Name ="公众号管理",
-                    Path = "/admin/wechat",
+                    Path = "/admin/wechat/account",
                     Icon = "team",
-                    Key = "admin.wechat.index",
+                    Key = "admin.wechat.account",
                 },
                 new MenuDataItem
                 {
                     Name = "消息管理",
                     Icon = "message",
-                    Path = "admin/wechat/message",
+                    Path = "/admin/wechat/message",
+                    Key = "admin.wechat.message"
                 },
                 new MenuDataItem
                 {
                     Name = "菜单管理",
-                    Icon = "unordered-list"
+                    Icon = "unordered-list",
+                    Path = "/admin/wechat/menu",
+                    Key = "admin.wechat.menu"
+                }
+            }
+        },
+        new MenuDataItem
+        {
+            Name = "系统",
+            Key = "system",
+            Icon = "global",
+            Children = new MenuDataItem[]
+            {
+                new MenuDataItem
+                {
+                    Name = "系统设置",
+                    Path = "/admin/settings",
+                    Icon = "setting",
+                    Key = "admin.system.settings"
+                },
+                new MenuDataItem
+                {
+                    Name = "系统日志",
+                    Path = "/admin/logging",
+                    Icon = "file-text",
+                    Key = "admin.system.logging"
                 }
             }
         }
