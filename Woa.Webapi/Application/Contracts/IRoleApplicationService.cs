@@ -28,7 +28,7 @@ public interface IRoleApplicationService
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task DeleteAsync(int id, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// 获取角色信息
     /// </summary>
@@ -46,4 +46,12 @@ public interface IRoleApplicationService
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task<List<RoleInfoDto>> SearchAsync(RoleQueryDto condition, int page, int size, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 统计角色数量
+    /// </summary>
+    /// <param name="condition"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<int> CountAsync(RoleQueryDto condition, CancellationToken cancellationToken = default);
 }

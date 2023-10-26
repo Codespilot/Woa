@@ -36,9 +36,30 @@ public class WechatMessageApplicationService : BaseApplicationService, IWechatMe
 
 		var predicate = expressions.Aggregate(t => t.Id > 0);
 
-		var entities = await _repository.FindAsync(predicate, offset, size, cancellationToken);
+		var entities = await _repository.FindAsync(predicate, offset, size, t => t.CreateTime, false, cancellationToken);
 		var result = Mapper.Map<List<WechatMessageItemDto>>(entities);
 		return result;
+	}
+
+	public async Task<int> CountAsync(WechatMessageQueryDto condition, CancellationToken cancellationToken = default)
+	{
+		var expressions = new List<Expression<Func<WechatMessageEntity, bool>>>();
+
+		if (!string.IsNullOrEmpty(condition.Type))
+		{
+			expressions.Add(t => t.Type == condition.Type);
+		}
+
+		if (!string.IsNullOrWhiteSpace(condition.OpenId))
+		{
+			expressions.Add(t => t.OpenId == condition.OpenId);
+		}
+
+		var predicate = expressions.Aggregate(t => t.Id > 0);
+
+		var count = await _repository.CountAsync(predicate, cancellationToken);
+
+		return count;
 	}
 
 	public async Task<WechatMessageDetailDto> GetAsync(long id, CancellationToken cancellationToken = default)

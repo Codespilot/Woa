@@ -82,7 +82,7 @@ public class WechatEventMessageHandler : IWechatMessageHandler
         if (entity != null)
         {
             entity.State = 1;
-            entity.UnfollowTime = operateTime;
+            entity.UnsubscribeTime = operateTime;
         }
 
         await _repository.UpdateAsync(entity);

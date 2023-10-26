@@ -49,4 +49,17 @@ public class RoleApplicationService : BaseApplicationService, IRoleApplicationSe
         return repository.FindAsync(predicate, page, size, cancellationToken)
                          .ContinueWith(task => Mapper.Map<List<RoleInfoDto>>(task.Result), cancellationToken);
     }
+
+    /// <inheritdoc />
+    public Task<int> CountAsync(RoleQueryDto condition, CancellationToken cancellationToken = default)
+    {
+        var expressions = new List<Expression<Func<RoleEntity, bool>>>();
+        if (!string.IsNullOrWhiteSpace(condition.Keywords))
+        {
+            expressions.Add(x => x.Code.Contains(condition.Keywords) || x.Name.Contains(condition.Keywords));
+        }
+        var predicate = expressions.Aggregate(t => t.Id > 0);
+        var repository = ServiceProvider.GetRequiredService<IRepository<RoleEntity, int>>();
+        return repository.CountAsync(predicate, cancellationToken);
+    }
 }

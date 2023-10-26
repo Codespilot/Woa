@@ -2,6 +2,10 @@
 
 @page "/admin/user"
 
+@namespace Woa.Webapp.Pages.Admin
+
+@attribute [Authorize]
+
 @using Woa.Common
 
 @inject IUserApi Api

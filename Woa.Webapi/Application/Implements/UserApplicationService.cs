@@ -124,7 +124,7 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 
 		return response;
 
-		TValue ReadJson<TValue>(JsonElement element, string property)
+		static TValue ReadJson<TValue>(JsonElement element, string property)
 		{
 			var value = element.GetProperty(property);
 			return JsonSerializer.Deserialize<TValue>(value.GetRawText());
@@ -227,6 +227,30 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 
 		var entities = await _repository.FindAsync(predicate, page, size, cancellationToken);
 		return Mapper.Map<List<UserItemDto>>(entities);
+	}
+
+	public Task<int> CountAsync(UserQueryDto condition, CancellationToken cancellationToken = default)
+	{
+		var expressions = new List<Expression<Func<UserEntity, bool>>>();
+
+		if (!string.IsNullOrWhiteSpace(condition.Keywords))
+		{
+			expressions.Add(t => t.Username.Contains(condition.Keywords) || t.Email.Contains(condition.Keywords) || t.Phone.Contains(condition.Keywords));
+		}
+
+		switch (condition.Locked)
+		{
+			case true:
+				expressions.Add(t => t.LockoutTime > DateTime.UtcNow);
+				break;
+			case false:
+				expressions.Add(t => t.LockoutTime == null || t.LockoutTime < DateTime.UtcNow);
+				break;
+		}
+
+		var predicate = expressions.Aggregate(t => t.Id > 0);
+
+		return _repository.CountAsync(predicate, cancellationToken);
 	}
 
 	/// <summary>

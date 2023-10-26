@@ -44,8 +44,8 @@ public class WechatFollowerEntity : BaseModel, IEntity<long>
 	/// <summary>
 	/// 取消关注时间
 	/// </summary>
-	[Column("unfollow_time")]
-	public DateTime? UnfollowTime { get; set; }
+	[Column("unsubscribe_time")]
+	public DateTime? UnsubscribeTime { get; set; }
 
 	[Column("state")]
 	public int State { get; set; }

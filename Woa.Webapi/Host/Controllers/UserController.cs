@@ -18,13 +18,37 @@ public class UserController : ControllerBase
 		_service = service;
 	}
 
-	[HttpGet]
+	/// <summary>
+	/// 查询用户列表
+	/// </summary>
+	/// <param name="condition"></param>
+	/// <param name="page"></param>
+	/// <param name="size"></param>
+	/// <returns></returns>
+	[HttpGet("list")]
 	public async Task<IActionResult> SearchAsync([FromQuery] UserQueryDto condition, int page, int size)
 	{
 		var result = await _service.SearchAsync(condition, page, size, HttpContext.RequestAborted);
 		return Ok(result);
 	}
 
+	/// <summary>
+	/// 查询用户数量
+	/// </summary>
+	/// <param name="condition"></param>
+	/// <returns></returns>
+	[HttpGet("count")]
+	public async Task<IActionResult> CountAsync([FromQuery] UserQueryDto condition)
+	{
+		var result = await _service.CountAsync(condition, HttpContext.RequestAborted);
+		return Ok(result);
+	}
+
+	/// <summary>
+	/// 获取用户详细信息
+	/// </summary>
+	/// <param name="id"></param>
+	/// <returns></returns>
 	[HttpGet("{id:int}")]
 	public async Task<IActionResult> GetAsync(int id)
 	{
@@ -46,7 +70,7 @@ public class UserController : ControllerBase
 		return Ok();
 	}
 
-	[HttpPut("{id:int}")]
+	[HttpPut("{id:int}/role")]
 	public async Task<IActionResult> SetRoleAsync(int id, [FromBody] List<int> roles)
 	{
 		return Ok();
