@@ -295,14 +295,13 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 			return Array.Empty<TOutput>();
 		}
 
-		var roleIds = relations.Select(t => t.RoleId);
+		var roleIds = relations.Select(t => t.RoleId as object).ToList();
 
 		var roleRepository = ServiceProvider.GetRequiredService<IRepository<RoleEntity, int>>();
 
-		var roles = new List<RoleEntity>();
-		var tasks = roleIds.Select(roleId => roleRepository.GetAsync(roleId, cancellationToken).ContinueWith(t => roles.Add(t.Result), cancellationToken)).ToList();
+		// Supabase client不支持 xxx.Contains(t.Id)表达式，所以这里改成了下面的写法
+		var roles = await roleRepository.FindAsync(t => t.Id, QueryOperator.In, roleIds, cancellationToken);
 
-		await Task.WhenAll(tasks);
 		return roles.Select(selector);
 	}
 }

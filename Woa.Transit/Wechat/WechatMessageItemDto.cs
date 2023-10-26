@@ -28,7 +28,7 @@ public class WechatMessageItemDto
 	/// <summary>
 	/// 消息内容
 	/// </summary>
-	public sbyte Content { get; set; }
+	public string Content { get; set; }
 
 	/// <summary>
 	/// 消息发送时间

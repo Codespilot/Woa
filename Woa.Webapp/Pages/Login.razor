@@ -1,9 +1,10 @@
 ﻿@page "/login"
 
-@inject NavigationManager navigation
-@inject IdentityAuthenticationStateProvider authentication
-@inject IAccountApi accountApi
-@inject IJSRuntime script;
+@inject NavigationManager Navigation
+@inject IdentityAuthenticationStateProvider Authentication
+@inject IAccountApi Api
+@inject IJSRuntime Script
+@inject IMessageService MessageService
 
 <div class="container container-bg-img">
     <div style="text-align:center;width:368px;margin:32px auto;box-shadow:none;">
@@ -60,6 +61,11 @@
 </div>
 
 @code {
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "redirect")]
+    public string Redirect { get; set; }
+
     private UserLoginViewmodel Model { get; } = new();
 
     private bool Loading { get; set; }
@@ -72,23 +78,27 @@
                 Password = Model.Password
             };
 
-        var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
         try
         {
             Loading = true;
-            var response = await accountApi.GrantAsync(request, cancellationToken.Token)
-            .ContinueWith(x => x.Result.EnsureSuccess<LoginResponseDto>(), cancellationToken.Token);
+            var response = await Api.GrantAsync(request, cancellationToken.Token)
+                                    .ContinueWith(x => x.Result.EnsureSuccess(), cancellationToken.Token);
 
-            await authentication.SetAuthenticationStateAsync(response.AccessToken, response.RefreshToken);
+            await Authentication.SetAuthenticationStateAsync(response.AccessToken, response.RefreshToken);
+            Navigation.NavigateTo(Redirect ?? "/");
         }
         catch (Exception exception)
         {
-            await script.InvokeVoidAsync("console.log", cancellationToken.Token, exception.GetPromptMessage());
+            var message = exception.GetPromptMessage();
+            await MessageService.Error(message);
+            await Script.InvokeVoidAsync("console.log", cancellationToken.Token, message);
         }
         finally
         {
             Loading = false;
+            StateHasChanged();
         }
     }
 }

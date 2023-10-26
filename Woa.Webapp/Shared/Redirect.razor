@@ -1,4 +1,7 @@
-﻿@inject NavigationManager Navigation
+﻿@using System.Text;
+@using System.Web;
+
+@inject NavigationManager Navigation
 
 @code
 {
@@ -11,8 +14,11 @@
     [Parameter]
     public bool Replace { get; set; } = false;
 
+    [Parameter]
+    public RouteData RouteData { get; set; }
+
     protected override void OnInitialized()
     {
-        Navigation.NavigateTo(Uri, ForceLoad, Replace);
+        Navigation.NavigateTo($"{Uri}?redirect={HttpUtility.UrlEncode(Navigation.Uri)}", ForceLoad, Replace);
     }
 }

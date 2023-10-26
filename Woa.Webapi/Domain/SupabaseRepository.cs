@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Net;
 using System.Net.WebSockets;
+using System.Reflection;
 using Polly;
 using Postgrest.Models;
 using Woa.Common;
@@ -132,12 +133,31 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 		return response.Models;
 	}
 
-	public async Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+	public async Task<List<TEntity>> FindAsync(Expression<Func<TEntity, object>> predicate, string @operator, object criterion, CancellationToken cancellationToken = default)
 	{
-		return await ExecuteAsync(() =>
+		var response = await ExecuteAsync(() =>
+			_client.From<TEntity>()
+				   .Filter(predicate, GetOperator(@operator), criterion: criterion)
+				   .Get(cancellationToken)
+		);
+		return response.Models;
+	}
+
+	public Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+	{
+		return ExecuteAsync(() =>
 			_client.From<TEntity>()
 			       .Where(predicate)
 			       .Count(PostgrestConstants.CountType.Planned, cancellationToken)
+		);
+	}
+
+	public Task<int> CountAsync(Expression<Func<TEntity, object>> predicate, string @operator, object criterion, CancellationToken cancellationToken = default)
+	{
+		return ExecuteAsync(() =>
+			_client.From<TEntity>()
+				   .Filter(predicate, GetOperator(@operator), criterion)
+				   .Count(PostgrestConstants.CountType.Planned, cancellationToken)
 		);
 	}
 
@@ -166,5 +186,40 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	private void OnRetry(Exception exception, TimeSpan timeSpan, int retryCount, object context)
 	{
 		_logger.LogError(exception, "第{RetryCount}次重试，等待{TimeSpan}后重试", retryCount, timeSpan);
+	}
+
+	private static PostgrestConstants.Operator GetOperator(string @operator)
+	{
+		@operator = @operator.ToLowerInvariant();
+
+		return @operator switch
+		{
+			"and" => PostgrestConstants.Operator.And,
+			"or" => PostgrestConstants.Operator.Or,
+			"eq" => PostgrestConstants.Operator.Equals,
+			"gt" => PostgrestConstants.Operator.GreaterThan,
+			"gte" => PostgrestConstants.Operator.GreaterThanOrEqual,
+			"lt" => PostgrestConstants.Operator.LessThan,
+			"lte" => PostgrestConstants.Operator.LessThanOrEqual,
+			"neq" => PostgrestConstants.Operator.NotEqual,
+			"like" => PostgrestConstants.Operator.Like,
+			"ilike" => PostgrestConstants.Operator.ILike,
+			"in" => PostgrestConstants.Operator.In,
+			"is" => PostgrestConstants.Operator.Is,
+			"fts" => PostgrestConstants.Operator.FTS,
+			"plfts" => PostgrestConstants.Operator.PLFTS,
+			"phfts" => PostgrestConstants.Operator.PHFTS,
+			"wfts" => PostgrestConstants.Operator.WFTS,
+			"cs" => PostgrestConstants.Operator.Contains,
+			"cd" => PostgrestConstants.Operator.ContainedIn,
+			"ov" => PostgrestConstants.Operator.Overlap,
+			"sl" => PostgrestConstants.Operator.StrictlyLeft,
+			"sr" => PostgrestConstants.Operator.StrictlyRight,
+			"nxr" => PostgrestConstants.Operator.NotRightOf,
+			"nxl" => PostgrestConstants.Operator.NotLeftOf,
+			"adj" => PostgrestConstants.Operator.Adjacent,
+			"not" => PostgrestConstants.Operator.Not,
+			_ => throw new ArgumentOutOfRangeException(nameof(@operator), @operator, null)
+		};
 	}
 }

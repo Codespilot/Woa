@@ -1,8 +1,6 @@
 ﻿using System.Diagnostics;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Caching.Memory;
-using Supabase.Realtime;
-using Supabase.Realtime.Models;
 using Woa.Sdk.Tencent;
 using Woa.Shared;
 using Woa.Webapi.Domain;
@@ -26,36 +24,43 @@ public class ChatbotBackgroundService : BackgroundService
 
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
-		await _client.InitializeAsync();
-		var channel = _client.Realtime.Channel("chatbot");
-		var broadcast = channel.Register<ChatbotBroadcast>(false, true);
-		broadcast.AddBroadcastEventHandler((_, message) =>
+		try
 		{
-			var payload = (ChatbotBroadcast)message;
-			if (string.IsNullOrWhiteSpace(payload?.MessageContent))
+			await _client.InitializeAsync();
+			var channel = _client.Realtime.Channel("chatbot");
+			var broadcast = channel.Register<ChatbotBroadcast>(false, true);
+			broadcast.AddBroadcastEventHandler((_, message) =>
 			{
-				return;
-			}
+				var payload = (ChatbotBroadcast)message;
+				if (string.IsNullOrWhiteSpace(payload?.MessageContent))
+				{
+					return;
+				}
 
-			if (_configuration.GetValue<bool>("Wechat:EnableCustomMessage"))
+				if (_configuration.GetValue<bool>("Wechat:EnableCustomMessage"))
+				{
+					SendCustomMessage(payload.OpenId, payload.MessageContent);
+				}
+				else
+				{
+					_client.From<WechatMessageEntity>()
+						   .Where(t => t.Id == payload.MessageId)
+						   .Set(t => t.Reply, payload.MessageContent)
+						   .Update(cancellationToken: stoppingToken);
+				}
+			});
+			await channel.Subscribe();
+
+			WeakReferenceMessenger.Default.Register<ChatbotBroadcast>(this, SendBroadcastMessage);
+
+			async void SendBroadcastMessage(object sender, ChatbotBroadcast message)
 			{
-				SendCustomMessage(payload.OpenId, payload.MessageContent);
+				await channel.Send(RealtimeConstants.ChannelEventName.Broadcast, null, message);
 			}
-			else
-			{
-				_client.From<WechatMessageEntity>()
-				       .Where(t => t.Id == payload.MessageId)
-				       .Set(t => t.Reply, payload.MessageContent)
-				       .Update(cancellationToken: stoppingToken);
-			}
-		});
-		await channel.Subscribe();
-
-		WeakReferenceMessenger.Default.Register<ChatbotBroadcast>(this, SendBroadcastMessage);
-
-		async void SendBroadcastMessage(object sender, ChatbotBroadcast message)
+		}
+		catch (Exception exception)
 		{
-			await channel.Send(RealtimeConstants.ChannelEventName.Broadcast, null, message);
+			Debug.WriteLine(exception);
 		}
 	}
 
