@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Woa.Webapi.Application;
-using Woa.Webapi.Dtos;
+using Woa.Transit;
 
 namespace Woa.Webapi.Controllers;
 
@@ -17,10 +17,17 @@ public class SensitiveWordController : ControllerBase
 		_service = service;
 	}
 
-	[HttpGet]
+	[HttpGet("list")]
 	public async Task<IActionResult> Search(string keyword, int page = 1, int size = 10)
 	{
 		var result = await _service.SearchAsync(keyword, page, size, HttpContext.RequestAborted);
+		return Ok(result);
+	}
+
+	[HttpGet("count")]
+	public async Task<IActionResult> Count(string keyword)
+	{
+		var result = await _service.CountAsync(keyword, HttpContext.RequestAborted);
 		return Ok(result);
 	}
 

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Woa.Webapi.Domain;
-using Woa.Webapi.Dtos;
+using Woa.Transit;
 
 namespace Woa.Webapi.Application;
 

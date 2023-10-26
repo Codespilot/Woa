@@ -1,7 +1,5 @@
-﻿using AutoMapper;
-using MediatR;
-using Woa.Webapi.Domain;
-using Woa.Webapi.Dtos;
+﻿using Woa.Webapi.Domain;
+using Woa.Transit;
 
 namespace Woa.Webapi.Application;
 
