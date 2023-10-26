@@ -54,6 +54,7 @@ public class WechatEventMessageHandler : IWechatMessageHandler
             OpenId = openId,
             AccountId = accountId,
             State = 1,
+			CreateTime = DateTime.UtcNow,
             SubscribeTime = operateTime
         };
 
