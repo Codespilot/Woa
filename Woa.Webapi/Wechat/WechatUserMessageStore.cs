@@ -6,10 +6,10 @@ namespace Woa.Webapi.Wechat;
 
 public class WechatUserMessageStore : IWechatUserMessageStore
 {
-	private readonly IRepository<WechatMessageEntity, long> _repository;
+	private readonly WechatMessageRepository _repository;
 	private readonly ILogger<WechatUserMessageStore> _logger;
 
-	public WechatUserMessageStore(IRepository<WechatMessageEntity, long> repository, ILoggerFactory logger)
+	public WechatUserMessageStore(WechatMessageRepository repository, ILoggerFactory logger)
 	{
 		_repository = repository;
 		_logger = logger.CreateLogger<WechatUserMessageStore>();
@@ -30,7 +30,7 @@ public class WechatUserMessageStore : IWechatUserMessageStore
 				Id = message.MessageId,
 				CreateTime = message.CreateTime,
 				OpenId = message.GetValue<string>(WechatMessageKey.FromUserName),
-				AccountId = message.GetValue<string>(WechatMessageKey.ToUserName),
+				PlatformId = message.GetValue<string>(WechatMessageKey.ToUserName),
 				Type = message.MessageType.ToString(),
 				Payload = Cryptography.Base64.Encrypt(message.GetOriginXml())
 			};
@@ -41,7 +41,7 @@ public class WechatUserMessageStore : IWechatUserMessageStore
 					entity.Content = message.GetValue<string>(WechatMessageKey.Standard.Content);
 					break;
 				case WechatMessageType.Image:
-					entity.Content = message.GetValue<string>(WechatMessageKey.Standard.PictureUrl);
+					entity.Content = message.GetValue<string>(WechatMessageKey.Standard.PictureUrl)?.Replace("http://", "https://");
 					break;
 				case WechatMessageType.Voice:
 					entity.Content = message.GetValue<string>(WechatMessageKey.Standard.Recognition);
@@ -55,6 +55,18 @@ public class WechatUserMessageStore : IWechatUserMessageStore
 					break;
 				case WechatMessageType.Link:
 					entity.Content = message.GetValue<string>(WechatMessageKey.Standard.Title);
+					break;
+				case WechatMessageType.Event:
+					entity.Content = message.GetValue<string>(WechatMessageKey.Event.EventType) switch
+					{
+						"subscribe" => "用户关注了公众号",
+						"unsubscribe" => "用户取消关注了公众号",
+						"scan" => "用户扫描了二维码",
+						"location" => "用户上报了地理位置",
+						"click" => "用户点击了菜单",
+						"view" => "用户点击了菜单",
+						_ => "未知事件"
+					};
 					break;
 			}
 

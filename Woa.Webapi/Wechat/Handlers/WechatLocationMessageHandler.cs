@@ -13,7 +13,7 @@ public class WechatLocationMessageHandler : WechatUserMessageHandler
 	{
 	}
 
-	protected override async Task<WechatMessage> HandleMessageAsync(string openId, WechatMessage message, CancellationToken cancellationToken = default)
+	protected override async Task<WechatMessage> HandleMessageAsync(string openId, string platformId, WechatMessage message, CancellationToken cancellationToken = default)
 	{
 		var content = $"LAT:{message.GetValue<double>(WechatMessageKey.Standard.Latitude)} LNG:{message.GetValue<double>(WechatMessageKey.Standard.Longitude)}";
 		var reply = WechatMessage.Text(content);

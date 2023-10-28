@@ -9,62 +9,33 @@ namespace Woa.Webapi.Application;
 
 public class WechatMessageApplicationService : BaseApplicationService, IWechatMessageApplicationService
 {
-	private readonly IRepository<WechatMessageEntity, long> _repository;
-	private readonly IWechatApi _api;
+	private WechatMessageRepository _repository;
+	private IWechatApi _wechatApi;
 
-	public WechatMessageApplicationService(IRepository<WechatMessageEntity, long> repository, IWechatApi api)
-	{
-		_repository = repository;
-		_api = api;
-	}
+	private WechatMessageRepository Repository => _repository ??= ServiceProvider.GetService<WechatMessageRepository>();
+	private IWechatApi WechatApi => _wechatApi ??= ServiceProvider.GetService<IWechatApi>();
 
 	public async Task<List<WechatMessageItemDto>> SearchAsync(WechatMessageQueryDto condition, int page, int size, CancellationToken cancellationToken = default)
 	{
-		var offset = (page - 1) * size;
+		var predicate = BuildExpression(condition);
 
-		var expressions = new List<Expression<Func<WechatMessageEntity, bool>>>();
-
-		if (!string.IsNullOrEmpty(condition.Type))
-		{
-			expressions.Add(t => t.Type == condition.Type);
-		}
-
-		if (!string.IsNullOrWhiteSpace(condition.OpenId))
-		{
-			expressions.Add(t => t.OpenId == condition.OpenId);
-		}
-
-		var predicate = expressions.Aggregate(t => t.Id > 0);
-
-		var entities = await _repository.FindAsync(predicate, offset, size, t => t.CreateTime, false, cancellationToken);
+		var entities = await Repository.FindAsync(predicate, page, size, cancellationToken);
 		var result = Mapper.Map<List<WechatMessageItemDto>>(entities);
 		return result;
 	}
 
 	public async Task<int> CountAsync(WechatMessageQueryDto condition, CancellationToken cancellationToken = default)
 	{
-		var expressions = new List<Expression<Func<WechatMessageEntity, bool>>>();
+		var predicate = BuildExpression(condition);
 
-		if (!string.IsNullOrEmpty(condition.Type))
-		{
-			expressions.Add(t => t.Type == condition.Type);
-		}
-
-		if (!string.IsNullOrWhiteSpace(condition.OpenId))
-		{
-			expressions.Add(t => t.OpenId == condition.OpenId);
-		}
-
-		var predicate = expressions.Aggregate(t => t.Id > 0);
-
-		var count = await _repository.CountAsync(predicate, cancellationToken);
+		var count = await Repository.CountAsync(predicate, cancellationToken);
 
 		return count;
 	}
 
 	public async Task<WechatMessageDetailDto> GetAsync(long id, CancellationToken cancellationToken = default)
 	{
-		var entity = await _repository.GetAsync(id, cancellationToken);
+		var entity = await Repository.GetAsync(id, cancellationToken);
 
 		if (entity == null)
 		{
@@ -132,14 +103,14 @@ public class WechatMessageApplicationService : BaseApplicationService, IWechatMe
 		async Task<string> GetMediaUrlAsync(string mediaId, string name)
 		{
 			var token = Cache.Get<string>(Constants.Cache.WechatAccessToken);
-			var response = await _api.GetTemporaryMediaAsync(token, mediaId, cancellationToken);
+			var response = await WechatApi.GetTemporaryMediaAsync(token, mediaId, cancellationToken);
 			return response?.Content?.TryGetValue(name, out var url) == true ? url : response.RequestMessage.RequestUri.OriginalString;
 		}
 	}
 
 	public async Task<string> GetReplyAsync(long id, CancellationToken cancellationToken = default)
 	{
-		var entity = await _repository.GetAsync(id, cancellationToken);
+		var entity = await Repository.GetAsync(id, cancellationToken);
 		if (entity == null)
 		{
 			throw new NotFoundException("微信消息不存在");
@@ -158,5 +129,24 @@ public class WechatMessageApplicationService : BaseApplicationService, IWechatMe
 	{
 		var command = new WechatMessageDeleteCommand(id);
 		await Mediator.Send(command, cancellationToken);
+	}
+
+	private static Expression<Func<WechatMessageEntity, bool>> BuildExpression(WechatMessageQueryDto condition)
+	{
+		var expressions = new List<Expression<Func<WechatMessageEntity, bool>>>();
+
+		if (!string.IsNullOrEmpty(condition.Type))
+		{
+			expressions.Add(t => t.Type == condition.Type);
+		}
+
+		if (!string.IsNullOrWhiteSpace(condition.OpenId))
+		{
+			expressions.Add(t => t.OpenId == condition.OpenId);
+		}
+
+		var predicate = expressions.Aggregate(t => t.Id > 0);
+
+		return predicate;
 	}
 }

@@ -29,29 +29,29 @@ internal static class ServiceCollectionExtensions
 	/// <param name="services"></param>
 	/// <returns></returns>
 	/// <exception cref="InvalidOperationException"></exception>
-	public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+	internal static IServiceCollection AddApplicationServices(this IServiceCollection services)
 	{
 		services.AddTransient<LazyServiceProvider>();
 
 		services.AddMediatR(config =>
-		        {
-			        config.Lifetime = ServiceLifetime.Scoped;
-			        config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
-		        })
-		        .AddObjectMapping()
-		        .AddObjectValidation();
+				{
+					config.Lifetime = ServiceLifetime.Scoped;
+					config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+				})
+				.AddObjectMapping()
+				.AddObjectValidation();
 
 		services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
 		var serviceTypes = _types.Where(type => typeof(IApplicationService).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract)
-		                         .ToList();
+								 .ToList();
 
 		foreach (var serviceType in serviceTypes)
 		{
 			services.AddScoped(serviceType);
 			var interfaceTypes = serviceType.GetInterfaces()
-			                                .Where(t => t != typeof(IApplicationService))
-			                                .ToList();
+											.Where(t => t != typeof(IApplicationService))
+											.ToList();
 			foreach (var interfaceType in interfaceTypes)
 			{
 				services.AddScoped(interfaceType, provider =>
@@ -63,7 +63,7 @@ internal static class ServiceCollectionExtensions
 					}
 
 					var properties = interfaceType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-					                              .Where(t => t.CanWrite && t.GetCustomAttribute<InjectAttribute>() != null);
+												  .Where(t => t.CanWrite && t.GetCustomAttribute<InjectAttribute>() != null);
 
 					foreach (var property in properties)
 					{
@@ -174,7 +174,7 @@ internal static class ServiceCollectionExtensions
 		}
 
 		var implements = _types.Where(type => typeof(IValidator).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract)
-		                       .ToList();
+							   .ToList();
 
 		foreach (var validatorType in implements)
 		{
@@ -207,13 +207,19 @@ internal static class ServiceCollectionExtensions
 	/// </summary>
 	/// <param name="services"></param>
 	/// <returns></returns>
-	public static IServiceCollection AddDomainServices(this IServiceCollection services)
+	internal static IServiceCollection AddDomainServices(this IServiceCollection services)
 	{
 		services.AddScoped<IRepositoryContext, SupabaseRepositoryContext>();
-		return services.AddScoped(typeof(IRepository<,>), typeof(SupabaseRepository<,>));
+		services.AddScoped(typeof(IRepository<,>), typeof(SupabaseRepository<,>));
+		services.AddTransient<WechatFollowerRepository>()
+				.AddTransient<WechatMessageRepository>()
+				.AddTransient<WechatMenuRepository>()
+				.AddTransient<UserRepository>()
+				.AddTransient<RoleRepository>();
+		return services;
 	}
 
-	public static IServiceCollection AddAuthentication(this IServiceCollection services, IConfiguration configuration)
+	internal static IServiceCollection AddAuthentication(this IServiceCollection services, IConfiguration configuration)
 	{
 		JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
@@ -257,7 +263,7 @@ internal static class ServiceCollectionExtensions
 		return services;
 	}
 
-	public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+	internal static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
 	{
 		var bearerOptions = configuration.GetSection(nameof(JwtBearerOptions)).Get<JwtBearerOptions>();
 		var issuer = configuration.GetValue<string>("JwtBearerOptions:TokenIssuer");
@@ -265,19 +271,19 @@ internal static class ServiceCollectionExtensions
 		var key = Encoding.UTF8.GetBytes(tokenKey.ToSha256());
 
 		services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-		        .AddJwtBearer(options =>
-		        {
-			        options.TokenValidationParameters = new TokenValidationParameters()
-			        {
-				        ValidateIssuerSigningKey = true,
-				        ValidIssuer = issuer,
-				        ValidAudience = bearerOptions.Audience,
-				        //用于签名验证
-				        IssuerSigningKey = new SymmetricSecurityKey(key),
-				        ValidateIssuer = false,
-				        ValidateAudience = false
-			        };
-		        });
+				.AddJwtBearer(options =>
+				{
+					options.TokenValidationParameters = new TokenValidationParameters()
+					{
+						ValidateIssuerSigningKey = true,
+						ValidIssuer = issuer,
+						ValidAudience = bearerOptions.Audience,
+						//用于签名验证
+						IssuerSigningKey = new SymmetricSecurityKey(key),
+						ValidateIssuer = false,
+						ValidateAudience = false
+					};
+				});
 
 		return services;
 	}
@@ -287,7 +293,7 @@ internal static class ServiceCollectionExtensions
 	/// </summary>
 	/// <param name="services"></param>
 	/// <returns></returns>
-	public static IServiceCollection AddRecurringJobService(this IServiceCollection services)
+	internal static IServiceCollection AddRecurringJobService(this IServiceCollection services)
 	{
 		services.AddTransient<WechatAccessTokenGrantJob>();
 
@@ -323,10 +329,10 @@ internal static class ServiceCollectionExtensions
 			// quickest way to create a job with single trigger is to use ScheduleJob
 			// (requires version 3.2)
 			quartz.ScheduleJob<WechatAccessTokenGrantJob>(trigger => trigger.WithIdentity("WechatAccessTokenGrantJob")
-			                                                                .StartAt(DateBuilder.EvenSecondDate(DateTimeOffset.UtcNow.AddSeconds(7)))
-			                                                                .WithSimpleSchedule(x => x.WithIntervalInMinutes(30).RepeatForever())
-				//.WithDailyTimeIntervalSchedule(x => x.WithInterval(10, IntervalUnit.Second))
-				//.WithDescription("my awesome trigger configured for a job with single call")
+																			.StartAt(DateBuilder.EvenSecondDate(DateTimeOffset.UtcNow.AddSeconds(7)))
+																			.WithSimpleSchedule(x => x.WithIntervalInMinutes(30).RepeatForever())
+			//.WithDailyTimeIntervalSchedule(x => x.WithInterval(10, IntervalUnit.Second))
+			//.WithDescription("my awesome trigger configured for a job with single call")
 			);
 
 			/*

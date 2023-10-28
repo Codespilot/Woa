@@ -3,9 +3,9 @@
 public class WechatMessageCommandHandler : ICommandHandler<WechatMessageDeleteCommand>,
 										   ICommandHandler<WechatMessageReplyCommand>
 {
-	private readonly IRepository<WechatMessageEntity, long> _repository;
+	private readonly WechatMessageRepository _repository;
 
-	public WechatMessageCommandHandler(IRepository<WechatMessageEntity, long> repository)
+	public WechatMessageCommandHandler(WechatMessageRepository repository)
 	{
 		_repository = repository;
 	}

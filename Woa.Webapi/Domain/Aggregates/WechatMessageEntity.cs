@@ -21,9 +21,9 @@ public class WechatMessageEntity : BaseModel, IEntity<long>
 	/// <summary>
 	/// 微信账号
 	/// </summary>
-	[Column("account_id")]
-	public string AccountId { get; set; }
-	
+	[Column("platform_id")]
+	public string PlatformId { get; set; }
+
 	/// <summary>
 	/// 消息类型
 	/// </summary>

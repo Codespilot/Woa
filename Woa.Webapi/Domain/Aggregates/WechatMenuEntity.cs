@@ -22,6 +22,12 @@ public class WechatMenuEntity : BaseModel, IEntity<int>
 	public int ParentId { get; set; }
 
 	/// <summary>
+	/// 公众号Id
+	/// </summary>
+	[Column("platform_id")]
+	public string PlatformId { get; set; }
+
+	/// <summary>
 	/// 菜单的响应动作类型，view表示网页类型，click表示点击类型，miniprogram表示小程序类型
 	/// </summary>
 	[Column("type")]

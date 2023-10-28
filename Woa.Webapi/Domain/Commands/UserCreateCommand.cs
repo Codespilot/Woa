@@ -11,6 +11,8 @@ public sealed class UserCreateCommand : ICommand<int>
 	public string Email { get; set; }
 
 	public string Phone { get; set; }
+
+	public string Fullname { get; set; }
 }
 
 public sealed class UserCreateCommandValidator : AbstractValidator<UserCreateCommand>
@@ -18,15 +20,15 @@ public sealed class UserCreateCommandValidator : AbstractValidator<UserCreateCom
 	public UserCreateCommandValidator()
 	{
 		RuleFor(x => x.Username).NotEmpty().WithMessage("用户名不能为空。")
-		                        .MaximumLength(50).WithMessage("用户名长度不能超过50个字符。");
+								.MaximumLength(50).WithMessage("用户名长度不能超过50个字符。");
 
 		RuleFor(x => x.Password).NotEmpty().WithMessage("密码不能为空")
-		                        .MaximumLength(50).WithMessage("密码长度不能超过50个字符。");
+								.MaximumLength(50).WithMessage("密码长度不能超过50个字符。");
 
 		When(model => !string.IsNullOrEmpty(model.Email), () =>
 		{
 			RuleFor(x => x.Email).EmailAddress().WithMessage("邮箱格式不正确。")
-			                     .MaximumLength(255).WithMessage("邮箱长度不能超过50个字符。");
+								 .MaximumLength(255).WithMessage("邮箱长度不能超过50个字符。");
 		});
 
 		When(model => !string.IsNullOrEmpty(model.Phone), () =>

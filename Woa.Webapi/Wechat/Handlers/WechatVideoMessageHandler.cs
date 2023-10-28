@@ -14,7 +14,7 @@ public class WechatVideoMessageHandler : WechatUserMessageHandler
 	}
 
 	/// <inheritdoc />
-	protected override async Task<WechatMessage> HandleMessageAsync(string openId, WechatMessage message, CancellationToken cancellationToken = default)
+	protected override async Task<WechatMessage> HandleMessageAsync(string openId, string platformId, WechatMessage message, CancellationToken cancellationToken = default)
 	{
 		return await Task.FromResult(WechatMessage.Empty);
 	}

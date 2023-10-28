@@ -23,8 +23,8 @@ public class WechatFollowerEntity : BaseModel, IEntity<long>
 	/// <summary>
 	/// 微信公众号Id
 	/// </summary>
-	[Column("account_id")]
-	public string AccountId { get; set; }
+	[Column("platform_id")]
+	public string PlatformId { get; set; }
 
 	/// <summary>
 	/// 用户昵称

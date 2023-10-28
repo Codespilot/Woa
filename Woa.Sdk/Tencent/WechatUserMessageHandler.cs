@@ -21,17 +21,19 @@ public abstract class WechatUserMessageHandler : IWechatMessageHandler
 	{
 		SaveMessage(message);
 		var openId = message.GetValue<string>(WechatMessageKey.FromUserName);
-		return HandleMessageAsync(openId, message, cancellationToken);
+		var platformId = message.GetValue<string>(WechatMessageKey.ToUserName);
+		return HandleMessageAsync(openId, platformId, message, cancellationToken);
 	}
 
 	/// <summary>
 	/// 处理指定用户的微信消息
 	/// </summary>
 	/// <param name="openId"></param>
+	/// <param name="platformId"></param>
 	/// <param name="message"></param>
-	/// <param name="cancellationToken"></param>
 	/// <returns></returns>
-	protected abstract Task<WechatMessage> HandleMessageAsync(string openId, WechatMessage message, CancellationToken cancellationToken = default);
+	/// <param name="cancellationToken"></param>
+	protected abstract Task<WechatMessage> HandleMessageAsync(string openId, string platformId, WechatMessage message, CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// 保存微信消息

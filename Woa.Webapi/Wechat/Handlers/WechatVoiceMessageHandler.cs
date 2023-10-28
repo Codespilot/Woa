@@ -12,10 +12,10 @@ namespace Woa.Webapi.Wechat;
 [WechatMessageHandle(WechatMessageType.Voice)]
 public class WechatVoiceMessageHandler : WechatUserMessageHandler
 {
-	private readonly IRepository<WechatFollowerEntity, long> _repository;
+	private readonly WechatFollowerRepository _repository;
 	private readonly WechatOptions _options;
 
-	public WechatVoiceMessageHandler(IWechatUserMessageStore store, IRepository<WechatFollowerEntity, long> repository, IOptions<WechatOptions> options)
+	public WechatVoiceMessageHandler(IWechatUserMessageStore store, WechatFollowerRepository repository, IOptions<WechatOptions> options)
 		: base(store)
 	{
 		_repository = repository;
@@ -23,7 +23,7 @@ public class WechatVoiceMessageHandler : WechatUserMessageHandler
 	}
 
 	/// <inheritdoc />
-	protected override async Task<WechatMessage> HandleMessageAsync(string openId, WechatMessage message, CancellationToken cancellationToken = default)
+	protected override async Task<WechatMessage> HandleMessageAsync(string openId, string platformId, WechatMessage message, CancellationToken cancellationToken = default)
 	{
 		var messageContent = message.GetValue<string>(WechatMessageKey.Standard.Recognition);
 
@@ -35,7 +35,7 @@ public class WechatVoiceMessageHandler : WechatUserMessageHandler
 			};
 		}
 
-		var follower = await _repository.GetAsync(t => t.OpenId == openId, cancellationToken);
+		var follower = await _repository.GetAsync(openId, platformId, cancellationToken);
 
 		if (follower?.IsChatbotEnabled == true)
 		{
