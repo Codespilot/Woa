@@ -12,10 +12,10 @@ namespace Woa.Webapi.Wechat;
 [WechatMessageHandle(WechatMessageType.Text)]
 public class WechatTextMessageHandler : WechatUserMessageHandler
 {
-	private readonly IRepository<WechatFollowerEntity, long> _repository;
+	private readonly WechatFollowerRepository _repository;
 	private readonly WechatOptions _options;
 
-	public WechatTextMessageHandler(IWechatUserMessageStore store, IRepository<WechatFollowerEntity, long> repository, IOptions<WechatOptions> options)
+	public WechatTextMessageHandler(IWechatUserMessageStore store, WechatFollowerRepository repository, IOptions<WechatOptions> options)
 		: base(store)
 	{
 		_repository = repository;
@@ -23,7 +23,7 @@ public class WechatTextMessageHandler : WechatUserMessageHandler
 	}
 
 	/// <inheritdoc />
-	protected override async Task<WechatMessage> HandleMessageAsync(string openId, WechatMessage message, CancellationToken cancellationToken = default)
+	protected override async Task<WechatMessage> HandleMessageAsync(string openId, string platformId, WechatMessage message, CancellationToken cancellationToken = default)
 	{
 		var messageContent = message.GetValue<string>(WechatMessageKey.Standard.Content);
 
@@ -32,7 +32,7 @@ public class WechatTextMessageHandler : WechatUserMessageHandler
 			return WechatMessage.Text("无法识别内容");
 		}
 
-		var follower = await _repository.GetAsync(t => t.OpenId == openId, cancellationToken);
+		var follower = await _repository.GetAsync(openId, platformId, cancellationToken);
 		if (follower?.IsChatbotEnabled == true)
 		{
 			WeakReferenceMessenger.Default.Send(new ChatbotBroadcast { OpenId = openId, MessageId = message.MessageId, MessageContent = messageContent });

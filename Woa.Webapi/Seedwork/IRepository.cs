@@ -12,6 +12,8 @@ public interface IRepository<TEntity, in TKey>
 
 	Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken = default);
 
+	Task InsertAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default);
+
 	Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default);
 
 	Task<TEntity> UpdateAsync(TKey id, Action<TEntity> updateAction, CancellationToken cancellationToken = default);

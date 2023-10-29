@@ -17,7 +17,7 @@ public class WechatMessageMappingProfile : Profile
 		//.ForMember(dest => dest.Detail, options => options.MapFrom(GetMessageDetail));
 	}
 
-	private static string GetMessageTypeName(WechatMessageEntity entity, WechatMessageDetailDto dto, string obj, ResolutionContext context)
+	private static string GetMessageTypeName(WechatMessageEntity entity, WechatMessageItemDto dto, string obj, ResolutionContext context)
 	{
 		var type = Enum.Parse<WechatMessageType>(entity.Type, true);
 		return type.GetDescription();

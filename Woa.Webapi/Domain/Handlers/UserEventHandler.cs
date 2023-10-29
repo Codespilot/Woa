@@ -17,7 +17,7 @@ public class UserEventHandler : IEventHandler<UserLoginFaultEvent>,
 	{
 		try
 		{
-			var repository = _provider.GetService<IRepository<UserEntity, int>>();
+			var repository = _provider.GetService<UserRepository>();
 
 			var entity = await repository.GetAsync(notification.UserId, cancellationToken);
 			if (entity == null)
@@ -44,7 +44,7 @@ public class UserEventHandler : IEventHandler<UserLoginFaultEvent>,
 	{
 		try
 		{
-			var repository = _provider.GetService<IRepository<UserEntity, int>>();
+			var repository = _provider.GetService<UserRepository>();
 
 			var entity = await repository.GetAsync(notification.UserId, cancellationToken);
 			if (entity == null)
@@ -67,10 +67,10 @@ public class UserEventHandler : IEventHandler<UserLoginFaultEvent>,
 	{
 		try
 		{
-			var repository = _provider.GetService<IRepository<UserRoleEntity, int>>();
-			await repository.DeleteAsync(t => t.RoleId == notification.Id, cancellationToken);
+			var repository = _provider.GetService<UserRoleRepository>();
+			await repository.DeleteByRoleIdAsync(notification.Id, cancellationToken);
 		}
-		catch(Exception exception)
+		catch (Exception exception)
 		{
 			_logger.LogError(exception, "更新用户角色信息失败");
 		}

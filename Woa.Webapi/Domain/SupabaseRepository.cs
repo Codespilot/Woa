@@ -49,6 +49,15 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 		return response.Model;
 	}
 
+	public async Task InsertAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+	{
+		await ExecuteAsync(async() =>
+		{
+			await _client.From<TEntity>()
+						 .Insert(entities.ToList(), cancellationToken: cancellationToken);
+		});
+	}
+
 	public async Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
 	{
 		var response = await ExecuteAsync(() =>
@@ -93,7 +102,7 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 		var response = await ExecuteAsync(() =>
 			_client.From<TEntity>()
 				   .Where(predicate)
-				   .Count(PostgrestConstants.CountType.Planned, cancellationToken)
+				   .Count(PostgrestConstants.CountType.Exact, cancellationToken)
 		);
 		return response > 0;
 	}
@@ -148,7 +157,7 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 		return ExecuteAsync(() =>
 			_client.From<TEntity>()
 				   .Where(predicate)
-				   .Count(PostgrestConstants.CountType.Planned, cancellationToken)
+				   .Count(PostgrestConstants.CountType.Exact, cancellationToken)
 		);
 	}
 
@@ -157,7 +166,7 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 		return ExecuteAsync(() =>
 			_client.From<TEntity>()
 				   .Filter(predicate, GetOperator(@operator), criterion)
-				   .Count(PostgrestConstants.CountType.Planned, cancellationToken)
+				   .Count(PostgrestConstants.CountType.Exact, cancellationToken)
 		);
 	}
 

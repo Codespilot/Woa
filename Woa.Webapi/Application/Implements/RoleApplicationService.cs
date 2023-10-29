@@ -6,8 +6,11 @@ namespace Woa.Webapi.Application;
 
 public class RoleApplicationService : BaseApplicationService, IRoleApplicationService
 {
-    /// <inheritdoc />
-    public Task<int> CreateAsync(RoleEditDto dto, CancellationToken cancellationToken = default)
+	private RoleRepository _repository;
+	private RoleRepository Repository => _repository??= ServiceProvider.GetRequiredService<RoleRepository>();
+
+	/// <inheritdoc />
+	public Task<int> CreateAsync(RoleEditDto dto, CancellationToken cancellationToken = default)
     {
         var command = Mapper.Map<RoleCreateCommand>(dto);
         return Mediator.Send(command, cancellationToken);
@@ -31,35 +34,36 @@ public class RoleApplicationService : BaseApplicationService, IRoleApplicationSe
     /// <inheritdoc />
     public Task<RoleInfoDto> GetAsync(int id, CancellationToken cancellationToken = default)
     {
-        var repository = ServiceProvider.GetRequiredService<IRepository<RoleEntity, int>>();
-        return repository.GetAsync(id, cancellationToken)
+        return Repository.GetAsync(id, cancellationToken)
                          .ContinueWith(task => Mapper.Map<RoleInfoDto>(task.Result), cancellationToken);
     }
 
     /// <inheritdoc />
     public Task<List<RoleInfoDto>> SearchAsync(RoleQueryDto condition, int page, int size, CancellationToken cancellationToken = default)
     {
-        var expressions = new List<Expression<Func<RoleEntity, bool>>>();
-        if (!string.IsNullOrWhiteSpace(condition.Keywords))
-        {
-            expressions.Add(x => x.Code.Contains(condition.Keywords) || x.Name.Contains(condition.Keywords));
-        }
-        var predicate = expressions.Aggregate(t => t.Id > 0);
-        var repository = ServiceProvider.GetRequiredService<IRepository<RoleEntity, int>>();
-        return repository.FindAsync(predicate, page, size, cancellationToken)
+		var predicate = BuildExpression(condition);
+
+		return Repository.FindAsync(predicate, page, size, cancellationToken)
                          .ContinueWith(task => Mapper.Map<List<RoleInfoDto>>(task.Result), cancellationToken);
     }
 
     /// <inheritdoc />
     public Task<int> CountAsync(RoleQueryDto condition, CancellationToken cancellationToken = default)
     {
-        var expressions = new List<Expression<Func<RoleEntity, bool>>>();
-        if (!string.IsNullOrWhiteSpace(condition.Keywords))
-        {
-            expressions.Add(x => x.Code.Contains(condition.Keywords) || x.Name.Contains(condition.Keywords));
-        }
-        var predicate = expressions.Aggregate(t => t.Id > 0);
-        var repository = ServiceProvider.GetRequiredService<IRepository<RoleEntity, int>>();
-        return repository.CountAsync(predicate, cancellationToken);
+		var predicate = BuildExpression(condition);
+
+		return Repository.CountAsync(predicate, cancellationToken);
     }
+
+	private static Expression<Func<RoleEntity,bool>> BuildExpression(RoleQueryDto condition)
+	{
+		var expressions = new List<Expression<Func<RoleEntity, bool>>>();
+		if (!string.IsNullOrWhiteSpace(condition.Keywords))
+		{
+			expressions.Add(x => x.Code.Contains(condition.Keywords) || x.Name.Contains(condition.Keywords));
+		}
+		var predicate = expressions.Aggregate(t => t.Id > 0);
+
+		return predicate;
+	}
 }

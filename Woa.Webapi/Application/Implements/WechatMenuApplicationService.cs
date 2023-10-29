@@ -9,14 +9,11 @@ namespace Woa.Webapi.Application;
 
 public class WechatMenuApplicationService : BaseApplicationService, IWechatMenuApplicationService
 {
-	private readonly IRepository<WechatMenuEntity, int> _repository;
-	private readonly IWechatApi _api;
+	private IWechatApi _wechatApi;
+	private WechatMenuRepository _repository;
 
-	public WechatMenuApplicationService(IRepository<WechatMenuEntity, int> repository, IWechatApi api)
-	{
-		_repository = repository;
-		_api = api;
-	}
+	private IWechatApi WechatApi => _wechatApi ??= ServiceProvider.GetService<IWechatApi>();
+	private WechatMenuRepository Repository => _repository ??= ServiceProvider.GetService<WechatMenuRepository>();
 
 	public async Task<List<WechatMenuItemDto>> SearchAsync(WechatMenuQueryDto condition, int page, int size, CancellationToken cancellationToken = default)
 	{
@@ -35,14 +32,14 @@ public class WechatMenuApplicationService : BaseApplicationService, IWechatMenuA
 
 		var predicate = expressions.Aggregate(t => t.Id > 0);
 
-		var entities = await _repository.FindAsync(predicate, offset, size, cancellationToken);
+		var entities = await Repository.FindAsync(predicate, offset, size, cancellationToken);
 		var result = Mapper.Map<List<WechatMenuItemDto>>(entities);
 		return result;
 	}
 
 	public async Task<WechatMenuDetailDto> GetAsync(int id, CancellationToken cancellationToken = default)
 	{
-		var entity = await _repository.GetAsync(id, cancellationToken);
+		var entity = await Repository.GetAsync(id, cancellationToken);
 		return Mapper.Map<WechatMenuDetailDto>(entity);
 	}
 
@@ -67,21 +64,21 @@ public class WechatMenuApplicationService : BaseApplicationService, IWechatMenuA
 
 	public async Task PublishAsync(CancellationToken cancellationToken = default)
 	{
-		var entities = await _repository.FindAsync(t => t.IsValid, cancellationToken);
+		var entities = await Repository.FindAsync(t => t.IsValid, cancellationToken);
 
 		var level1 = entities.Where(t => t.ParentId == 0)
-		                     .OrderBy(t => t.Sort)
-		                     .ThenBy(t => t.Id)
-		                     .ToList();
+							 .OrderBy(t => t.Sort)
+							 .ThenBy(t => t.Id)
+							 .ToList();
 
 		var request = new WechatMenuUpdateRequest();
 
 		foreach (var entity in level1)
 		{
 			var level2 = entities.Where(t => t.ParentId == entity.Id)
-			                     .OrderBy(t => t.Sort)
-			                     .ThenBy(t => t.Id)
-			                     .ToList();
+								 .OrderBy(t => t.Sort)
+								 .ThenBy(t => t.Id)
+								 .ToList();
 
 			if (level2.Any())
 			{
@@ -124,7 +121,7 @@ public class WechatMenuApplicationService : BaseApplicationService, IWechatMenuA
 			}
 		}
 
-		var response = await _api.CreateMenuAsync(request, Cache.Get<string>(Constants.Cache.WechatAccessToken), cancellationToken);
+		var response = await WechatApi.CreateMenuAsync(request, Cache.Get<string>(Constants.Cache.WechatAccessToken), cancellationToken);
 		if (response.IsSuccessStatusCode)
 		{
 			if (response.Content?.ErrorCode != 0)

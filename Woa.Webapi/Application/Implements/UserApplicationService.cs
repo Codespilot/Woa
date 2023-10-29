@@ -14,12 +14,18 @@ namespace Woa.Webapi.Application;
 
 public class UserApplicationService : BaseApplicationService, IUserApplicationService
 {
-	private readonly IRepository<UserEntity, int> _repository;
 	private readonly IConfiguration _configuration;
 
-	public UserApplicationService(IRepository<UserEntity, int> repository, IConfiguration configuration)
+	private UserRepository _userRepository;
+	private RoleRepository _roleRepository;
+	private UserRoleRepository _relationRepository;
+
+	private UserRepository UserRepository => _userRepository ??= ServiceProvider.GetService<UserRepository>();
+	private RoleRepository RoleRepository => _roleRepository ??= ServiceProvider.GetService<RoleRepository>();
+	private UserRoleRepository RelationRepository => _relationRepository ??= ServiceProvider.GetService<UserRoleRepository>();
+
+	public UserApplicationService(IConfiguration configuration)
 	{
-		_repository = repository;
 		_configuration = configuration;
 	}
 
@@ -37,7 +43,7 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 
 		username = username.Trim().ToLower(CultureInfo.CurrentCulture);
 
-		var entity = await _repository.GetAsync(t => t.Username == username, cancellationToken);
+		var entity = await UserRepository.GetAsync(username, cancellationToken);
 		if (entity == null || entity.IsDeleted)
 		{
 			throw new NotFoundException("用户名或密码错误");
@@ -99,7 +105,7 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 			throw new BadRequestException("Token已失效");
 		}
 
-		var entity = await _repository.GetAsync(id, cancellationToken);
+		var entity = await UserRepository.GetAsync(id, cancellationToken);
 
 		if (entity == null || entity.IsDeleted)
 		{
@@ -138,7 +144,7 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 			throw new BadRequestException("Id必须大于0");
 		}
 
-		var entity = await _repository.GetAsync(id, cancellationToken);
+		var entity = await UserRepository.GetAsync(id, cancellationToken);
 		if (entity == null)
 		{
 			throw new NotFoundException();
@@ -158,7 +164,7 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 
 		username = username.Trim().ToLower(CultureInfo.CurrentCulture);
 
-		var entity = await _repository.GetAsync(t => t.Username == username, cancellationToken);
+		var entity = await UserRepository.GetAsync(username, cancellationToken);
 		if (entity == null)
 		{
 			throw new NotFoundException();
@@ -177,7 +183,7 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 			throw new BadRequestException("Id必须大于0");
 		}
 
-		var entity = await _repository.GetAsync(id, cancellationToken);
+		var entity = await UserRepository.GetAsync(id, cancellationToken);
 
 		if (entity == null || entity.IsDeleted)
 		{
@@ -206,51 +212,17 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 
 	public async Task<List<UserItemDto>> SearchAsync(UserQueryDto condition, int page, int size, CancellationToken cancellationToken = default)
 	{
-		var expressions = new List<Expression<Func<UserEntity, bool>>>();
+		var predicate = BuildExpression(condition);
 
-		if (!string.IsNullOrWhiteSpace(condition.Keywords))
-		{
-			expressions.Add(t => t.Username.Contains(condition.Keywords) || t.Email.Contains(condition.Keywords) || t.Phone.Contains(condition.Keywords));
-		}
-
-		switch (condition.Locked)
-		{
-			case true:
-				expressions.Add(t => t.LockoutTime > DateTime.UtcNow);
-				break;
-			case false:
-				expressions.Add(t => t.LockoutTime == null || t.LockoutTime < DateTime.UtcNow);
-				break;
-		}
-
-		var predicate = expressions.Aggregate(t => t.Id > 0);
-
-		var entities = await _repository.FindAsync(predicate, page, size, cancellationToken);
+		var entities = await UserRepository.FindAsync(predicate, page, size, cancellationToken);
 		return Mapper.Map<List<UserItemDto>>(entities);
 	}
 
 	public Task<int> CountAsync(UserQueryDto condition, CancellationToken cancellationToken = default)
 	{
-		var expressions = new List<Expression<Func<UserEntity, bool>>>();
+		var predicate = BuildExpression(condition);
 
-		if (!string.IsNullOrWhiteSpace(condition.Keywords))
-		{
-			expressions.Add(t => t.Username.Contains(condition.Keywords) || t.Email.Contains(condition.Keywords) || t.Phone.Contains(condition.Keywords));
-		}
-
-		switch (condition.Locked)
-		{
-			case true:
-				expressions.Add(t => t.LockoutTime > DateTime.UtcNow);
-				break;
-			case false:
-				expressions.Add(t => t.LockoutTime == null || t.LockoutTime < DateTime.UtcNow);
-				break;
-		}
-
-		var predicate = expressions.Aggregate(t => t.Id > 0);
-
-		return _repository.CountAsync(predicate, cancellationToken);
+		return UserRepository.CountAsync(predicate, cancellationToken);
 	}
 
 	/// <summary>
@@ -312,20 +284,39 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 
 	private async Task<IEnumerable<TOutput>> GetRolesAsync<TOutput>(int userId, Func<RoleEntity, TOutput> selector, CancellationToken cancellationToken = default)
 	{
-		var relationRepository = ServiceProvider.GetRequiredService<IRepository<UserRoleEntity, int>>();
-		var relations = await relationRepository.FindAsync(t => t.UserId == userId, cancellationToken);
+		var relations = await RelationRepository.GetAsync(userId, cancellationToken);
 		if (relations.Count == 0)
 		{
 			return Array.Empty<TOutput>();
 		}
 
-		var roleIds = relations.Select(t => t.RoleId as object).ToList();
+		var roleIds = relations.Select(t => t.RoleId).ToList();
 
-		var roleRepository = ServiceProvider.GetRequiredService<IRepository<RoleEntity, int>>();
-
-		// Supabase client不支持 xxx.Contains(t.Id)表达式，所以这里改成了下面的写法
-		var roles = await roleRepository.FindAsync(t => t.Id, QueryOperator.In, roleIds, cancellationToken);
+		var roles = await RoleRepository.GetAsync(roleIds, cancellationToken);
 
 		return roles.Select(selector);
+	}
+
+	private static Expression<Func<UserEntity,bool>> BuildExpression(UserQueryDto condition)
+	{
+		var expressions = new List<Expression<Func<UserEntity, bool>>>();
+
+		if (!string.IsNullOrWhiteSpace(condition.Keywords))
+		{
+			expressions.Add(t => t.Username.Contains(condition.Keywords) || t.Email.Contains(condition.Keywords) || t.Phone.Contains(condition.Keywords));
+		}
+
+		switch (condition.Locked)
+		{
+			case true:
+				expressions.Add(t => t.LockoutTime > DateTime.UtcNow);
+				break;
+			case false:
+				expressions.Add(t => t.LockoutTime == null || t.LockoutTime < DateTime.UtcNow);
+				break;
+		}
+
+		var predicate = expressions.Aggregate(t => t.Id > 0);
+		return predicate;
 	}
 }

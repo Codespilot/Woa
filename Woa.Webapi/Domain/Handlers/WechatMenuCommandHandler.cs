@@ -4,13 +4,13 @@ using Woa.Common;
 namespace Woa.Webapi.Domain;
 
 public class WechatMenuCommandHandler : ICommandHandler<WechatMenuCreateCommand, int>,
-                                        ICommandHandler<WechatMenuUpdateCommand>,
-                                        ICommandHandler<WechatMenuDeleteCommand>
+										ICommandHandler<WechatMenuUpdateCommand>,
+										ICommandHandler<WechatMenuDeleteCommand>
 {
-	private readonly IRepository<WechatMenuEntity, int> _repository;
+	private readonly WechatMenuRepository _repository;
 	private readonly IMediator _mediator;
 
-	public WechatMenuCommandHandler(IRepository<WechatMenuEntity, int> repository, IMediator mediator)
+	public WechatMenuCommandHandler(WechatMenuRepository repository, IMediator mediator)
 	{
 		_repository = repository;
 		_mediator = mediator;
@@ -20,7 +20,7 @@ public class WechatMenuCommandHandler : ICommandHandler<WechatMenuCreateCommand,
 	{
 		if (request.ParentId > 0)
 		{
-			var parent = await _repository.GetAsync(t => t.Id == request.ParentId, cancellationToken);
+			var parent = await _repository.GetAsync(request.ParentId, cancellationToken);
 			if (parent == null)
 			{
 				throw new BadRequestException("上级菜单不存在");
@@ -66,7 +66,7 @@ public class WechatMenuCommandHandler : ICommandHandler<WechatMenuCreateCommand,
 
 		if (request.Sort <= 0)
 		{
-			entity.Sort = await GetMaximumSortAsync(request.ParentId);
+			entity.Sort = await _repository.GetMaximumSortAsync(request.ParentId);
 		}
 		else
 		{
@@ -90,7 +90,7 @@ public class WechatMenuCommandHandler : ICommandHandler<WechatMenuCreateCommand,
 
 		if (request.ParentId > 0)
 		{
-			var parent = await _repository.GetAsync(t => t.Id == request.ParentId, cancellationToken);
+			var parent = await _repository.GetAsync(request.ParentId, cancellationToken);
 			if (parent == null)
 			{
 				throw new BadRequestException("上级菜单不存在");
@@ -132,7 +132,7 @@ public class WechatMenuCommandHandler : ICommandHandler<WechatMenuCreateCommand,
 
 		if (request.Sort <= 0)
 		{
-			entity.Sort = await GetMaximumSortAsync(request.ParentId);
+			entity.Sort = await _repository.GetMaximumSortAsync(request.ParentId);
 		}
 		else
 		{
@@ -158,16 +158,5 @@ public class WechatMenuCommandHandler : ICommandHandler<WechatMenuCreateCommand,
 		await _repository.UpdateAsync(entity, cancellationToken);
 
 		await _mediator.Publish(new WechatMenuChangedEvent(), cancellationToken);
-	}
-
-	private async Task<int> GetMaximumSortAsync(int parentId)
-	{
-		var entities = await _repository.FindAsync(t => t.ParentId == parentId, 0, 1, t => t.Sort, false);
-		if (entities.Count == 0)
-		{
-			return 0;
-		}
-
-		return entities.Max(t => t.Sort);
 	}
 }
