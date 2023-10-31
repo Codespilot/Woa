@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Woa.Common;
 
@@ -35,5 +37,41 @@ public static class StringExtension
 	public static string GetValueOrDefault(this string source, string defaultValue = null)
 	{
 		return string.IsNullOrEmpty(source) ? defaultValue : source;
+	}
+
+	public static string Trim(this string source, TextTrimType type)
+	{
+		if (string.IsNullOrEmpty(source))
+		{
+			return source;
+		}
+
+		return type switch
+		{
+			TextTrimType.Head => source.TrimStart(),
+			TextTrimType.Tail => source.TrimEnd(),
+			TextTrimType.Both => source.Trim(),
+			TextTrimType.All => Regex.Replace(source, @"\s+", string.Empty),
+			TextTrimType.None => source,
+			_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+		};
+	}
+
+	public static string Normalize(this string source, TextCaseType caseType)
+	{
+		if (string.IsNullOrEmpty(source))
+		{
+			return source;
+		}
+
+		var text = CultureInfo.CurrentCulture.TextInfo;
+		return caseType switch
+		{
+			TextCaseType.Upper => text.ToUpper(source),
+			TextCaseType.Lower => text.ToLower(source),
+			TextCaseType.Title => text.ToTitleCase(source),
+			TextCaseType.None => source,
+			_ => throw new ArgumentOutOfRangeException(nameof(caseType), caseType, null)
+		};
 	}
 }

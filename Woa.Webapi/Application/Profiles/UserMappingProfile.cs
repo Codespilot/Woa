@@ -1,6 +1,5 @@
-﻿using System.Globalization;
-using System.Text.RegularExpressions;
-using AutoMapper;
+﻿using AutoMapper;
+using Woa.Common;
 using Woa.Transit;
 using Woa.Webapi.Domain;
 
@@ -11,9 +10,9 @@ public class UserMappingProfile : Profile
 	public UserMappingProfile()
 	{
 		CreateMap<UserCreateDto, UserCreateCommand>()
-			.ForMember(dest => dest.Username, opt => opt.MapFrom(dto => TrimString(dto.Username)))
-			.ForMember(dest => dest.Email, opt => opt.MapFrom(dto => TrimString(dto.Email)))
-			.ForMember(dest => dest.Phone, opt => opt.MapFrom(dto => TrimString(dto.Phone)));
+			.ForMember(dest => dest.Username, opt => opt.MapFrom(dto => dto.Username.Trim(TextTrimType.All).Normalize(TextCaseType.Lower)))
+			.ForMember(dest => dest.Email, opt => opt.MapFrom(dto => dto.Email.Trim(TextTrimType.All).Normalize(TextCaseType.Lower)))
+			.ForMember(dest => dest.Phone, opt => opt.MapFrom(dto => dto.Phone.Trim(TextTrimType.All).Normalize(TextCaseType.Lower)));
 
 		CreateMap<UserEntity, UserProfileDto>();
 		CreateMap<UserEntity, UserDetailDto>();
@@ -21,16 +20,5 @@ public class UserMappingProfile : Profile
 		CreateMap<RoleEntity, RoleInfoDto>();
 		CreateMap<RoleEditDto, RoleCreateCommand>();
 		CreateMap<RoleEditDto, RoleUpdateCommand>();
-	}
-
-	private static string TrimString(string value)
-	{
-		if (string.IsNullOrEmpty(value))
-		{
-			return null;
-		}
-
-		value = Regex.Replace(value, @"\s+", string.Empty);
-		return CultureInfo.CurrentCulture.TextInfo.ToLower(value);
 	}
 }
