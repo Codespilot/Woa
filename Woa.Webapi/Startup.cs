@@ -19,9 +19,13 @@ public class Startup
 	{
 		services.AddTransient<ExceptionHandlingMiddleware>();
 
+		services.AddHttpContextAccessor()
+		        .AddScoped<IIdentityContext, IdentityContext>();
+
 		services.AddAuthentication(Configuration);
 
-		services.AddApplicationServices().AddDomainServices();
+		services.AddApplicationServices()
+		        .AddDomainServices();
 
 		services.AddControllers().AddNewtonsoftJson();
 
@@ -66,7 +70,7 @@ public class Startup
 				}
 			});
 		});
-		
+
 		var corsOrigins = Configuration.GetSection("CorsOrigins").Get<string[]>();
 		services.AddCors(options =>
 		{

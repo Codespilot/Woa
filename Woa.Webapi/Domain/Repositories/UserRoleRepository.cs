@@ -31,7 +31,7 @@ public class UserRoleRepository
 		{
 			UserId = userId,
 			RoleId = roleId
-		});
+		}).ToList();
 
 		return _repository.InsertAsync(entities, cancellationToken);
 	}
