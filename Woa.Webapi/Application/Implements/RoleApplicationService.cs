@@ -58,9 +58,9 @@ public class RoleApplicationService : BaseApplicationService, IRoleApplicationSe
 	private static Expression<Func<RoleEntity,bool>> BuildExpression(RoleQueryDto condition)
 	{
 		var expressions = new List<Expression<Func<RoleEntity, bool>>>();
-		if (!string.IsNullOrWhiteSpace(condition.Keywords))
+		if (!string.IsNullOrWhiteSpace(condition.Keyword))
 		{
-			expressions.Add(x => x.Code.Contains(condition.Keywords) || x.Name.Contains(condition.Keywords));
+			expressions.Add(x => x.Code.Contains(condition.Keyword) || x.Name.Contains(condition.Keyword));
 		}
 		var predicate = expressions.Aggregate(t => t.Id > 0);
 
