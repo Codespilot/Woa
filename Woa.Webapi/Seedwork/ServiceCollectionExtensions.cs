@@ -214,6 +214,7 @@ internal static class ServiceCollectionExtensions
 		services.AddTransient<WechatFollowerRepository>()
 				.AddTransient<WechatMessageRepository>()
 				.AddTransient<WechatMenuRepository>()
+				.AddTransient<WechatAccountRepository>()
 				.AddTransient<UserRepository>()
 				.AddTransient<RoleRepository>()
 				.AddTransient<UserRoleRepository>();
