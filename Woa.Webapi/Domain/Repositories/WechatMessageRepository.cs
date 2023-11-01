@@ -23,8 +23,7 @@ public class WechatMessageRepository
 
 	public Task<List<WechatMessageEntity>> FindAsync(Expression<Func<WechatMessageEntity, bool>> predicate, int page, int size, CancellationToken cancellationToken = default)
 	{
-		var offset = (page - 1) * size;
-		return _repository.FindAsync(predicate, offset, size, t => t.CreateTime, false, cancellationToken);
+		return _repository.FindAsync(predicate, page, size, t => t.CreateTime, false, cancellationToken);
 	}
 
 	public Task<int> CountAsync(Expression<Func<WechatMessageEntity, bool>> predicate, CancellationToken cancellationToken = default)

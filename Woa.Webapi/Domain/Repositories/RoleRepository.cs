@@ -26,7 +26,7 @@ public class RoleRepository
 
 	public Task<List<RoleEntity>> FindAsync(Expression<Func<RoleEntity, bool>> predicate, int page, int size, CancellationToken cancellationToken = default)
 	{
-		return _repository.FindAsync(predicate, page, size, cancellationToken);
+		return _repository.FindAsync(predicate, page, size, t => t.Id, false, cancellationToken);
 	}
 
 	public Task<int> CountAsync(Expression<Func<RoleEntity, bool>> predicate, CancellationToken cancellationToken = default)

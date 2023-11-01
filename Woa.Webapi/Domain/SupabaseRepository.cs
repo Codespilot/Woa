@@ -155,8 +155,10 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 		return response.Models;
 	}
 
-	public async Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, int offset, int count, CancellationToken cancellationToken = default)
+	public async Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, int page, int count, CancellationToken cancellationToken = default)
 	{
+		var offset = GetOffset(page, count);
+		
 		var response = await ExecuteAsync(() =>
 			_client.From<TEntity>()
 			       .Where(predicate)
@@ -166,14 +168,16 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 		return response.Models;
 	}
 
-	public async Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, int offset, int count, Expression<Func<TEntity, object>> orderBy, bool ascending, CancellationToken cancellationToken = default)
+	public async Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, int page, int count, Expression<Func<TEntity, object>> orderBy, bool ascending, CancellationToken cancellationToken = default)
 	{
+		var offset = GetOffset(page, count);
+		
 		var ordering = ascending ? PostgrestConstants.Ordering.Ascending : PostgrestConstants.Ordering.Descending;
 
 		var response = await ExecuteAsync(() =>
 			_client.From<TEntity>()
 			       .Where(predicate)
-			       .Range(offset, offset + count - 1)
+			       .Range(offset, page + count - 1)
 			       .Order(orderBy, ordering)
 			       .Get(cancellationToken)
 		);
@@ -235,6 +239,11 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 		_logger.LogError(exception, "第{RetryCount}次重试，等待{TimeSpan}后重试", retryCount, timeSpan);
 	}
 
+	private static int GetOffset(int page, int count)
+	{
+		return (page - 1) * count;
+	}
+	
 	private static PostgrestConstants.Operator GetOperator(string @operator)
 	{
 		@operator = @operator.ToLowerInvariant();

@@ -17,8 +17,6 @@ public class WechatMenuApplicationService : BaseApplicationService, IWechatMenuA
 
 	public async Task<List<WechatMenuItemDto>> SearchAsync(WechatMenuQueryDto condition, int page, int size, CancellationToken cancellationToken = default)
 	{
-		var offset = (page - 1) * size;
-
 		var expressions = new List<Expression<Func<WechatMenuEntity, bool>>>();
 		if (!string.IsNullOrEmpty(condition.Type))
 		{
@@ -32,7 +30,7 @@ public class WechatMenuApplicationService : BaseApplicationService, IWechatMenuA
 
 		var predicate = expressions.Aggregate(t => t.Id > 0);
 
-		var entities = await Repository.FindAsync(predicate, offset, size, cancellationToken);
+		var entities = await Repository.FindAsync(predicate, page, size, cancellationToken);
 		var result = Mapper.Map<List<WechatMenuItemDto>>(entities);
 		return result;
 	}

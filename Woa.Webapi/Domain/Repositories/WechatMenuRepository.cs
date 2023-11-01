@@ -58,12 +58,7 @@ public class WechatMenuRepository
 
 	public async Task<int> GetMaximumSortAsync(int parentId)
 	{
-		var entities = await _repository.FindAsync(t => t.ParentId == parentId, 0, 1, t => t.Sort, false);
-		if (entities.Count == 0)
-		{
-			return 0;
-		}
-
-		return entities.Max(t => t.Sort);
+		var entities = await _repository.FindAsync(t => t.ParentId == parentId, 1, 1, t => t.Sort, false);
+		return entities.Count == 0 ? 0 : entities.Max(t => t.Sort);
 	}
 }
