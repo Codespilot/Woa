@@ -4,7 +4,7 @@ using Woa.Sdk.Tencent;
 using Woa.Transit;
 using Woa.Webapi.Domain;
 
-namespace Woa.Webapi.Application;
+namespace Woa.Webapi.Profiles;
 
 public class WechatMessageMappingProfile : Profile
 {
