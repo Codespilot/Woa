@@ -7,6 +7,8 @@ public sealed class RoleCreateCommand : ICommand<int>
     public string Code { get; set; }
 
     public string Name { get; set; }
+
+    public string Description { get; set; }
 }
 
 public class RoleCreateCommandValidator : AbstractValidator<RoleCreateCommand>

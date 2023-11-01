@@ -27,7 +27,8 @@ public sealed class RoleCommandHandler : ICommandHandler<RoleCreateCommand, int>
 		var entity = new RoleEntity
 		{
 			Code = request.Code,
-			Name = request.Name
+			Name = request.Name,
+			Description = request.Description,
 		};
 
 		var result = await _repository.InsertAsync(entity, cancellationToken);
@@ -50,6 +51,7 @@ public sealed class RoleCommandHandler : ICommandHandler<RoleCreateCommand, int>
 
 		entity.Code = request.Code;
 		entity.Name = request.Name;
+		entity.Description = request.Description;
 
 		await _repository.UpdateAsync(entity, cancellationToken);
 	}
