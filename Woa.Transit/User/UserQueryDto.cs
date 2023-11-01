@@ -8,7 +8,7 @@ public class UserQueryDto
 	/// <summary>
 	/// 关键字
 	/// </summary>
-	public string Keywords { get; set; }
+	public string Keyword { get; set; }
 
 	/// <summary>
 	/// 是否锁定

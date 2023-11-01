@@ -301,9 +301,9 @@ public class UserApplicationService : BaseApplicationService, IUserApplicationSe
 	{
 		var expressions = new List<Expression<Func<UserEntity, bool>>>();
 
-		if (!string.IsNullOrWhiteSpace(condition.Keywords))
+		if (!string.IsNullOrWhiteSpace(condition.Keyword))
 		{
-			expressions.Add(t => t.Username.Contains(condition.Keywords) || t.Email.Contains(condition.Keywords) || t.Phone.Contains(condition.Keywords));
+			expressions.Add(t => t.Username.Contains(condition.Keyword) || t.Email.Contains(condition.Keyword) || t.Phone.Contains(condition.Keyword));
 		}
 
 		switch (condition.Locked)

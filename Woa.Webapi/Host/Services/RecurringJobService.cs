@@ -44,7 +44,7 @@ public class RecurringJobService : BackgroundService
             var trigger = TriggerBuilder.Create()
                                         .WithIdentity(attribute.Identity, "RecurringJobTriggerGroup")
                                         .WithSimpleSchedule(x => x.WithIntervalInMinutes(attribute.Interval).RepeatForever())
-                                        .StartAt(new DateTimeOffset(DateTime.Now.AddSeconds(attribute.DelaySeconds)))
+                                        .StartAt(new DateTimeOffset(DateTime.UtcNow.AddSeconds(attribute.DelaySeconds)))
                                         .Build();
             await _scheduler.ScheduleJob(job, trigger, stoppingToken);
         }

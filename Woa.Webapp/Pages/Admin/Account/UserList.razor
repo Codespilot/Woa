@@ -41,7 +41,7 @@
 {
     private ObservableRangeCollection<UserItemDto> Items { get; } = new();
 
-    private string Keywords { get; set; }
+    private string Keyword { get; set; }
 
     private int PageNumber { get; set; }
 
@@ -59,7 +59,7 @@
 
         var condition = new UserQueryDto()
         {
-            Keywords = Keywords
+            Keyword = Keyword
         };
 
         try

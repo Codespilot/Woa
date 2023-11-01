@@ -1,10 +1,11 @@
 ﻿using System.Linq.Expressions;
 using System.Net;
 using System.Net.WebSockets;
-using System.Reflection;
 using Polly;
 using Postgrest.Models;
 using Woa.Common;
+
+// ReSharper disable SuspiciousTypeConversion.Global
 
 namespace Woa.Webapi.Domain;
 
@@ -14,11 +15,13 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 {
 	private readonly SupabaseClient _client;
 	private readonly ILogger<SupabaseRepository<TEntity, TKey>> _logger;
+	private readonly IIdentityContext _identity;
 
-	public SupabaseRepository(SupabaseClient client, ILoggerFactory logger)
+	public SupabaseRepository(SupabaseClient client, ILoggerFactory logger, IIdentityContext identity)
 	{
 		_client = client;
 		_logger = logger.CreateLogger<SupabaseRepository<TEntity, TKey>>();
+		_identity = identity;
 	}
 
 	public async Task<TEntity> GetAsync(TKey id, CancellationToken cancellationToken = default)
@@ -26,8 +29,8 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 		var predicate = ExpressionHelper.BuildPropertyEqualsExpression<TEntity, TKey>(id, "Id");
 		return await ExecuteAsync(() =>
 			_client.From<TEntity>()
-				   .Where(predicate)
-				   .Single(cancellationToken)
+			       .Where(predicate)
+			       .Single(cancellationToken)
 		);
 	}
 
@@ -35,34 +38,57 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	{
 		return await ExecuteAsync(() =>
 			_client.From<TEntity>()
-				   .Where(predicate)
-				   .Single(cancellationToken)
+			       .Where(predicate)
+			       .Single(cancellationToken)
 		);
 	}
 
 	public async Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken = default)
 	{
+		if (entity is ICreateAudit audit)
+		{
+			audit.CreateBy = _identity.Id;
+			audit.CreateAt = DateTime.UtcNow;
+		}
+
 		var response = await ExecuteAsync(() =>
 			_client.From<TEntity>()
-				   .Insert(entity, cancellationToken: cancellationToken)
+			       .Insert(entity, cancellationToken: cancellationToken)
 		);
 		return response.Model;
 	}
 
-	public async Task InsertAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+	public async Task InsertAsync(List<TEntity> entities, CancellationToken cancellationToken = default)
 	{
-		await ExecuteAsync(async() =>
+		foreach (var entity in entities)
+		{
+			if (entity is not ICreateAudit audit)
+			{
+				continue;
+			}
+
+			audit.CreateBy = _identity.Id;
+			audit.CreateAt = DateTime.UtcNow;
+		}
+
+		await ExecuteAsync(async () =>
 		{
 			await _client.From<TEntity>()
-						 .Insert(entities.ToList(), cancellationToken: cancellationToken);
+			             .Insert(entities, cancellationToken: cancellationToken);
 		});
 	}
 
 	public async Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
 	{
+		if (entity is IUpdateAudit audit)
+		{
+			audit.UpdateBy = _identity.Id;
+			audit.UpdateAt = DateTime.UtcNow;
+		}
+
 		var response = await ExecuteAsync(() =>
 			_client.From<TEntity>()
-				   .Update(entity, cancellationToken: cancellationToken)
+			       .Update(entity, cancellationToken: cancellationToken)
 		);
 		return response.Model;
 	}
@@ -70,7 +96,19 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	public async Task<TEntity> UpdateAsync(TKey id, Action<TEntity> updateAction, CancellationToken cancellationToken = default)
 	{
 		var entity = await GetAsync(id, cancellationToken);
+		if (entity == null)
+		{
+			throw new NotFoundException();
+		}
 		updateAction(entity);
+		if (entity is IUpdateAudit audit)
+		{
+			audit.UpdateBy = _identity.Id;
+			audit.UpdateAt = DateTime.UtcNow;
+		}
+
+		{
+		}
 		return await UpdateAsync(entity, cancellationToken);
 	}
 
@@ -78,7 +116,7 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	{
 		await ExecuteAsync(() =>
 			_client.From<TEntity>()
-				   .Delete(entity, cancellationToken: cancellationToken)
+			       .Delete(entity, cancellationToken: cancellationToken)
 		);
 	}
 
@@ -92,8 +130,8 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	{
 		await ExecuteAsync(() =>
 			_client.From<TEntity>()
-				   .Where(predicate)
-				   .Delete(cancellationToken: cancellationToken)
+			       .Where(predicate)
+			       .Delete(cancellationToken: cancellationToken)
 		);
 	}
 
@@ -101,8 +139,8 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	{
 		var response = await ExecuteAsync(() =>
 			_client.From<TEntity>()
-				   .Where(predicate)
-				   .Count(PostgrestConstants.CountType.Exact, cancellationToken)
+			       .Where(predicate)
+			       .Count(PostgrestConstants.CountType.Exact, cancellationToken)
 		);
 		return response > 0;
 	}
@@ -111,8 +149,8 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	{
 		var response = await ExecuteAsync(() =>
 			_client.From<TEntity>()
-				   .Where(predicate)
-				   .Get(cancellationToken)
+			       .Where(predicate)
+			       .Get(cancellationToken)
 		);
 		return response.Models;
 	}
@@ -121,9 +159,9 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	{
 		var response = await ExecuteAsync(() =>
 			_client.From<TEntity>()
-				   .Where(predicate)
-				   .Range(offset, offset + count - 1)
-				   .Get(cancellationToken)
+			       .Where(predicate)
+			       .Range(offset, offset + count - 1)
+			       .Get(cancellationToken)
 		);
 		return response.Models;
 	}
@@ -134,10 +172,10 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 
 		var response = await ExecuteAsync(() =>
 			_client.From<TEntity>()
-				   .Where(predicate)
-				   .Range(offset, offset + count - 1)
-				   .Order(orderBy, ordering)
-				   .Get(cancellationToken)
+			       .Where(predicate)
+			       .Range(offset, offset + count - 1)
+			       .Order(orderBy, ordering)
+			       .Get(cancellationToken)
 		);
 		return response.Models;
 	}
@@ -146,8 +184,8 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	{
 		var response = await ExecuteAsync(() =>
 			_client.From<TEntity>()
-				   .Filter(predicate, GetOperator(@operator), criterion: criterion)
-				   .Get(cancellationToken)
+			       .Filter(predicate, GetOperator(@operator), criterion: criterion)
+			       .Get(cancellationToken)
 		);
 		return response.Models;
 	}
@@ -156,8 +194,8 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	{
 		return ExecuteAsync(() =>
 			_client.From<TEntity>()
-				   .Where(predicate)
-				   .Count(PostgrestConstants.CountType.Exact, cancellationToken)
+			       .Where(predicate)
+			       .Count(PostgrestConstants.CountType.Exact, cancellationToken)
 		);
 	}
 
@@ -165,31 +203,31 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	{
 		return ExecuteAsync(() =>
 			_client.From<TEntity>()
-				   .Filter(predicate, GetOperator(@operator), criterion)
-				   .Count(PostgrestConstants.CountType.Exact, cancellationToken)
+			       .Filter(predicate, GetOperator(@operator), criterion)
+			       .Count(PostgrestConstants.CountType.Exact, cancellationToken)
 		);
 	}
 
 	private Task<TResult> ExecuteAsync<TResult>(Func<Task<TResult>> handle)
 	{
 		return Policy.Handle<OperationCanceledException>()
-					 .Or<HttpRequestException>()
-					 .Or<WebSocketException>()
-					 .Or<WebException>()
-					 .Or<TimeoutException>()
-					 .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-					 .ExecuteAsync(handle);
+		             .Or<HttpRequestException>()
+		             .Or<WebSocketException>()
+		             .Or<WebException>()
+		             .Or<TimeoutException>()
+		             .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
+		             .ExecuteAsync(handle);
 	}
 
 	private Task ExecuteAsync(Func<Task> handle)
 	{
 		return Policy.Handle<OperationCanceledException>()
-					 .Or<HttpRequestException>()
-					 .Or<WebSocketException>()
-					 .Or<WebException>()
-					 .Or<TimeoutException>()
-					 .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
-					 .ExecuteAsync(handle);
+		             .Or<HttpRequestException>()
+		             .Or<WebSocketException>()
+		             .Or<WebException>()
+		             .Or<TimeoutException>()
+		             .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(Math.Pow(2, i)), OnRetry)
+		             .ExecuteAsync(handle);
 	}
 
 	private void OnRetry(Exception exception, TimeSpan timeSpan, int retryCount, object context)

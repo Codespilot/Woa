@@ -70,6 +70,11 @@ public class WechatUserMessageStore : IWechatUserMessageStore
 					break;
 			}
 
+			if (entity.Id == 0)
+			{
+				entity.Id = Snowflake.Instance().NextId();
+			}
+
 			await _repository.InsertAsync(entity, cancellationToken);
 		}
 		catch (Exception exception)

@@ -2,5 +2,5 @@ namespace Woa.Transit;
 
 public class RoleQueryDto
 {
-    public string Keywords { get; set; }
+    public string Keyword { get; set; }
 }

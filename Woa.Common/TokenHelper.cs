@@ -112,9 +112,9 @@ public static class TokenHelper
 
 	public static string Generate(DateTime expires, IEnumerable<Claim> claims)
 	{
-		if (expires <= DateTime.Now.AddDays(1))
+		if (expires <= DateTime.UtcNow.AddDays(1))
 		{
-			expires = DateTime.Now.AddDays(1);
+			expires = DateTime.UtcNow.AddDays(1);
 		}
 
 		var identity = new ClaimsIdentity(claims);
@@ -128,7 +128,7 @@ public static class TokenHelper
 
 		var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
 		var handler = new JwtSecurityTokenHandler();
-		var token = handler.WriteToken(handler.CreateJwtSecurityToken(notBefore: new DateTime(1), expires: expires, issuedAt: DateTime.Now, subject: identity, signingCredentials: credentials));
+		var token = handler.WriteToken(handler.CreateJwtSecurityToken(notBefore: new DateTime(1), expires: expires, issuedAt: DateTime.UtcNow, subject: identity, signingCredentials: credentials));
 
 		return token;
 	}
