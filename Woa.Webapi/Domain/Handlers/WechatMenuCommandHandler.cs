@@ -61,7 +61,7 @@ public class WechatMenuCommandHandler : ICommandHandler<WechatMenuCreateCommand,
 			MiniAppId = request.MiniAppId,
 			MiniAppPage = request.MiniAppPage,
 			IsValid = true,
-			CreateTime = DateTime.Now
+			CreateTime = DateTime.UtcNow
 		};
 
 		if (request.Sort <= 0)
@@ -128,7 +128,7 @@ public class WechatMenuCommandHandler : ICommandHandler<WechatMenuCreateCommand,
 		entity.Url = request.Url;
 		entity.MiniAppId = request.MiniAppId;
 		entity.MiniAppPage = request.MiniAppPage;
-		entity.UpdateTime = DateTime.Now;
+		entity.UpdateTime = DateTime.UtcNow;
 
 		if (request.Sort <= 0)
 		{
@@ -153,7 +153,7 @@ public class WechatMenuCommandHandler : ICommandHandler<WechatMenuCreateCommand,
 		}
 
 		entity.IsValid = false;
-		entity.UpdateTime = DateTime.Now;
+		entity.UpdateTime = DateTime.UtcNow;
 
 		await _repository.UpdateAsync(entity, cancellationToken);
 

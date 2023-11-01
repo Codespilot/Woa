@@ -96,6 +96,10 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 	public async Task<TEntity> UpdateAsync(TKey id, Action<TEntity> updateAction, CancellationToken cancellationToken = default)
 	{
 		var entity = await GetAsync(id, cancellationToken);
+		if (entity == null)
+		{
+			throw new NotFoundException();
+		}
 		updateAction(entity);
 		if (entity is IUpdateAudit audit)
 		{

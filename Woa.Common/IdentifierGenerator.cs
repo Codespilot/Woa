@@ -39,7 +39,7 @@ internal static class IdentifierGenerator
 
     public static string GenerateSequentialNumericCode()
     {
-        var number = (DateTime.Now.Ticks - DateTime.Parse("2020-01-01").Ticks) / 100000;
+        var number = (DateTime.UtcNow.Ticks - DateTime.Parse("2020-01-01").Ticks) / 100000;
         return $"{number}";
     }
 
