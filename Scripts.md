@@ -145,6 +145,7 @@ CREATE TABLE "public"."wechat_account" (
   "encrypt_type" varchar(10) COLLATE "pg_catalog"."default" NOT NULL,
   "enable_custom_message" bool NOT NULL DEFAULT false,
   "enable_template_message" bool NOT NULL DEFAULT false,
+  "verified" bool NOT NULL DEFAULT false,
   "reply_title" varchar(255) COLLATE "pg_catalog"."default",
   "reply_description" text COLLATE "pg_catalog"."default",
   "reply_url" varchar(500) COLLATE "pg_catalog"."default",
@@ -174,6 +175,7 @@ COMMENT ON COLUMN "public"."wechat_account"."encrypt_key" IS '消息加解密密
 COMMENT ON COLUMN "public"."wechat_account"."encrypt_type" IS '消息加解密方式';
 COMMENT ON COLUMN "public"."wechat_account"."enable_custom_message" IS '公众号是否开启客服消息';
 COMMENT ON COLUMN "public"."wechat_account"."enable_template_message" IS '公众号是否开启模板消息';
+COMMENT ON COLUMN "public"."wechat_account"."verified" IS '是否已认证';
 COMMENT ON COLUMN "public"."wechat_account"."reply_title" IS '公众号消息回复内容标题';
 COMMENT ON COLUMN "public"."wechat_account"."reply_description" IS '公众号消息回复内容描述';
 COMMENT ON COLUMN "public"."wechat_account"."reply_url" IS '公众号消息回复内容查看链接';
