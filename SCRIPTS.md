@@ -73,6 +73,11 @@ CACHE 1
 ),
   "code" varchar(50) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
   "name" varchar(50) COLLATE "pg_catalog"."default" NOT NULL,
+  "description" text COLLATE "pg_catalog"."default",
+  "create_by" int4 NOT NULL,
+  "create_at" timestamp(6) NOT NULL,
+  "update_by" int4,
+  "update_at" timestamp(6),
   PRIMARY KEY ("id"),
   UNIQUE ("code")
 )
@@ -84,6 +89,11 @@ ALTER TABLE "public"."roles"
 COMMENT ON COLUMN "public"."roles"."id" IS '主键';
 COMMENT ON COLUMN "public"."roles"."code" IS '代码';
 COMMENT ON COLUMN "public"."roles"."name" IS '名称';
+COMMENT ON COLUMN "public"."roles"."description" IS '描述';
+COMMENT ON COLUMN "public"."roles"."create_by" IS '创建人Id';
+COMMENT ON COLUMN "public"."roles"."create_at" IS '创建时间';
+COMMENT ON COLUMN "public"."roles"."update_by" IS '更新人Id';
+COMMENT ON COLUMN "public"."roles"."update_at" IS '更新时间';
 COMMENT ON TABLE "public"."roles" IS '角色';
 ```
 
@@ -95,7 +105,7 @@ CREATE TABLE "public"."user_role" (
 INCREMENT 1
 MINVALUE  1
 MAXVALUE 2147483647
-START 1
+START 1000001
 CACHE 1
 ),
   "user_id" int4 NOT NULL,

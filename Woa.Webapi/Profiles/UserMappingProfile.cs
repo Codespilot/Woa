@@ -17,7 +17,9 @@ public class UserMappingProfile : Profile
 		CreateMap<UserEntity, UserProfileDto>();
 		CreateMap<UserEntity, UserDetailDto>();
 
-		CreateMap<RoleEntity, RoleInfoDto>();
+		CreateMap<RoleEntity, RoleInfoDto>()
+		.ForMember(dest => dest.CreateBy, options => options.MapFrom<UserNameResolver<RoleEntity, RoleInfoDto, int>, int>(src => src.CreateBy))
+		.ForMember(dest => dest.UpdateBy, options => options.MapFrom<UserNameResolver<RoleEntity, RoleInfoDto, int?>, int?>(src => src.UpdateBy));
 		CreateMap<RoleEditDto, RoleCreateCommand>();
 		CreateMap<RoleEditDto, RoleUpdateCommand>();
 	}

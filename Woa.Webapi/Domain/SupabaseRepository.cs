@@ -43,6 +43,17 @@ public class SupabaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 		);
 	}
 
+	public Task<List<TEntity>> GetAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default)
+	{
+		var criterion = ids.Select(t => t as object).ToList();
+		return ExecuteAsync(() =>
+			_client.From<TEntity>()
+				   .Filter("id", PostgrestConstants.Operator.In, criterion)
+				   .Get(cancellationToken)
+				   .ContinueWith(task => task.Result.Models, cancellationToken)
+		);
+	}
+
 	public async Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken = default)
 	{
 		if (entity is ICreateAudit audit)

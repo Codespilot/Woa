@@ -34,4 +34,8 @@ public class RoleInfoDto
     /// 更新时间
     /// </summary>
     public DateTime? UpdateAt { get; set; }
+
+    public string CreateBy { get; set; }
+
+    public string UpdateBy { get; set; }
 }

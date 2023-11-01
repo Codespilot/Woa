@@ -10,6 +10,8 @@ public interface IRepository<TEntity, in TKey>
 
 	Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 
+	Task<List<TEntity>> GetAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default);
+
 	Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken = default);
 
 	Task InsertAsync(List<TEntity> entities, CancellationToken cancellationToken = default);

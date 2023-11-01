@@ -21,6 +21,11 @@ public class UserRepository
 		return _repository.GetAsync(id, cancellationToken);
 	}
 
+	public Task<List<UserEntity>> GetAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default)
+	{
+		return _repository.GetAsync(ids, cancellationToken);
+	}
+
 	public Task<List<UserEntity>> FindAsync(Expression<Func<UserEntity, bool>> predicate, CancellationToken cancellationToken = default)
 	{
 		return _repository.FindAsync(predicate, cancellationToken);
