@@ -33,6 +33,11 @@ public class WechatAccountItemDto
 	public string AppId { get; set; }
 
 	/// <summary>
+	/// 公众号AppSecret
+	/// </summary>
+	public string AppSecret { get; set; }
+
+	/// <summary>
 	/// 公众号消息加密方式
 	/// </summary>
 	public string EncryptType { get; set; }

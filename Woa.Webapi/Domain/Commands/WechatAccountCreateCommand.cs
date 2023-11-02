@@ -45,14 +45,6 @@ public class WechatAccountCreateCommand : ICommand<string>
 	public string AppSecret { get; set; }
 
 	/// <summary>
-	/// 开发者令牌
-	/// </summary>
-	/// <remarks>
-	/// 必须为英文或数字，长度为3-32字符。
-	/// </remarks>
-	public string AppToken { get; set; }
-
-	/// <summary>
 	/// 消息加解密密钥
 	/// </summary>
 	/// <remarks>
@@ -112,10 +104,6 @@ public class WechatAccountCreateCommandValidator : AbstractValidator<WechatAccou
 		RuleFor(model => model.AppId).Cascade(CascadeMode.Stop)
 		                             .NotEmpty().WithMessage("开发者ID不能为空")
 		                             .Matches(@"^[A-Za-z0-9]{10,20}$").WithMessage("开发者ID格式错误");
-
-		RuleFor(model => model.AppToken).Cascade(CascadeMode.Stop)
-		                                .NotEmpty().WithMessage("开发者令牌不能为空")
-		                                .Matches(@"^[A-Za-z0-9]{3,32}$").WithMessage("开发者令牌必须为英文或数字，长度为3-32字符。");
 
 		RuleFor(model => model.EncryptKey).Cascade(CascadeMode.Stop)
 		                                  .Matches(@"^[A-Za-z0-9]{43}$").WithMessage("消息加解密密钥消息加密密钥由43位字符组成，可随机修改，字符范围为A-Z，a-z，0-9。");

@@ -58,12 +58,6 @@ public class WechatAccountEntity : BaseModel,
 	public string AppSecret { get; set; }
 
 	/// <summary>
-	/// 开发者令牌
-	/// </summary>
-	[Column("app_token")]
-	public string AppToken { get; set; }
-
-	/// <summary>
 	/// 消息加解密密钥
 	/// </summary>
 	[Column("encrypt_key")]

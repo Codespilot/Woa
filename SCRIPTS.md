@@ -150,7 +150,6 @@ CREATE TABLE "public"."wechat_account" (
   "image" varchar(255) COLLATE "pg_catalog"."default",
   "app_id" varchar(50) COLLATE "pg_catalog"."default" NOT NULL,
   "app_secret" varchar(128) COLLATE "pg_catalog"."default" NOT NULL,
-  "app_token" varchar(64) COLLATE "pg_catalog"."default" NOT NULL,
   "encrypt_key" varchar(100) COLLATE "pg_catalog"."default",
   "encrypt_type" varchar(10) COLLATE "pg_catalog"."default" NOT NULL,
   "enable_custom_message" bool NOT NULL DEFAULT false,
@@ -176,7 +175,6 @@ COMMENT ON COLUMN "public"."wechat_account"."description" IS '公众号简介';
 COMMENT ON COLUMN "public"."wechat_account"."image" IS '公众号头像';
 COMMENT ON COLUMN "public"."wechat_account"."app_id" IS '开发者ID';
 COMMENT ON COLUMN "public"."wechat_account"."app_secret" IS '开发者密码';
-COMMENT ON COLUMN "public"."wechat_account"."app_token" IS '开发者令牌';
 COMMENT ON COLUMN "public"."wechat_account"."encrypt_key" IS '消息加解密密钥';
 COMMENT ON COLUMN "public"."wechat_account"."encrypt_type" IS '消息加解密方式';
 COMMENT ON COLUMN "public"."wechat_account"."enable_custom_message" IS '公众号是否开启客服消息';
