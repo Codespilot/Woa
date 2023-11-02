@@ -156,10 +156,6 @@ CREATE TABLE "public"."wechat_account" (
   "enable_custom_message" bool NOT NULL DEFAULT false,
   "enable_template_message" bool NOT NULL DEFAULT false,
   "verified" bool NOT NULL DEFAULT false,
-  "reply_title" varchar(255) COLLATE "pg_catalog"."default",
-  "reply_description" text COLLATE "pg_catalog"."default",
-  "reply_url" varchar(500) COLLATE "pg_catalog"."default",
-  "reply_pic_url" varchar(500) COLLATE "pg_catalog"."default",
   "is_valid" bool NOT NULL DEFAULT true,
   "create_by" int4 NOT NULL,
   "create_at" timestamp(6) NOT NULL,
@@ -186,10 +182,6 @@ COMMENT ON COLUMN "public"."wechat_account"."encrypt_type" IS '消息加解密�
 COMMENT ON COLUMN "public"."wechat_account"."enable_custom_message" IS '公众号是否开启客服消息';
 COMMENT ON COLUMN "public"."wechat_account"."enable_template_message" IS '公众号是否开启模板消息';
 COMMENT ON COLUMN "public"."wechat_account"."verified" IS '是否已认证';
-COMMENT ON COLUMN "public"."wechat_account"."reply_title" IS '公众号消息回复内容标题';
-COMMENT ON COLUMN "public"."wechat_account"."reply_description" IS '公众号消息回复内容描述';
-COMMENT ON COLUMN "public"."wechat_account"."reply_url" IS '公众号消息回复内容查看链接';
-COMMENT ON COLUMN "public"."wechat_account"."reply_pic_url" IS '公众号消息回复图片链接';
 COMMENT ON COLUMN "public"."wechat_account"."is_valid" IS '是否有效';
 COMMENT ON COLUMN "public"."wechat_account"."create_by" IS '创建人Id';
 COMMENT ON COLUMN "public"."wechat_account"."create_at" IS '创建时间';

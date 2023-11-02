@@ -94,30 +94,6 @@ public class WechatAccountEntity : BaseModel,
 	public bool Verified { get; set; }
 
 	/// <summary>
-	/// 公众号消息回复内容标题
-	/// </summary>
-	[Column("reply_title")]
-	public string ReplyTitle { get; set; }
-
-	/// <summary>
-	/// 公众号消息回复内容描述
-	/// </summary>
-	[Column("reply_description")]
-	public string ReplyDescription { get; set; }
-
-	/// <summary>
-	/// 公众号消息回复内容查看链接
-	/// </summary>
-	[Column("reply_url")]
-	public string ReplyUrl { get; set; }
-
-	/// <summary>
-	/// 公众号消息回复图片链接
-	/// </summary>
-	[Column("reply_pic_url")]
-	public string ReplyPicUrl { get; set; }
-
-	/// <summary>
 	/// 是否有效
 	/// </summary>
 	[Column("is_valid")]
@@ -125,6 +101,15 @@ public class WechatAccountEntity : BaseModel,
 
 	[Column("create_by", ignoreOnUpdate: true)]
 	public int CreateBy { get; set; }
+
+	[Column("create_at", ignoreOnUpdate: true)]
+	public DateTime CreateAt { get; set; }
+
+	[Column("update_by", ignoreOnInsert: true)]
+	public int? UpdateBy { get; set; }
+
+	[Column("update_at", ignoreOnInsert: true)]
+	public DateTime? UpdateAt { get; set; }
 
 	object ICreateAudit.CreateBy
 	{
@@ -136,12 +121,6 @@ public class WechatAccountEntity : BaseModel,
 		};
 	}
 
-	[Column("create_at", ignoreOnUpdate: true)]
-	public DateTime CreateAt { get; set; }
-
-	[Column("update_by", ignoreOnInsert: true)]
-	public int? UpdateBy { get; set; }
-
 	object IUpdateAudit.UpdateBy
 	{
 		get => UpdateBy;
@@ -152,7 +131,4 @@ public class WechatAccountEntity : BaseModel,
 			_ => throw new ArgumentException("UpdateBy must be int or null")
 		};
 	}
-
-	[Column("update_at", ignoreOnInsert: true)]
-	public DateTime? UpdateAt { get; set; }
 }
