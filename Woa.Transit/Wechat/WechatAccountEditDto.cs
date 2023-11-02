@@ -33,14 +33,6 @@ public abstract class WechatAccountEditDto
 	public string AppSecret { get; set; }
 
 	/// <summary>
-	/// 开发者令牌
-	/// </summary>
-	/// <remarks>
-	/// 必须为英文或数字，长度为3-32字符。
-	/// </remarks>
-	public string AppToken { get; set; }
-
-	/// <summary>
 	/// 消息加解密密钥
 	/// </summary>
 	/// <remarks>

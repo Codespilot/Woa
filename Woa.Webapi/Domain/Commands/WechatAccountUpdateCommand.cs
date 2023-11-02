@@ -35,14 +35,6 @@ public class WechatAccountUpdateCommand : ICommand
 	public string AppSecret { get; set; }
 
 	/// <summary>
-	/// 开发者令牌
-	/// </summary>
-	/// <remarks>
-	/// 必须为英文或数字，长度为3-32字符。
-	/// </remarks>
-	public string AppToken { get; set; }
-
-	/// <summary>
 	/// 消息加解密密钥
 	/// </summary>
 	/// <remarks>
@@ -69,24 +61,4 @@ public class WechatAccountUpdateCommand : ICommand
 	/// 是否已认证
 	/// </summary>
 	public bool Verified { get; set; }
-
-	/// <summary>
-	/// 公众号消息回复内容标题
-	/// </summary>
-	public string ReplyTitle { get; set; }
-
-	/// <summary>
-	/// 公众号消息回复内容描述
-	/// </summary>
-	public string ReplyDescription { get; set; }
-
-	/// <summary>
-	/// 公众号消息回复内容查看链接
-	/// </summary>
-	public string ReplyUrl { get; set; }
-
-	/// <summary>
-	/// 公众号消息回复图片链接
-	/// </summary>
-	public string ReplyPicUrl { get; set; }
 }

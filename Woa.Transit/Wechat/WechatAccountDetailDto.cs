@@ -45,11 +45,6 @@ public class WechatAccountDetailDto
 	public string AppSecret { get; set; }
 
 	/// <summary>
-	/// 开发者令牌
-	/// </summary>
-	public string AppToken { get; set; }
-
-	/// <summary>
 	/// 消息加解密密钥
 	/// </summary>
 	public string EncryptKey { get; set; }
