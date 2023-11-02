@@ -7,89 +7,84 @@ namespace Woa.Webapi.Application;
 
 public class RoleApplicationService : BaseApplicationService, IRoleApplicationService
 {
-    private RoleRepository _roleRepository;
-    private UserRepository _userRepository;
-    private RoleRepository RoleRepository => _roleRepository ??= ServiceProvider.GetRequiredService<RoleRepository>();
-    private UserRepository UserRepository => _userRepository ??= ServiceProvider.GetRequiredService<UserRepository>();
+	private RoleRepository _repository;
 
-    /// <inheritdoc />
-    public Task<int> CreateAsync(RoleEditDto dto, CancellationToken cancellationToken = default)
-    {
-        var command = Mapper.Map<RoleCreateCommand>(dto);
-        return Mediator.Send(command, cancellationToken);
-    }
+	private RoleRepository Repository => _repository ??= ServiceProvider.GetRequiredService<RoleRepository>();
 
-    /// <inheritdoc />
-    public Task UpdateAsync(int id, RoleEditDto dto, CancellationToken cancellationToken = default)
-    {
-        var command = new RoleUpdateCommand(id);
-        Mapper.Map(dto, command);
-        return Mediator.Send(command, cancellationToken);
-    }
+	/// <inheritdoc />
+	public Task<int> CreateAsync(RoleEditDto dto, CancellationToken cancellationToken = default)
+	{
+		var command = Mapper.Map<RoleCreateCommand>(dto);
+		return Mediator.Send(command, cancellationToken);
+	}
 
-    /// <inheritdoc />
-    public Task DeleteAsync(int id, CancellationToken cancellationToken = default)
-    {
-        var command = new RoleDeleteCommand(id);
-        return Mediator.Send(command, cancellationToken);
-    }
+	/// <inheritdoc />
+	public Task UpdateAsync(int id, RoleEditDto dto, CancellationToken cancellationToken = default)
+	{
+		var command = new RoleUpdateCommand(id);
+		Mapper.Map(dto, command);
+		return Mediator.Send(command, cancellationToken);
+	}
 
-    /// <inheritdoc />
-    public async Task<RoleInfoDto> GetAsync(int id, CancellationToken cancellationToken = default)
-    {
-        var entity = await RoleRepository.GetAsync(id, cancellationToken);
-        if (entity == null)
-        {
-            throw new NotFoundException("角色不存在");
-        }
+	/// <inheritdoc />
+	public Task DeleteAsync(int id, CancellationToken cancellationToken = default)
+	{
+		var command = new RoleDeleteCommand(id);
+		return Mediator.Send(command, cancellationToken);
+	}
 
-        var users = await GetUserNameAsync(new[] { entity.CreateBy, entity.UpdateBy ?? 0 }, cancellationToken);
+	/// <inheritdoc />
+	public async Task<RoleInfoDto> GetAsync(int id, CancellationToken cancellationToken = default)
+	{
+		var entity = await Repository.GetAsync(id, cancellationToken);
+		if (entity == null)
+		{
+			throw new NotFoundException("角色不存在");
+		}
 
-        return Mapper.Map<RoleInfoDto>(entity, opts => opts.Items["users"] = users);
-    }
+		var users = await ServiceProvider.GetService<CommonRepository>().GetUserNameAsync(new[] { entity.CreateBy, entity.UpdateBy ?? 0 }, t => t.Username, cancellationToken);
 
-    /// <inheritdoc />
-    public async Task<List<RoleInfoDto>> SearchAsync(RoleQueryDto condition, int page, int size, CancellationToken cancellationToken = default)
-    {
-        var predicate = BuildExpression(condition);
+		return Mapper.Map<RoleInfoDto>(entity, opts => opts.Items["users"] = users);
+	}
 
-        var entities = await RoleRepository.FindAsync(predicate, page, size, cancellationToken);
+	/// <inheritdoc />
+	public async Task<List<RoleInfoDto>> SearchAsync(RoleQueryDto condition, int page, int size, CancellationToken cancellationToken = default)
+	{
+		var predicate = BuildExpression(condition);
 
-        var userIds = entities.SelectMany(t => new[] { t.CreateBy, t.UpdateBy ?? 0 })
-                              .Where(t => t > 0)
-                              .Distinct()
-                              .ToList();
+		var entities = await Repository.FindAsync(predicate, page, size, cancellationToken);
 
-        var users = await GetUserNameAsync(userIds, cancellationToken);
+		var userIds = entities.SelectMany(t => new[] { t.CreateBy, t.UpdateBy ?? 0 })
+							  .Where(t => t > 0)
+							  .Distinct()
+							  .ToList();
 
-        var items = Mapper.Map<List<RoleInfoDto>>(entities, opts => opts.Items["users"] = users);
+		var users = await ServiceProvider.GetService<CommonRepository>().GetUserNameAsync(userIds, t => t.Username, cancellationToken);
 
-        return items;
-    }
+		var items = Mapper.Map<List<RoleInfoDto>>(entities, opts => opts.Items["users"] = users);
 
-    /// <inheritdoc />
-    public Task<int> CountAsync(RoleQueryDto condition, CancellationToken cancellationToken = default)
-    {
-        var predicate = BuildExpression(condition);
+		return items;
+	}
 
-        return RoleRepository.CountAsync(predicate, cancellationToken);
-    }
+	/// <inheritdoc />
+	public Task<int> CountAsync(RoleQueryDto condition, CancellationToken cancellationToken = default)
+	{
+		var predicate = BuildExpression(condition);
 
-    private static Expression<Func<RoleEntity, bool>> BuildExpression(RoleQueryDto condition)
-    {
-        var expressions = new List<Expression<Func<RoleEntity, bool>>>();
-        if (!string.IsNullOrWhiteSpace(condition.Keyword))
-        {
-            expressions.Add(x => x.Code.Contains(condition.Keyword) || x.Name.Contains(condition.Keyword));
-        }
-        var predicate = expressions.Aggregate(t => t.Id > 0);
+		return Repository.CountAsync(predicate, cancellationToken);
+	}
 
-        return predicate;
-    }
+	#region Supports
+	private static Expression<Func<RoleEntity, bool>> BuildExpression(RoleQueryDto condition)
+	{
+		var expressions = new List<Expression<Func<RoleEntity, bool>>>();
+		if (!string.IsNullOrWhiteSpace(condition.Keyword))
+		{
+			expressions.Add(x => x.Code.Contains(condition.Keyword) || x.Name.Contains(condition.Keyword));
+		}
+		var predicate = expressions.Aggregate(t => t.Id > 0);
 
-    private async Task<Dictionary<int, string>> GetUserNameAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default)
-    {
-        var entities = await UserRepository.GetAsync(ids, cancellationToken);
-        return entities.ToDictionary(t => t.Id, t => t.Username);
-    }
+		return predicate;
+	}
+	#endregion
 }

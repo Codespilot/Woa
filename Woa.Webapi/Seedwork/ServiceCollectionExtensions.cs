@@ -220,7 +220,8 @@ internal static class ServiceCollectionExtensions
 				.AddTransient<WechatAccountRepository>()
 				.AddTransient<UserRepository>()
 				.AddTransient<RoleRepository>()
-				.AddTransient<UserRoleRepository>();
+				.AddTransient<UserRoleRepository>()
+				.AddTransient<CommonRepository>();
 		return services;
 	}
 
