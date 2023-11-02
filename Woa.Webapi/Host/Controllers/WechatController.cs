@@ -10,7 +10,7 @@ namespace Woa.Webapi.Controllers;
 /// <summary>
 /// 微信消息交互接口Controller
 /// </summary>
-[Route("api/[controller]")]
+[Route("api/[controller]/{id}")]
 [ApiController]
 [AllowAnonymous]
 public class WechatController : ControllerBase
@@ -43,7 +43,7 @@ public class WechatController : ControllerBase
 	///	<para>GET: 返回请求Url的echostr参数</para>
 	/// <para>POST: 处理消息并返回结果</para>
 	/// </returns>
-	[HttpGet("{id}"), HttpPost("{id}")]
+	[HttpGet, HttpPost]
 	public async Task<IActionResult> HandleAsync([FromRoute] string id, string signature, string timestamp, string nonce)
 	{
 		var isValid = Utility.VerifySignature(signature, timestamp, nonce, _options.Accounts[id].AppToken);
