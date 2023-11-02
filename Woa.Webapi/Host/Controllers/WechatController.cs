@@ -88,7 +88,7 @@ public class WechatController : ControllerBase
 
 		response[WechatMessageKey.ToUserName] = message.GetValue<string>(WechatMessageKey.FromUserName);
 		response[WechatMessageKey.FromUserName] = _configuration.GetValue<string>("Wechat:OpenId");
-		response[WechatMessageKey.CreateTime] = DateTimeOffset.Now.ToUnixTimeSeconds();
+		response[WechatMessageKey.CreateTime] = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 		return Content(response.ToXml(), "text/xml");
 	}
 
