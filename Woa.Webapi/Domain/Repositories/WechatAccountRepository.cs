@@ -16,9 +16,19 @@ public class WechatAccountRepository
 		return _repository.GetAsync(id, cancellationToken);
 	}
 
+	public Task<List<WechatAccountEntity>> GetAsync(IEnumerable<string> ids, CancellationToken cancellationToken = default)
+	{
+		return _repository.GetAsync(ids, cancellationToken);
+	}
+
 	public Task<WechatAccountEntity> GetAsync(Expression<Func<WechatAccountEntity, bool>> condition, CancellationToken cancellationToken = default)
 	{
 		return _repository.GetAsync(condition, cancellationToken);
+	}
+
+	public Task<List<WechatAccountEntity>> FindAsync(Expression<Func<WechatAccountEntity, bool>> condition, CancellationToken cancellationToken = default)
+	{
+		return _repository.FindAsync(condition, cancellationToken);
 	}
 
 	public Task<List<WechatAccountEntity>> FindAsync(Expression<Func<WechatAccountEntity, bool>> condition, int page, int size, CancellationToken cancellationToken = default)
@@ -40,7 +50,7 @@ public class WechatAccountRepository
 	{
 		return _repository.UpdateAsync(entity, cancellationToken);
 	}
-	
+
 	public Task UpdateAsync(string id, Action<WechatAccountEntity> action, CancellationToken cancellationToken = default)
 	{
 		return _repository.UpdateAsync(id, action, cancellationToken);

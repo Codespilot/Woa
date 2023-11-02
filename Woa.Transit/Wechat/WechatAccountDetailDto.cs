@@ -40,39 +40,9 @@ public class WechatAccountDetailDto
 	public string AppId { get; set; }
 
 	/// <summary>
-	/// 公众号AppSecret
-	/// </summary>
-	public string AppSecret { get; set; }
-
-	/// <summary>
-	/// 消息加解密密钥
-	/// </summary>
-	public string EncryptKey { get; set; }
-
-	/// <summary>
-	/// 公众号消息加密方式
-	/// </summary>
-	public string EncryptType { get; set; }
-
-	/// <summary>
-	/// 公众号是否开启客服消息
-	/// </summary>
-	public bool EnableCustomMessage { get; set; }
-
-	/// <summary>
-	/// 公众号是否开启模板消息
-	/// </summary>
-	public bool EnableTemplateMessage { get; set; }
-
-	/// <summary>
 	/// 是否已认证
 	/// </summary>
 	public bool Verified { get; set; }
-
-	/// <summary>
-	/// 是否有效
-	/// </summary>
-	public bool IsValid { get; set; }
 
 	public DateTime CreateAt { get; set; }
 

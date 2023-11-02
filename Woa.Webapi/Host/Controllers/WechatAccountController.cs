@@ -86,28 +86,4 @@ public class WechatAccountController : ControllerBase
 		await _service.UpdateAsync(id, model, HttpContext.RequestAborted);
 		return Ok();
 	}
-
-	/// <summary>
-	/// 启用微信公众号配置
-	/// </summary>
-	/// <param name="id"></param>
-	/// <returns></returns>
-	[HttpPut("{id}/enable")]
-	public async Task<IActionResult> SetValidityAsync([FromRoute] string id)
-	{
-		await _service.SetValidityAsync(id, true, HttpContext.RequestAborted);
-		return Ok();
-	}
-
-	/// <summary>
-	/// 禁用微信公众号配置
-	/// </summary>
-	/// <param name="id"></param>
-	/// <returns></returns>
-	[HttpPut("{id}/disable")]
-	public async Task<IActionResult> SetInvalidityAsync([FromRoute] string id)
-	{
-		await _service.SetValidityAsync(id, false, HttpContext.RequestAborted);
-		return Ok();
-	}
 }

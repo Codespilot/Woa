@@ -3,8 +3,7 @@
 namespace Woa.Webapi.Domain;
 
 public class WechatAccountCommandHandler : ICommandHandler<WechatAccountCreateCommand, string>,
-                                           ICommandHandler<WechatAccountUpdateCommand>,
-                                           ICommandHandler<WechatAccountSetValidityCommand>
+                                           ICommandHandler<WechatAccountUpdateCommand>
 {
 	private readonly WechatAccountRepository _repository;
 	private readonly IMapper _mapper;
@@ -25,10 +24,5 @@ public class WechatAccountCommandHandler : ICommandHandler<WechatAccountCreateCo
 	public Task Handle(WechatAccountUpdateCommand request, CancellationToken cancellationToken)
 	{
 		return _repository.UpdateAsync(request.Id, entity => _mapper.Map(request, entity), cancellationToken);
-	}
-
-	public Task Handle(WechatAccountSetValidityCommand request, CancellationToken cancellationToken)
-	{
-		return _repository.UpdateAsync(request.Id, entity => entity.IsValid = request.Validity, cancellationToken);
 	}
 }

@@ -22,10 +22,7 @@ public class WechatAccountMappingProfile : Profile
 		CreateMap<WechatAccountCreateDto, WechatAccountCreateCommand>()
 			.ForMember(dest => dest.Id, options => options.MapFrom(src => src.Id.Trim(TextTrimType.All).Normalize(TextCaseType.Lower)))
 			.ForMember(dest => dest.Account, options => options.MapFrom(src => src.Account.Trim(TextTrimType.All).Normalize(TextCaseType.Lower)))
-			.ForMember(dest => dest.AppId, options => options.MapFrom(src => src.AppId.Trim(TextTrimType.All).Normalize(TextCaseType.Lower)))
-			.ForMember(dest => dest.AppSecret, options => options.MapFrom(src => src.AppSecret.Trim(TextTrimType.All)))
-			.ForMember(dest => dest.AppToken, options => options.MapFrom(src => src.AppToken.Trim(TextTrimType.All)))
-			.ForMember(dest => dest.EncryptKey, options => options.MapFrom(src => src.EncryptKey.Trim(TextTrimType.All)));
+			.ForMember(dest => dest.AppId, options => options.MapFrom(src => src.AppId.Trim(TextTrimType.All).Normalize(TextCaseType.Lower)));
 
 		CreateMap<WechatAccountCreateCommand, WechatAccountEntity>();
 
@@ -39,6 +36,7 @@ public class WechatAccountMappingProfile : Profile
 			"subscription" => "订阅号",
 			"service" => "服务号",
 			"enterprise" => "企业号",
+			"test" => "测试号",
 			_ => "未知"
 		};
 	}

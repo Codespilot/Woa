@@ -13,6 +13,4 @@ public interface IWechatAccountApplicationService
 	Task<string> CreateAsync(WechatAccountCreateDto model, CancellationToken cancellationToken = default);
 
 	Task UpdateAsync(string id, WechatAccountUpdateDto model, CancellationToken cancellationToken = default);
-
-	Task SetValidityAsync(string id, bool validity, CancellationToken cancellationToken = default);
 }
