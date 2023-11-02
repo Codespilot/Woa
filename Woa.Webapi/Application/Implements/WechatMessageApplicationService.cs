@@ -102,7 +102,7 @@ public class WechatMessageApplicationService : BaseApplicationService, IWechatMe
 
 		async Task<string> GetMediaUrlAsync(string mediaId, string name)
 		{
-			var token = Cache.Get<string>(Constants.Cache.WechatAccessToken);
+			var token = Cache.Get<string>($"{Constants.Cache.WechatAccessToken}:{entity.PlatformId}");
 			var response = await WechatApi.GetTemporaryMediaAsync(token, mediaId, cancellationToken);
 			return response?.Content?.TryGetValue(name, out var url) == true ? url : response.RequestMessage.RequestUri.OriginalString;
 		}

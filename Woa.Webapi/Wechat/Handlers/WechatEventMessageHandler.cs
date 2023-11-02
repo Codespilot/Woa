@@ -10,17 +10,17 @@ namespace Woa.Webapi.Wechat;
 [WechatMessageHandle(WechatMessageType.Event)]
 internal class WechatEventMessageHandler : WechatUserMessageHandler
 {
-    private const string EVENT_TYPE_SUBSCRIBE = "subscribe";
-    private const string EVENT_TYPE_UNSUBSCRIBE = "unsubscribe";
-    private const string EVENT_TYPE_SCAN = "scan";
-    private const string EVENT_TYPE_LOCATION = "location";
-    private const string EVENT_TYPE_CLICK = "click";
-    private const string EVENT_TYPE_VIEW = "view";
+	private const string EVENT_TYPE_SUBSCRIBE = "subscribe";
+	private const string EVENT_TYPE_UNSUBSCRIBE = "unsubscribe";
+	private const string EVENT_TYPE_SCAN = "scan";
+	private const string EVENT_TYPE_LOCATION = "location";
+	private const string EVENT_TYPE_CLICK = "click";
+	private const string EVENT_TYPE_VIEW = "view";
 
-    private readonly WechatFollowerRepository _repository;
+	private readonly WechatFollowerRepository _repository;
 
-	public WechatEventMessageHandler(WechatFollowerRepository repository, IWechatUserMessageStore store)
-		: base(store)
+	public WechatEventMessageHandler(WechatFollowerRepository repository, IWechatUserMessageStore store, WechatOptions options)
+		: base(store, options)
 	{
 		_repository = repository;
 	}
@@ -46,58 +46,58 @@ internal class WechatEventMessageHandler : WechatUserMessageHandler
 	/// <param name="operateTime">操作时间</param>
 	/// <returns></returns>
 	private async Task<WechatMessage> OnUserSubscribedAsync(string openId, string platformId, DateTime operateTime)
-    {
+	{
 		var follower = await _repository.GetAsync(openId, platformId);
-        follower ??= new WechatFollowerEntity
-        {
-            OpenId = openId,
-            PlatformId = platformId,
-            State = 1,
+		follower ??= new WechatFollowerEntity
+		{
+			OpenId = openId,
+			PlatformId = platformId,
+			State = 1,
 			CreateTime = DateTime.UtcNow,
-            SubscribeTime = operateTime
-        };
+			SubscribeTime = operateTime
+		};
 
-        if (follower.Id < 1)
-        {
-            await _repository.InsertAsync(follower);
-        }
-        else
-        {
-            await _repository.UpdateAsync(follower);
-        }
+		if (follower.Id < 1)
+		{
+			await _repository.InsertAsync(follower);
+		}
+		else
+		{
+			await _repository.UpdateAsync(follower);
+		}
 
-        return WechatMessage.Text("欢迎关注公众号");
-    }
+		return WechatMessage.Text("欢迎关注公众号");
+	}
 
-    /// <summary>
-    /// 用户取消关注公众号
-    /// </summary>
-    /// <param name="openId">用户open id</param>
-    /// <param name="platformId">微信公众号Id</param>
-    /// <param name="operateTime">操作时间</param>
-    /// <returns></returns>
-    private async Task<WechatMessage> OnUserUnsubscribedAsync(string openId, string platformId, DateTime operateTime)
-    {
+	/// <summary>
+	/// 用户取消关注公众号
+	/// </summary>
+	/// <param name="openId">用户open id</param>
+	/// <param name="platformId">微信公众号Id</param>
+	/// <param name="operateTime">操作时间</param>
+	/// <returns></returns>
+	private async Task<WechatMessage> OnUserUnsubscribedAsync(string openId, string platformId, DateTime operateTime)
+	{
 		var entity = await _repository.GetAsync(openId, platformId);
-        if (entity != null)
-        {
-            entity.State = 1;
-            entity.UnsubscribeTime = operateTime;
-        }
+		if (entity != null)
+		{
+			entity.State = 1;
+			entity.UnsubscribeTime = operateTime;
+		}
 
-        await _repository.UpdateAsync(entity);
+		await _repository.UpdateAsync(entity);
 
-        return WechatMessage.Empty;
-    }
+		return WechatMessage.Empty;
+	}
 
-    /// <summary>
-    /// 用户点击自定义菜单
-    /// </summary>
-    /// <param name="openId"></param>
-    /// <param name="menuKey"></param>
-    /// <returns></returns>
-    public async Task<WechatMessage> OnUserClickedMenuAsync(string openId, string menuKey)
-    {
-        return await Task.FromResult(WechatMessage.Empty);
-    }
+	/// <summary>
+	/// 用户点击自定义菜单
+	/// </summary>
+	/// <param name="openId"></param>
+	/// <param name="menuKey"></param>
+	/// <returns></returns>
+	public async Task<WechatMessage> OnUserClickedMenuAsync(string openId, string menuKey)
+	{
+		return await Task.FromResult(WechatMessage.Empty);
+	}
 }

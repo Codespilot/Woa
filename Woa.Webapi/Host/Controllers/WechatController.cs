@@ -16,19 +16,19 @@ namespace Woa.Webapi.Controllers;
 public class WechatController : ControllerBase
 {
 	private readonly IServiceProvider _provider;
-	private readonly IConfiguration _configuration;
+	private readonly WechatOptions _options;
 	private readonly IWechatMessageApplicationService _service;
 
 	/// <summary>
 	/// 初始化<see cref="WechatController"/>实例
 	/// </summary>
 	/// <param name="provider"></param>
-	/// <param name="configuration"></param>
+	/// <param name="options"></param>
 	/// <param name="service"></param>
-	public WechatController(IServiceProvider provider, IConfiguration configuration, IWechatMessageApplicationService service)
+	public WechatController(IServiceProvider provider, WechatOptions options, IWechatMessageApplicationService service)
 	{
 		_provider = provider;
-		_configuration = configuration;
+		_options = options;
 		_service = service;
 	}
 
@@ -43,9 +43,7 @@ public class WechatController : ControllerBase
 	[HttpGet]
 	public async Task<IActionResult> Verify(string signature, string timestamp, string nonce, string echostr)
 	{
-		var token = _configuration.GetValue<string>("Wechat:Token");
-
-		var isValid = Utility.VerifySignature(signature, timestamp, nonce, token);
+		var isValid = Utility.VerifySignature(signature, timestamp, nonce, _options.Token);
 
 		if (isValid)
 		{
@@ -87,7 +85,7 @@ public class WechatController : ControllerBase
 		}
 
 		response[WechatMessageKey.ToUserName] = message.GetValue<string>(WechatMessageKey.FromUserName);
-		response[WechatMessageKey.FromUserName] = _configuration.GetValue<string>("Wechat:OpenId");
+		response[WechatMessageKey.FromUserName] = message.GetValue<string>(WechatMessageKey.ToUserName);
 		response[WechatMessageKey.CreateTime] = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 		return Content(response.ToXml(), "text/xml");
 	}

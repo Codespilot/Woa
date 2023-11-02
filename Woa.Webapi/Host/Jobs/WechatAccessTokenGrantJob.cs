@@ -8,14 +8,14 @@ namespace Woa.Webapi.Host;
 public class WechatAccessTokenGrantJob : IJob
 {
 	private readonly IWechatApi _api;
-	private readonly IConfiguration _configuration;
+	private readonly WechatOptions _options;
 	private readonly IMemoryCache _cache;
 	private readonly ILogger<WechatAccessTokenGrantJob> _logger;
-
-	public WechatAccessTokenGrantJob(IWechatApi api, IConfiguration configuration, IMemoryCache cache, ILoggerFactory logger)
+	
+	public WechatAccessTokenGrantJob(IWechatApi api, WechatOptions options, IMemoryCache cache, ILoggerFactory logger)
 	{
 		_api = api;
-		_configuration = configuration;
+		_options = options;
 		_cache = cache;
 		_logger = logger.CreateLogger<WechatAccessTokenGrantJob>();
 	}
@@ -24,15 +24,21 @@ public class WechatAccessTokenGrantJob : IJob
 	{
 		try
 		{
-			var response = await _api.GrantTokenAsync("client_credential", _configuration["Wechat:AppId"], _configuration["Wechat:AppSecret"]);
-			if (!response.IsSuccessStatusCode || response.Content == null)
+			foreach (var (id, account) in _options.Accounts)
 			{
-				return;
+				if (!account.Enabled)
+				{
+					continue;
+				}
+
+				var response = await _api.GrantTokenAsync("client_credential", account.AppId, account.AppSecret);
+				if (!response.IsSuccessStatusCode || response.Content == null)
+				{
+					return;
+				}
+
+				_cache.Set($"{Constants.Cache.WechatAccessToken}:{id}", response.Content.Token, TimeSpan.FromSeconds(response.Content.Expiry - 1800));
 			}
-
-			_cache.Set(Constants.Cache.WechatAccessToken, response.Content.Token, TimeSpan.FromSeconds(response.Content.Expiry - 1800));
-
-			_logger.LogDebug("WechatAccessToken:{Token}", response.Content.Token);
 		}
 		catch (Exception exception)
 		{

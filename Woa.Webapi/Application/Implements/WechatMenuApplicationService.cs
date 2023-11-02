@@ -60,9 +60,9 @@ public class WechatMenuApplicationService : BaseApplicationService, IWechatMenuA
 		await Mediator.Send(command, cancellationToken);
 	}
 
-	public async Task PublishAsync(CancellationToken cancellationToken = default)
+	public async Task PublishAsync(string platformId, CancellationToken cancellationToken = default)
 	{
-		var entities = await Repository.FindAsync(t => t.IsValid, cancellationToken);
+		var entities = await Repository.FindAsync(t => t.PlatformId == platformId && t.IsValid, cancellationToken);
 
 		var level1 = entities.Where(t => t.ParentId == 0)
 							 .OrderBy(t => t.Sort)
@@ -119,7 +119,7 @@ public class WechatMenuApplicationService : BaseApplicationService, IWechatMenuA
 			}
 		}
 
-		var response = await WechatApi.CreateMenuAsync(request, Cache.Get<string>(Constants.Cache.WechatAccessToken), cancellationToken);
+		var response = await WechatApi.CreateMenuAsync(request, Cache.Get<string>($"{Constants.Cache.WechatAccessToken}:{platformId}"), cancellationToken);
 		if (response.IsSuccessStatusCode)
 		{
 			if (response.Content?.ErrorCode != 0)

@@ -58,5 +58,5 @@ public interface IWechatMenuApplicationService : IApplicationService
 	/// </remarks>
 	/// <param name="cancellationToken">操作取消令牌</param>
 	/// <returns></returns>
-	Task PublishAsync(CancellationToken cancellationToken = default);
+	Task PublishAsync(string platformId, CancellationToken cancellationToken = default);
 }
