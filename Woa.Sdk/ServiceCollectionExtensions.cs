@@ -80,12 +80,12 @@ internal static class ServiceCollectionExtensions
 	internal static IServiceCollection AddWechatApi(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.Configure<WechatOptions>(configuration);
-
+		services.AddScoped(provider => provider.GetRequiredService<IOptionsSnapshot<WechatOptions>>().Value);
 		var settings = new RefitSettings { Buffered = true, ContentSerializer = new NewtonsoftJsonContentSerializer() };
 		services.AddRefitClient<IWechatApi>(settings)
 		        .ConfigureHttpClient((provider, client) =>
 		        {
-			        var options = provider.GetRequiredService<IOptions<WechatOptions>>()?.Value;
+			        var options = provider.GetRequiredService<WechatOptions>();
 			        if (options == null)
 			        {
 				        throw new InvalidOperationException($"{nameof(WechatOptions)} is not configured");

@@ -5,16 +5,20 @@
 /// </summary>
 public abstract class WechatUserMessageHandler : IWechatMessageHandler
 {
-	private readonly IWechatUserMessageStore _store;
-
 	/// <summary>
 	/// 初始化一个 <see cref="WechatUserMessageHandler"/> 对象
 	/// </summary>
 	/// <param name="store">微信消息保存服务</param>
-	protected WechatUserMessageHandler(IWechatUserMessageStore store)
+	/// <param name="options"></param>
+	protected WechatUserMessageHandler(IWechatUserMessageStore store, WechatOptions options)
 	{
-		_store = store;
+		Store = store;
+		Options = options;
 	}
+
+	protected virtual WechatOptions Options { get; }
+
+	protected virtual IWechatUserMessageStore Store { get; }
 
 	/// <inheritdoc />
 	public Task<WechatMessage> HandleAsync(WechatMessage message, CancellationToken cancellationToken = default)
@@ -41,9 +45,9 @@ public abstract class WechatUserMessageHandler : IWechatMessageHandler
 	/// <param name="message"></param>
 	private async void SaveMessage(WechatMessage message)
 	{
-		if (_store != null)
+		if (Store != null)
 		{
-			await _store.SaveAsync(message);
+			await Store.SaveAsync(message);
 		}
 	}
 }
