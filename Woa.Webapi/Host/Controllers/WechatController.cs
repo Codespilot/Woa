@@ -1,9 +1,7 @@
-﻿using System.Text;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Woa.Common;
 using Woa.Sdk.Tencent;
-using Woa.Webapi.Application;
 
 namespace Woa.Webapi.Controllers;
 
@@ -17,19 +15,16 @@ public class WechatController : ControllerBase
 {
 	private readonly IServiceProvider _provider;
 	private readonly WechatOptions _options;
-	private readonly IWechatMessageApplicationService _service;
 
 	/// <summary>
 	/// 初始化<see cref="WechatController"/>实例
 	/// </summary>
 	/// <param name="provider"></param>
 	/// <param name="options"></param>
-	/// <param name="service"></param>
-	public WechatController(IServiceProvider provider, WechatOptions options, IWechatMessageApplicationService service)
+	public WechatController(IServiceProvider provider, WechatOptions options)
 	{
 		_provider = provider;
 		_options = options;
-		_service = service;
 	}
 
 	/// <summary>
