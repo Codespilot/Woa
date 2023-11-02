@@ -85,7 +85,7 @@ internal static class ServiceCollectionExtensions
 		services.AddRefitClient<IWechatApi>(settings)
 		        .ConfigureHttpClient((provider, client) =>
 		        {
-			        var options = provider.GetRequiredService<WechatOptions>();
+			        var options = provider.GetRequiredService<IOptions<WechatOptions>>()?.Value;
 			        if (options == null)
 			        {
 				        throw new InvalidOperationException($"{nameof(WechatOptions)} is not configured");

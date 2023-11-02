@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Woa.Transit;
 using Woa.Webapi.Application;
@@ -68,11 +69,24 @@ public class WechatMessageController : Controller
 	/// <param name="id"></param>
 	/// <param name="dto"></param>
 	/// <returns></returns>
-	[HttpPut("{id:long}")]
+	[HttpPut("{id:long}/reply")]
 	public async Task<IActionResult> ReplyAsync([FromRoute] long id, [FromBody] WechatMessageReplyDto dto)
 	{
 		await _service.ReplyAsync(id, dto.Content, HttpContext.RequestAborted);
 		return Ok();
+	}
+
+	/// <summary>
+	/// 查看消息回复
+	/// </summary>
+	/// <param name="id"></param>
+	/// <returns></returns>
+	[AllowAnonymous]
+	[HttpGet("{id:long}/reply")]
+	public async Task<IActionResult> GetReplyAsync([FromRoute] long id)
+	{
+		var result = await _service.GetReplyAsync(id);
+		return Content(result ?? "正在处理您的请求，请耐心等待...", "text/plain", Encoding.UTF8);
 	}
 
 	/// <summary>

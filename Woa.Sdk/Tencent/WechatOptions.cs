@@ -6,12 +6,7 @@ public class WechatOptions
 	/// 微信主机地址
 	/// </summary>
 	public string Host { get; set; }
-
-	/// <summary>
-	/// 开发者令牌
-	/// </summary>
-	public string Token { get; set; }
-
+	
 	/// <summary>
 	/// 微信公众号配置
 	/// </summary>
@@ -44,6 +39,11 @@ public class WechatPlatformAccount
 	/// </summary>
 	public string AppSecret { get; set; }
 
+	/// <summary>
+	/// 开发者令牌
+	/// </summary>
+	public string AppToken { get; set; }
+	
 	/// <summary>
 	/// 消息加解密密钥
 	/// </summary>
