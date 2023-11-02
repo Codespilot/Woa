@@ -5,8 +5,8 @@ namespace Woa.Webapi.Wechat;
 [WechatMessageHandle(WechatMessageType.Image)]
 public class WechatImageMessageHandler : WechatUserMessageHandler
 {
-	public WechatImageMessageHandler(IWechatUserMessageStore client)
-		: base(client)
+	public WechatImageMessageHandler(IWechatUserMessageStore store, WechatOptions options)
+		: base(store, options)
 	{
 	}
 

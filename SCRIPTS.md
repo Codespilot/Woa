@@ -73,6 +73,11 @@ CACHE 1
 ),
   "code" varchar(50) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
   "name" varchar(50) COLLATE "pg_catalog"."default" NOT NULL,
+  "description" text COLLATE "pg_catalog"."default",
+  "create_by" int4 NOT NULL,
+  "create_at" timestamp(6) NOT NULL,
+  "update_by" int4,
+  "update_at" timestamp(6),
   PRIMARY KEY ("id"),
   UNIQUE ("code")
 )
@@ -84,6 +89,11 @@ ALTER TABLE "public"."roles"
 COMMENT ON COLUMN "public"."roles"."id" IS '主键';
 COMMENT ON COLUMN "public"."roles"."code" IS '代码';
 COMMENT ON COLUMN "public"."roles"."name" IS '名称';
+COMMENT ON COLUMN "public"."roles"."description" IS '描述';
+COMMENT ON COLUMN "public"."roles"."create_by" IS '创建人Id';
+COMMENT ON COLUMN "public"."roles"."create_at" IS '创建时间';
+COMMENT ON COLUMN "public"."roles"."update_by" IS '更新人Id';
+COMMENT ON COLUMN "public"."roles"."update_at" IS '更新时间';
 COMMENT ON TABLE "public"."roles" IS '角色';
 ```
 
@@ -95,7 +105,7 @@ CREATE TABLE "public"."user_role" (
 INCREMENT 1
 MINVALUE  1
 MAXVALUE 2147483647
-START 1
+START 1000001
 CACHE 1
 ),
   "user_id" int4 NOT NULL,
@@ -128,7 +138,7 @@ COMMENT ON COLUMN "public"."user_role"."create_at" IS '创建时间';
 COMMENT ON TABLE "public"."user_role" IS '用户角色配置';
 ```
 
-### 公众号配置
+### 公众号信息
 
 ```sql
 CREATE TABLE "public"."wechat_account" (
@@ -139,18 +149,7 @@ CREATE TABLE "public"."wechat_account" (
   "description" text COLLATE "pg_catalog"."default",
   "image" varchar(255) COLLATE "pg_catalog"."default",
   "app_id" varchar(50) COLLATE "pg_catalog"."default" NOT NULL,
-  "app_secret" varchar(128) COLLATE "pg_catalog"."default" NOT NULL,
-  "app_token" varchar(64) COLLATE "pg_catalog"."default" NOT NULL,
-  "encrypt_key" varchar(100) COLLATE "pg_catalog"."default",
-  "encrypt_type" varchar(10) COLLATE "pg_catalog"."default" NOT NULL,
-  "enable_custom_message" bool NOT NULL DEFAULT false,
-  "enable_template_message" bool NOT NULL DEFAULT false,
   "verified" bool NOT NULL DEFAULT false,
-  "reply_title" varchar(255) COLLATE "pg_catalog"."default",
-  "reply_description" text COLLATE "pg_catalog"."default",
-  "reply_url" varchar(500) COLLATE "pg_catalog"."default",
-  "reply_pic_url" varchar(500) COLLATE "pg_catalog"."default",
-  "is_valid" bool NOT NULL DEFAULT true,
   "create_by" int4 NOT NULL,
   "create_at" timestamp(6) NOT NULL,
   "update_by" int4,
@@ -169,23 +168,12 @@ COMMENT ON COLUMN "public"."wechat_account"."type" IS '类型';
 COMMENT ON COLUMN "public"."wechat_account"."description" IS '公众号简介';
 COMMENT ON COLUMN "public"."wechat_account"."image" IS '公众号头像';
 COMMENT ON COLUMN "public"."wechat_account"."app_id" IS '开发者ID';
-COMMENT ON COLUMN "public"."wechat_account"."app_secret" IS '开发者密码';
-COMMENT ON COLUMN "public"."wechat_account"."app_token" IS '开发者令牌';
-COMMENT ON COLUMN "public"."wechat_account"."encrypt_key" IS '消息加解密密钥';
-COMMENT ON COLUMN "public"."wechat_account"."encrypt_type" IS '消息加解密方式';
-COMMENT ON COLUMN "public"."wechat_account"."enable_custom_message" IS '公众号是否开启客服消息';
-COMMENT ON COLUMN "public"."wechat_account"."enable_template_message" IS '公众号是否开启模板消息';
 COMMENT ON COLUMN "public"."wechat_account"."verified" IS '是否已认证';
-COMMENT ON COLUMN "public"."wechat_account"."reply_title" IS '公众号消息回复内容标题';
-COMMENT ON COLUMN "public"."wechat_account"."reply_description" IS '公众号消息回复内容描述';
-COMMENT ON COLUMN "public"."wechat_account"."reply_url" IS '公众号消息回复内容查看链接';
-COMMENT ON COLUMN "public"."wechat_account"."reply_pic_url" IS '公众号消息回复图片链接';
-COMMENT ON COLUMN "public"."wechat_account"."is_valid" IS '是否有效';
 COMMENT ON COLUMN "public"."wechat_account"."create_by" IS '创建人Id';
 COMMENT ON COLUMN "public"."wechat_account"."create_at" IS '创建时间';
 COMMENT ON COLUMN "public"."wechat_account"."update_by" IS '更新人Id';
 COMMENT ON COLUMN "public"."wechat_account"."update_at" IS '更新时间';
-COMMENT ON TABLE "public"."wechat_account" IS '公众号配置';
+COMMENT ON TABLE "public"."wechat_account" IS '公众号信息';
 ```
 
 ### 公众号消息

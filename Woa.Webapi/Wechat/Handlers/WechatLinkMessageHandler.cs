@@ -5,8 +5,8 @@ namespace Woa.Webapi.Wechat;
 [WechatMessageHandle(WechatMessageType.Link)]
 public class WechatLinkMessageHandler : WechatUserMessageHandler
 {
-	public WechatLinkMessageHandler(IWechatUserMessageStore store)
-		: base(store)
+	public WechatLinkMessageHandler(IWechatUserMessageStore store, WechatOptions options)
+		: base(store, options)
 	{
 	}
 

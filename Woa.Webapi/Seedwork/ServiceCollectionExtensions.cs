@@ -13,6 +13,7 @@ using Woa.Webapi.Application;
 using Woa.Webapi.Domain;
 using Woa.Common;
 using System.Collections;
+using Woa.Webapi.Profiles;
 
 namespace Woa.Webapi;
 
@@ -136,6 +137,8 @@ internal static class ServiceCollectionExtensions
 	/// <returns></returns>
 	internal static IServiceCollection AddObjectMapping(this IServiceCollection services, Action<MapperConfigurationExpression> config = null)
 	{
+		services.AddTransient(typeof(UserNameResolver<,,>));
+
 		var expression = new MapperConfigurationExpression();
 
 		if (_types != null)
@@ -214,9 +217,11 @@ internal static class ServiceCollectionExtensions
 		services.AddTransient<WechatFollowerRepository>()
 				.AddTransient<WechatMessageRepository>()
 				.AddTransient<WechatMenuRepository>()
+				.AddTransient<WechatAccountRepository>()
 				.AddTransient<UserRepository>()
 				.AddTransient<RoleRepository>()
-				.AddTransient<UserRoleRepository>();
+				.AddTransient<UserRoleRepository>()
+				.AddTransient<CommonRepository>();
 		return services;
 	}
 

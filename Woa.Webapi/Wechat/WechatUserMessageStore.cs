@@ -7,11 +7,13 @@ namespace Woa.Webapi.Wechat;
 public class WechatUserMessageStore : IWechatUserMessageStore
 {
 	private readonly WechatMessageRepository _repository;
+	private readonly WechatOptions _options;
 	private readonly ILogger<WechatUserMessageStore> _logger;
 
-	public WechatUserMessageStore(WechatMessageRepository repository, ILoggerFactory logger)
+	public WechatUserMessageStore(WechatMessageRepository repository, WechatOptions options, ILoggerFactory logger)
 	{
 		_repository = repository;
+		_options = options;
 		_logger = logger.CreateLogger<WechatUserMessageStore>();
 	}
 
@@ -59,8 +61,8 @@ public class WechatUserMessageStore : IWechatUserMessageStore
 				case WechatMessageType.Event:
 					entity.Content = message.GetValue<string>(WechatMessageKey.Event.EventType) switch
 					{
-						"subscribe" => "用户关注了公众号",
-						"unsubscribe" => "用户取消关注了公众号",
+						"subscribe" => $"用户关注了公众号【{_options.Accounts[entity.PlatformId].Name}】",
+						"unsubscribe" => $"用户取消关注了公众号【{_options.Accounts[entity.PlatformId].Name}】",
 						"scan" => "用户扫描了二维码",
 						"location" => "用户上报了地理位置",
 						"click" => "用户点击了菜单",

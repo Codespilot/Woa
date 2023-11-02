@@ -8,8 +8,8 @@ namespace Woa.Webapi.Wechat;
 [WechatMessageHandle(WechatMessageType.Video), WechatMessageHandle(WechatMessageType.ShortVideo)]
 public class WechatVideoMessageHandler : WechatUserMessageHandler
 {
-	public WechatVideoMessageHandler(IWechatUserMessageStore store)
-		: base(store)
+	public WechatVideoMessageHandler(IWechatUserMessageStore store, WechatOptions options)
+		: base(store, options)
 	{
 	}
 

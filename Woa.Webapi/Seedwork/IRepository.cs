@@ -10,6 +10,8 @@ public interface IRepository<TEntity, in TKey>
 
 	Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 
+	Task<List<TEntity>> GetAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default);
+
 	Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken = default);
 
 	Task InsertAsync(List<TEntity> entities, CancellationToken cancellationToken = default);
@@ -28,9 +30,9 @@ public interface IRepository<TEntity, in TKey>
 
 	Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 
-	Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, int offset, int count, CancellationToken cancellationToken = default);
+	Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, int page, int count, CancellationToken cancellationToken = default);
 
-	Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, int offset, int count, Expression<Func<TEntity, object>> orderBy, bool ascending, CancellationToken cancellationToken = default);
+	Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, int page, int count, Expression<Func<TEntity, object>> orderBy, bool ascending, CancellationToken cancellationToken = default);
 
 	Task<List<TEntity>> FindAsync(Expression<Func<TEntity, object>> predicate, string @operator, object criterion, CancellationToken cancellationToken = default);
 

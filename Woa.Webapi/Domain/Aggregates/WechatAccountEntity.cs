@@ -1,9 +1,13 @@
 ﻿using Postgrest.Attributes;
+using Postgrest.Models;
 
 namespace Woa.Webapi.Domain;
 
-[Table("wechat_accounts")]
-public class WechatAccountEntity : IEntity<string>
+[Table("wechat_account")]
+public class WechatAccountEntity : BaseModel,
+                                   IEntity<string>,
+                                   ICreateAudit<int>,
+                                   IUpdateAudit<int?>
 {
 	/// <summary>
 	/// 微信公众号Id（OpenId）
@@ -12,10 +16,34 @@ public class WechatAccountEntity : IEntity<string>
 	public string Id { get; set; }
 
 	/// <summary>
+	/// 微信号
+	/// </summary>
+	[Column("account")]
+	public string Account { get; set; }
+
+	/// <summary>
+	/// 类型
+	/// </summary>
+	[Column("type")]
+	public string Type { get; set; }
+
+	/// <summary>
 	/// 公众号名称
 	/// </summary>
 	[Column("name")]
 	public string Name { get; set; }
+
+	/// <summary>
+	/// 公众号简介
+	/// </summary>
+	[Column("description")]
+	public string Description { get; set; }
+
+	/// <summary>
+	/// 公众号头像
+	/// </summary>
+	[Column("image")]
+	public string Image { get; set; }
 
 	/// <summary>
 	/// 公众号AppId
@@ -24,74 +52,41 @@ public class WechatAccountEntity : IEntity<string>
 	public string AppId { get; set; }
 
 	/// <summary>
-	/// 公众号AppSecret
+	/// 是否已认证
 	/// </summary>
-	[Column("app_secret")]
-	public string AppSecret { get; set; }
+	[Column("verified")]
+	public bool Verified { get; set; }
 
-	/// <summary>
-	/// 公众号自定义Token
-	/// </summary>
-	[Column("app_token")]
-	public string AppToken { get; set; }
+	[Column("create_by", ignoreOnUpdate: true)]
+	public int CreateBy { get; set; }
 
-	/// <summary>
-	/// 消息加解密密钥
-	/// </summary>
-	[Column("encoding_key")]
-	public string EncodingKey { get; set; }
+	[Column("create_at", ignoreOnUpdate: true)]
+	public DateTime CreateAt { get; set; }
 
-	/// <summary>
-	/// 公众号消息加密方式
-	/// </summary>
-	[Column("encrypt_type")]
-	public string EncryptType { get; set; }
+	[Column("update_by", ignoreOnInsert: true)]
+	public int? UpdateBy { get; set; }
 
-	/// <summary>
-	/// 公众号是否开启客服消息
-	/// </summary>
-	[Column("enable_custom_message")]
-	public bool EnableCustomMessage { get; set; }
+	[Column("update_at", ignoreOnInsert: true)]
+	public DateTime? UpdateAt { get; set; }
 
-	/// <summary>
-	/// 公众号是否开启模板消息
-	/// </summary>
-	[Column("enable_template_message")]
-	public bool EnableTemplateMessage { get; set; }
+	object ICreateAudit.CreateBy
+	{
+		get => CreateBy;
+		set => CreateBy = value switch
+		{
+			int i => i,
+			_ => throw new ArgumentException("CreateBy must be int")
+		};
+	}
 
-	/// <summary>
-	/// 公众号消息回复内容标题
-	/// </summary>
-	[Column("reply_title")]
-	public string ReplyTitle { get; set; }
-
-	/// <summary>
-	/// 公众号消息回复内容描述
-	/// </summary>
-	[Column("reply_description")]
-	public string ReplyDescription { get; set; }
-
-	/// <summary>
-	/// 公众号消息回复内容查看链接
-	/// </summary>
-	[Column("reply_url")]
-	public string ReplyUrl { get; set; }
-
-	/// <summary>
-	/// 公众号消息回复图片链接
-	/// </summary>
-	[Column("reply_pic_url")]
-	public string ReplyPicUrl { get; set; }
-
-	/// <summary>
-	/// 最后更新用户Id
-	/// </summary>
-	[Column("update_user_id", ignoreOnInsert: true)]
-	public long? UpdateUserId { get; set; }
-
-	/// <summary>
-	/// 最后更新时间
-	/// </summary>
-	[Column("update_time", ignoreOnInsert: true)]
-	public DateTime? UpdateTime { get; set; }
+	object IUpdateAudit.UpdateBy
+	{
+		get => UpdateBy;
+		set => UpdateBy = value switch
+		{
+			null => null,
+			int i => i,
+			_ => throw new ArgumentException("UpdateBy must be int or null")
+		};
+	}
 }

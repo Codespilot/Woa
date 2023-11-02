@@ -60,10 +60,10 @@ public class MenuController : ControllerBase
 		return Ok();
 	}
 
-	[HttpPost("publish")]
-	public async Task<IActionResult> PublishAsync()
+	[HttpPost("publish/{plarformId}")]
+	public async Task<IActionResult> PublishAsync(string platformId)
 	{
-		await _service.PublishAsync(HttpContext.RequestAborted);
+		await _service.PublishAsync(platformId, HttpContext.RequestAborted);
 		return Ok();
 	}
 }

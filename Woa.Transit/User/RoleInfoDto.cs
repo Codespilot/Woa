@@ -5,9 +5,9 @@ namespace Woa.Transit;
 /// </summary>
 public class RoleInfoDto
 {
-	/// <summary>
-	/// 角色Id
-	/// </summary>
+    /// <summary>
+    /// 角色Id
+    /// </summary>
     public int Id { get; set; }
 
     /// <summary>
@@ -21,7 +21,21 @@ public class RoleInfoDto
     public string Name { get; set; }
 
     /// <summary>
+    /// 描述
+    /// </summary>
+    public string Description { get; set; }
+
+    /// <summary>
     /// 创建时间
     /// </summary>
     public DateTime CreateAt { get; set; }
+
+    /// <summary>
+    /// 更新时间
+    /// </summary>
+    public DateTime? UpdateAt { get; set; }
+
+    public string CreateBy { get; set; }
+
+    public string UpdateBy { get; set; }
 }

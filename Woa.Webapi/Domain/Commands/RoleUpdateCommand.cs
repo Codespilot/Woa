@@ -23,9 +23,14 @@ public sealed class RoleUpdateCommand : ICommand
     /// 角色名称
     /// </summary>
     public string Name { get; set; }
+
+    /// <summary>
+    /// 角色描述
+    /// </summary>
+    public string Description { get; set; }
 }
 
-public class RoleUpdateCommandValidator: AbstractValidator<RoleUpdateCommand>
+public class RoleUpdateCommandValidator : AbstractValidator<RoleUpdateCommand>
 {
     public RoleUpdateCommandValidator()
     {

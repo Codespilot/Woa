@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.Extensions.Options;
 using Woa.Sdk.Tencent;
 using Woa.Shared;
 using Woa.Webapi.Domain;
@@ -13,13 +12,11 @@ namespace Woa.Webapi.Wechat;
 public class WechatTextMessageHandler : WechatUserMessageHandler
 {
 	private readonly WechatFollowerRepository _repository;
-	private readonly WechatOptions _options;
 
-	public WechatTextMessageHandler(IWechatUserMessageStore store, WechatFollowerRepository repository, IOptions<WechatOptions> options)
-		: base(store)
+	public WechatTextMessageHandler(IWechatUserMessageStore store, WechatFollowerRepository repository, WechatOptions options)
+		: base(store, options)
 	{
 		_repository = repository;
-		_options = options.Value;
 	}
 
 	/// <inheritdoc />
@@ -37,7 +34,7 @@ public class WechatTextMessageHandler : WechatUserMessageHandler
 		{
 			WeakReferenceMessenger.Default.Send(new ChatbotBroadcast { OpenId = openId, MessageId = message.MessageId, MessageContent = messageContent });
 
-			if (_options.EnableCustomMessage)
+			if (Options.Accounts[platformId].EnableCustomMessage)
 			{
 				// 如果公众号开启了客服消息功能，直接返回null，表示不需要等待聊天机器人回复，因为聊天机器人回复的消息会通过异步方式下发给用户
 				return WechatMessage.Empty;
@@ -51,10 +48,10 @@ public class WechatTextMessageHandler : WechatUserMessageHandler
 					{
 						new
 						{
-							Title = _options.ReplyTitle,
-							Description = _options.ReplyDescription,
-							PicUrl = _options.ReplyPicUrl,
-							Url = $"{_options.ReplyUrl}{message.MessageId}/reply"
+							Title = Options.ReplyTitle,
+							Description = Options.ReplyDescription,
+							PicUrl = Options.ReplyPicUrl,
+							Url = $"{Options.ReplyUrl}{message.MessageId}/reply"
 						}
 					}
 				};
