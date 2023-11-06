@@ -6,8 +6,6 @@
 
 @attribute [Authorize]
 
-@using Woa.Common
-
 @inject IWechatMessageApi WechatMessageApi
 
 <PageTitle>消息管理</PageTitle>
@@ -28,37 +26,38 @@
                     <Search Placeholder="输入关键字搜索" OnSearch="OnSearchRequestedAsync" />
                 </Extra>
                 <ChildContent>
-                    <AntList TItem="WechatMessageItemDto" ItemLayout="ListItemLayout.Horizontal" DataSource="Items"
-                        Grid="_listGridType">
-                        <ListItem NoFlex>
-                            <Card Hoverable Bordered Class="card">
-                                <ChildContent>
-                                    <CardMeta>
-                                        <TitleTemplate>@context.TypeName</TitleTemplate>
-                                        <DescriptionTemplate>
-                                            @switch (context.Type)
-                                            {
-                                                case "Text":
-                                                case "Voice":
-                                                case "Location":
-                                                    <Paragraph class="item" Ellipsis>
-                                                        @context.Content
-                                                    </Paragraph>
-                                                    break;
-                                                case "Image":
-                                                    <img src="@context.Content" />
-                                                    break;
-                                                case "Video":
-                                                case "ShortVideo":
-                                                    <video src="@context.Content" controls="controls"></video>
-                                                    break;
-                                            }
-                                        </DescriptionTemplate>
-                                    </CardMeta>
-                                </ChildContent>
-                                <ActionTemplate>
-                                </ActionTemplate>
-                            </Card>
+                    <AntList TItem="WechatMessageItemDto" ItemLayout="ListItemLayout.Horizontal" DataSource="Items">
+                        <ListItem>
+                            <ListItemMeta>
+                                <TitleTemplate>
+                                    <span>@context.TypeName</span>
+                                </TitleTemplate>
+                                <DescriptionTemplate>
+                                    @switch (context.Type)
+                                    {
+                                        case "Text":
+                                        case "Voice":
+                                        case "Event":
+                                        case "Location":
+                                        case "Link":
+                                            <span>@context.Content</span>
+                                            break;
+                                        case "Image":
+                                            <a href="@context.Content" target="_blank">查看图片</a>
+                                            break;
+                                    }
+                                </DescriptionTemplate>
+                            </ListItemMeta>
+                            <div class="listContent">
+                                @* <div class="listContentItem">
+                                <span>Owner</span>
+                                <p>@context.Owner</p>
+                                </div> *@
+                                <div class="listContentItem">
+                                    <span>发送时间</span>
+                                    <p>@context.CreateTime.ToString("yyyy-MM-dd HH:mm")</p>
+                                </div>
+                            </div>
                         </ListItem>
                     </AntList>
                 </ChildContent>

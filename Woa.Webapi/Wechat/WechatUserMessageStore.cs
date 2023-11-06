@@ -17,7 +17,7 @@ public class WechatUserMessageStore : IWechatUserMessageStore
 		_logger = logger.CreateLogger<WechatUserMessageStore>();
 	}
 
-	public async Task SaveAsync(WechatMessage message, CancellationToken cancellationToken = default)
+	public async Task SaveAsync(WechatMessage message, string payload, CancellationToken cancellationToken = default)
 	{
 		try
 		{
@@ -34,7 +34,7 @@ public class WechatUserMessageStore : IWechatUserMessageStore
 				OpenId = message.GetValue<string>(WechatMessageKey.FromUserName),
 				PlatformId = message.GetValue<string>(WechatMessageKey.ToUserName),
 				Type = message.MessageType.ToString(),
-				Payload = Cryptography.Base64.Encrypt(message.GetOriginXml())
+				Payload = Cryptography.Base64.Encrypt(payload)
 			};
 
 			switch (message.MessageType)
