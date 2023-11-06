@@ -4,21 +4,23 @@
         <TargetFramework>net7.0</TargetFramework>
         <Nullable>disable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <MicrosoftComponetsVersion>7.0.13</MicrosoftComponetsVersion>
+        <MicrosoftExtensionsVersion>7.0.0</MicrosoftExtensionsVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AntDesign" Version="0.15.5" />
+        <PackageReference Include="AntDesign" Version="0.16.1" />
         <PackageReference Include="AntDesign.Components.Authentication" Version="0.15.5" />
-        <PackageReference Include="AntDesign.ProLayout" Version="0.15.5" />
+        <PackageReference Include="AntDesign.ProLayout" Version="0.16.0" />
         <PackageReference Include="AutoMapper" Version="*" />
         <PackageReference Include="Blazored.LocalStorage" Version="*" />
         <PackageReference Include="FluentValidation" Version="11.8.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="*" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="*" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="*" PrivateAssets="all" />
-        <PackageReference Include="Microsoft.Extensions.Http" Version="*" />
-        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="*" />
-        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="*" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="$(MicrosoftComponetsVersion)" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="$(MicrosoftComponetsVersion)" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="$(MicrosoftComponetsVersion)" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="Refit" Version="7.0.0" />
         <PackageReference Include="Refit.HttpClientFactory" Version="7.0.0" />
         <PackageReference Include="Refit.Newtonsoft.Json" Version="7.0.0" />

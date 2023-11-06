@@ -21,9 +21,9 @@ public abstract class WechatUserMessageHandler : IWechatMessageHandler
 	protected virtual IWechatUserMessageStore Store { get; }
 
 	/// <inheritdoc />
-	public Task<WechatMessage> HandleAsync(WechatMessage message, CancellationToken cancellationToken = default)
+	public Task<WechatMessage> HandleAsync(WechatMessage message, string payload, CancellationToken cancellationToken = default)
 	{
-		SaveMessage(message);
+		SaveMessage(message, payload);
 		var openId = message.GetValue<string>(WechatMessageKey.FromUserName);
 		var platformId = message.GetValue<string>(WechatMessageKey.ToUserName);
 		return HandleMessageAsync(openId, platformId, message, cancellationToken);
@@ -43,11 +43,12 @@ public abstract class WechatUserMessageHandler : IWechatMessageHandler
 	/// 保存微信消息
 	/// </summary>
 	/// <param name="message"></param>
-	private async void SaveMessage(WechatMessage message)
+	/// <param name="payload"></param>
+	private async void SaveMessage(WechatMessage message, string payload)
 	{
 		if (Store != null)
 		{
-			await Store.SaveAsync(message);
+			await Store.SaveAsync(message, payload);
 		}
 	}
 }

@@ -2,7 +2,7 @@
 
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    height:unset !important;
+    height: unset !important;
 }
 
 h1:focus {
@@ -20,7 +20,7 @@ a, .btn-link {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 .content {
@@ -107,4 +107,24 @@ a, .btn-link {
     background-repeat: no-repeat;
     background-position: center 110px;
     background-size: 100%;
+}
+
+.listContent {
+    font-size: 0;
+}
+
+    .listContent .listContentItem {
+        display: inline-block;
+        margin-left: 40px;
+        vertical-align: middle;
+    }
+
+.listContentItem span {
+    line-height: 20px;
+}
+
+.listContentItem p {
+    margin-top: 4px;
+    margin-bottom: 0;
+    line-height: 22px;
 }

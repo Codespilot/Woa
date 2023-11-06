@@ -5,24 +5,25 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Woa.Common;
-public static class TokenHelper
+
+internal static class TokenHelper
 {
-	public static IEnumerable<Claim> Resolve(string value)
+	public static JwtSecurityToken Resolve(string value)
 	{
 		if (string.IsNullOrEmpty(value))
 		{
-			return Enumerable.Empty<Claim>();
+			return null;
 		}
 
 		try
 		{
 			var handler = new JwtSecurityTokenHandler();
 			var token = handler.ReadJwtToken(value);
-			return token.Claims;
+			return token;
 		}
 		catch
 		{
-			return Enumerable.Empty<Claim>();
+			return null;
 		}
 	}
 
@@ -35,8 +36,7 @@ public static class TokenHelper
 
 		try
 		{
-			var handler = new JwtSecurityTokenHandler();
-			var token = handler.ReadJwtToken(value);
+			var token = Resolve(value);
 			return long.Parse(token.Subject);
 		}
 		catch
@@ -54,8 +54,7 @@ public static class TokenHelper
 
 		try
 		{
-			var handler = new JwtSecurityTokenHandler();
-			var token = handler.ReadJwtToken(value);
+			var token = Resolve(value);
 			return token.ValidTo > DateTime.UtcNow;
 		}
 		catch (Exception exception)
@@ -74,8 +73,7 @@ public static class TokenHelper
 
 		try
 		{
-			var handler = new JwtSecurityTokenHandler();
-			var token = handler.ReadJwtToken(value);
+			var token = Resolve(value);
 			return token.ValidTo;
 		}
 		catch (Exception exception)
@@ -94,8 +92,7 @@ public static class TokenHelper
 
 		try
 		{
-			var handler = new JwtSecurityTokenHandler();
-			var token = handler.ReadJwtToken(value);
+			var token = Resolve(value);
 			return token.IssuedAt;
 		}
 		catch (Exception exception)

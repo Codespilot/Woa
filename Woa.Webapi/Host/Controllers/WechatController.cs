@@ -53,16 +53,16 @@ public class WechatController : ControllerBase
 			"GET" => Ok(Request.Query["echostr"].ToString()),
 			"POST" => await Task.Run<IActionResult>(async () =>
 			{
-				var requestBody = await new StreamReader(Request.Body).ReadToEndAsync();
+				var payload = await new StreamReader(Request.Body).ReadToEndAsync();
 
-				var message = WechatMessage.Parse(requestBody);
+				var message = WechatMessage.Parse(payload);
 
 				var response = WechatMessage.Empty;
 
 				var handler = _provider.GetService<IWechatMessageHandler>(message.MessageType.ToString());
 				if (handler != null)
 				{
-					response = await handler.HandleAsync(message);
+					response = await handler.HandleAsync(message, payload);
 				}
 
 				if (response == null || response.Count < 1)
